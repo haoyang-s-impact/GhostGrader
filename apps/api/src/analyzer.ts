@@ -1,6 +1,6 @@
 import { groundTruth, mockAnalyze, type AnalysisResult, type Answer, type Assignment, type Question } from "@gg/shared";
 import { AnalysisError, createClaudeAnalyzer } from "./claude";
-import { createOpenAIAnalyzer, createOpenRouterAnalyzer } from "./openrouter";
+import { createJsonChat, createOpenAIAnalyzer, createOpenRouterAnalyzer, type JsonChat } from "./openrouter";
 
 export type Analyzer = (answer: Answer, assignment: Assignment, question: Question) => Promise<AnalysisResult>;
 
@@ -17,8 +17,8 @@ export interface AnalyzerInfo extends ProviderInfo {
   analyze: Analyzer;
 }
 
-export const DEFAULT_OPENROUTER_MODEL = "openai/gpt-4o-mini";
-export const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
+export const DEFAULT_OPENROUTER_MODEL = "openai/gpt-5-mini";
+export const DEFAULT_OPENAI_MODEL = "gpt-5-mini";
 
 /**
  * Provider chain, in order: OpenRouter, OpenAI, Claude, for whichever keys
@@ -72,4 +72,22 @@ export function selectAnalyzer(env: NodeJS.ProcessEnv = process.env, log?: (m: s
       throw lastError instanceof Error ? lastError : new AnalysisError("All providers failed.", true);
     },
   };
+}
+
+/**
+ * A plain JSON chat on the first OpenAI-compatible provider that has a key
+ * (OpenRouter, then OpenAI), for auxiliary tasks such as drafting a rubric
+ * from a question's grader notes. Null when only Claude or nothing is
+ * configured, or when GG_MOCK is set; callers fall back to a deterministic path.
+ */
+export function selectJsonChat(env: NodeJS.ProcessEnv = process.env, log?: (m: string) => void): JsonChat | null {
+  const forceMock = env.GG_MOCK === "1" || env.GG_MOCK === "true";
+  if (forceMock) return null;
+  if (env.OPENROUTER_API_KEY) {
+    return createJsonChat({ provider: "openrouter", apiKey: env.OPENROUTER_API_KEY, model: env.OPENROUTER_MODEL || DEFAULT_OPENROUTER_MODEL, baseUrl: env.OPENROUTER_BASE_URL, log });
+  }
+  if (env.OPENAI_API_KEY) {
+    return createJsonChat({ provider: "openai", apiKey: env.OPENAI_API_KEY, model: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL, baseUrl: env.OPENAI_BASE_URL, log });
+  }
+  return null;
 }

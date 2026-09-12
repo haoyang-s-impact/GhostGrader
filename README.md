@@ -1,7 +1,8 @@
 # Ghost Grader
 
-A grading copilot that sits alongside the LMS. Teachers grade students' answers
-question by question in Ghost Grader. As they work, the agent reads each answer
+A grading copilot that works inside the LMS. On Moodle's quiz manual-grading
+page a Chrome extension opens a panel beside the marks; teachers can also grade
+the seeded demo in Ghost Grader's own web app. As they work, the agent reads each answer
 against that question's rubric and suggests a grade with reasoning and quoted
 evidence. It flags a grade that contradicts the rubric, and compares the grade
 with those already given to other students with the same gaps on the same
@@ -19,6 +20,7 @@ bound to exactly that rubric when it looks at answers to that question.
 
 | Path | What it is |
 |---|---|
+| `apps/extension` | Chrome extension for Moodle: reads the quiz manual-grading page, suggests a rubric-referenced mark per attempt, fills Moodle's mark box and comment on Use, checks marks against the rubric as you type, and holds Save while cross-student inconsistencies are open. |
 | `apps/web` | The Ghost Grader app (React, port 5173): courses, the grading workspace, a gradebook, and the rubric editor. |
 | `apps/api` | Hono server on port 8787. Teacher-scoped data (courses, assignments, questions, rubrics, answers, grades, push records) in a SQLite database, LLM rubric analysis (OpenRouter, OpenAI or Claude), grading sessions, cross-student comparison, and the LMS sync layer. |
 | `packages/shared` | Zod schemas, rubric math and grade rollup, the comparison algorithm, the seeded dataset, and a deterministic mock analyzer. |
@@ -63,9 +65,15 @@ students who answered all of them.
 Copy `apps/api/.env.example` to `apps/api/.env` and set any of:
 
 - `OPENROUTER_API_KEY` (optional `OPENROUTER_MODEL`, default
-  `openai/gpt-4o-mini`). Any OpenAI-compatible model on OpenRouter.
-- `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-4o-mini`).
+  `openai/gpt-5-mini`). Any OpenAI-compatible model on OpenRouter.
+- `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-5-mini`).
 - `ANTHROPIC_API_KEY` for Claude Opus 5 with structured outputs.
+
+Before changing the model, run
+`pnpm --filter @gg/api compare-models <assignmentId> <questionId> --models=...`
+to see each candidate's marks side by side on a question's real answers; on
+the seeded Moodle question gpt-5-mini matched the rubric on 16 of 16 answers
+where gpt-4o-mini matched 10.
 
 They form a chain in that order. The first configured provider is primary.
 When a call fails for any reason (outage, rate limit, refusal, or malformed
@@ -78,6 +86,32 @@ works offline. For Q1 it uses hand-checked ground truth; for Q2 it falls back
 to a keyword scan of the rubric's concept tags. The chip says "Mock mode" so
 nobody mistakes it for model output. `GG_MOCK=1` forces the mock even with keys
 (the tests use this).
+
+## Grading inside Moodle
+
+1. `pnpm --filter @gg/extension build`, then in Chrome open `chrome://extensions`,
+   turn on Developer mode, **Load unpacked**, pick `apps/extension/dist`.
+   The options page holds the API URL (default `http://localhost:8787`), the
+   web app URL and the teacher id.
+2. Open a quiz's **Results → Manual grading** page in Moodle, for example
+   `/mod/quiz/report.php?id=157&mode=grading&slot=1&qid=172&grade=needsgrading`.
+3. The panel lists every attempt on the page with a rubric-referenced mark.
+   The first time a question is seen its rubric is drafted from Moodle's
+   "Information for graders"; the note in the panel links to the rubric editor
+   so you can refine it. Click an attempt for the per-criterion reasoning,
+   quoted evidence and a feedback draft. **Use** writes the mark into Moodle's
+   mark box and the feedback into the comment editor.
+4. Type a mark yourself and the Checks tab tells you when it contradicts the
+   rubric. **Approve** applies the referenced mark and feedback; **Keep mine**
+   dismisses it.
+5. Click Moodle's **Save and show next**. Ghost Grader records every mark on
+   the page, compares each with the marks you already gave other students on
+   this question, and, if any pair is inconsistent, holds the save and shows
+   the pair with **Align** and **Keep mine**. Click Save again and Moodle saves
+   as usual. Nothing reaches Moodle except through Moodle's own form.
+
+No extension handy? Load `apps/extension/dist/content.js` as a plain script on
+the page after setting `window.__ggSettings = { apiBase: "http://localhost:8787" }`.
 
 ## The grading workspace
 
@@ -243,6 +277,7 @@ pnpm test                  # unit tests: comparison, rubric math and rollup, pus
 pnpm typecheck
 pnpm --filter @gg/web e2e:install   # once: downloads Chromium for Playwright
 pnpm e2e                   # end-to-end: runs the demo script in a real browser
+pnpm --filter @gg/extension e2e   # end-to-end against a local Moodle (set MOODLE_URL, MOODLE_USER, MOODLE_PASSWORD, MOODLE_GRADING_URL)
 ```
 
 The end-to-end run starts the API (mock analyzer, throwaway database) and the

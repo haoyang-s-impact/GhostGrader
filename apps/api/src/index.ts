@@ -2,7 +2,7 @@ import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { selectAnalyzer } from "./analyzer";
+import { selectAnalyzer, selectJsonChat } from "./analyzer";
 import { createApp } from "./app";
 import { selectLmsAdapter } from "./lms/select";
 import { Store } from "./store";
@@ -14,7 +14,8 @@ const log = (m: string) => console.log("  ", m);
 const analyzer = selectAnalyzer(process.env, log);
 const lms = selectLmsAdapter(process.env);
 const store = new Store(dbPath, {}, log);
-const app = createApp({ analyzer, store, lms });
+const chat = selectJsonChat(process.env, log);
+const app = createApp({ analyzer, store, lms, chat, log });
 const port = Number(process.env.PORT ?? 8787);
 
 serve({ fetch: app.fetch, port }, (info) => {

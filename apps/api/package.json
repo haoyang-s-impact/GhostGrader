@@ -12,7 +12,8 @@
     "analyze-all": "tsx scripts/analyze-all.ts",
     "import-json": "tsx scripts/import-json.ts",
     "transcribe-media": "tsx scripts/transcribe-media.ts",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "compare-models": "tsx scripts/compare-models.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",

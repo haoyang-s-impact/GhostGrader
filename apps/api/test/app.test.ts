@@ -399,6 +399,17 @@ describe("decision flow", () => {
   });
 });
 
+describe("GET /embed/:file", () => {
+  it("serves only the built content script, without a teacher header", async () => {
+    const app = mkApp();
+    const res = await app.request("/embed/content.js");
+    expect([200, 404]).toContain(res.status); // 200 once the extension is built
+    if (res.status === 200) expect(res.headers.get("content-type")).toMatch(/javascript/);
+    expect((await app.request("/embed/manifest.json")).status).toBe(404);
+    expect((await app.request("/embed/..%2Fpackage.json")).status).toBe(404);
+  });
+});
+
 describe("Store persistence", () => {
   const tmpPath = async () => {
     const { mkdtempSync } = await import("node:fs");

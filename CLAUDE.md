@@ -11,18 +11,29 @@ demo, or anything a user reads.
 
 ## What the system is
 
-A grading copilot that sits **alongside** an LMS, not inside it.
+A grading copilot that works **inside the LMS page the teacher already
+grades in**, with a small API and web app behind it.
 
-1. Question/answer pairs live in Ghost Grader's own store. Today they are the
-   seeded demo data; a configured LMS can supply them through a pull.
-2. The teacher reads each answer in the Ghost Grader web app and enters one
-   grade per (student, question), plus feedback.
-3. As they grade, Ghost Grader analyzes the answer against **that question's
-   rubric**, flags a grade that contradicts the rubric (rubric check), and
-   flags a grade that treats the same gap differently from another student's
-   grade **on the same question** (consistency alert).
-4. When an LMS is configured, the teacher pushes grades back to it. No LMS is
-   connected by default.
+1. **Chrome extension (`apps/extension`)**: on Moodle's quiz manual-grading
+   page (`mod/quiz/report.php?mode=grading`) a panel opens beside the marks.
+   The content script reads the question, its "Information for graders", and
+   every attempt on the page, and posts them to the API (`POST /lms/moodle/page`).
+   First sight of a question drafts a rubric from the grader notes. Each
+   attempt gets a rubric-referenced mark with reasoning; **Use** writes the
+   mark into Moodle's mark box and the feedback into its TinyMCE comment.
+   Typing a mark drives the rubric check. Clicking Moodle's **Save and show
+   next** is intercepted once: every mark becomes a Decision, the API compares
+   each with the other students on that question, and the save is held while
+   consistency alerts are open. The second click saves through Moodle.
+2. **Web app (`apps/web`)**: rubric editor (including rubrics the extension
+   drafted), a standalone grading workspace for the seeded demo, and the
+   gradebook.
+3. **API (`apps/api`)**: rubrics, answers, decisions and sessions in SQLite;
+   the LLM provider chain; drift detection; the LMS sync layer.
+
+Ghost Grader never grades on its own. A suggestion only becomes a grade when
+the teacher clicks Use or types a mark and saves, and nothing reaches Moodle
+except through Moodle's own form.
 
 Ghost Grader never grades on its own. A suggestion only becomes a grade when
 the teacher clicks Submit, and nothing is written to an LMS until the teacher
@@ -40,7 +51,8 @@ pnpm workspace (`apps/*`, `packages/*`), TypeScript everywhere.
 |---|---|---|
 | `@gg/shared` | `packages/shared` | Zod schemas and types, rubric math and rollup (`rubric.ts`), drift detection (`drift.ts`), push diffing (`sync.ts`), the deterministic mock analyzer, and the seeded dataset (`data.ts`, `fixtures/`). |
 | `@gg/api` | `apps/api` | Hono server on port 8787. SQLite store through Drizzle (`store.ts`, schema in `db/schema.ts`, migrations in `drizzle/`), teacher scoping, LLM provider chain, grading sessions, and LMS sync behind the `LmsAdapter` interface. |
-| `@gg/web` | `apps/web` | React + Vite app on port 5173: courses, grading workspace, gradebook, rubric editor. Playwright e2e lives here. |
+| `@gg/web` | `apps/web` | React + Vite app on port 5173: courses, grading workspace, gradebook, rubric editor. Playwright e2e for the web app lives here. |
+| `@gg/extension` | `apps/extension` | Manifest V3 Chrome extension for Moodle. `src/content/moodle.ts` is the only file that knows Moodle's DOM; `Panel.tsx` owns the flow; `page-bridge-core.ts` runs in the page world to drive TinyMCE. Built by `build.mjs` (one bundle per entry). Playwright e2e runs against the local Moodle. |
 
 ### Data model (`packages/shared/src/schemas.ts`)
 
@@ -96,6 +108,30 @@ Everything else requires `X-Teacher-Id`.
 - Sync: `GET /sync/available`, `POST /sync/pull`, `GET /sync/status/:assignmentId`,
   `POST /sync/push`. With no LMS configured they return 400 "No LMS is
   configured" (status returns `{ linked: false, lms: null }`).
+- Extension: `POST /lms/moodle/page` (`src/lms/page-sync.ts`). Body: course,
+  quiz, question (with `graderInfo`) and the attempts on the page. Upserts
+  course/assignment/question/students/answers keyed by namespaced LMS ids
+  (`moodle:quiz:157`, `moodle:q:172`, `moodle:quba:78:1`, `moodle:user:<email>`),
+  drafts the rubric via `src/rubric-draft.ts` on first sight (model through
+  `selectJsonChat`, else the `Score N:` parser), and returns
+  `{ assignmentId, questionId, rubricDrafted, answers: { [attemptLmsId]: { answerId, studentId, studentIndex } } }`.
+  Rubrics the teacher edited afterwards are never overwritten.
+
+### Extension (`apps/extension/src`)
+
+- `content/index.tsx` mounts only on `mode=grading` pages with at least one
+  attempt. `content/moodle.ts` parses the page (ids from the options form's
+  hidden inputs, course from the breadcrumb link, attempts by walking
+  `#manualgradingform` so each `.que` pairs with the `h4` above it) and writes
+  marks with real input events.
+- `content/bridge.ts` + `page-bridge-core.ts`: TinyMCE is only reachable from
+  the page world, so comments are set through `postMessage` to an injected
+  bridge; the textarea is written as a fallback.
+- Settings (`settings.ts`): `apiBase`, `webBase`, `teacherId` in
+  `chrome.storage.sync`, editable on the options page. **Embed mode:** if
+  `window.__ggSettings` exists the bundle runs without `chrome.*`, so
+  `dist/content.js` can be loaded as a plain script for demos.
+- Decision ids are `${answerId}:grade`, the same convention as the web app.
 
 ### Web app (`apps/web/src`)
 
@@ -207,7 +243,12 @@ pnpm --filter @gg/api import-json [file]   # copy a pre-SQLite data/ghost-grader
   `questionId`, from other students, by offset from the suggestion. No model call.
 - **Typing is a draft; only Submit records a Decision.** Grades applied by
   Use/Align/Approve are drafts too and must not be overwritten by a session
-  refresh (`views/Grade.tsx` tracks this with `touched`).
+  refresh (`views/Grade.tsx` tracks this with `touched`). In the extension the
+  equivalent of Submit is Moodle's Save button: decisions are recorded in the
+  intercepted submit, never while typing.
+- **The extension never bypasses Moodle's form.** It fills inputs and lets
+  Moodle save; the only thing it adds to a save is a one-time hold while
+  consistency alerts are open (`bypassSubmit` in `Panel.tsx`).
 - **Pushing to an LMS is always an explicit teacher action**, and idempotent:
   `pushReference(answerId, points, comment)` is the upsert key, and
   `pendingPush` compares against the **latest** push per answer.
@@ -239,8 +280,11 @@ pnpm typecheck
 pnpm test         # vitest in every package
 pnpm --filter @gg/api db:generate   # after changing apps/api/src/db/schema.ts
 pnpm --filter @gg/api import-json   # one-time import of an old data/ghost-grader.json
+pnpm --filter @gg/api compare-models <assignmentId> <questionId> --models=a,b --expected=f.json   # model bake-off on a synced question
 pnpm --filter @gg/api transcribe-media [assignment.json]   # transcribe untranscribed audio media (OpenAI), write back to the fixture
 pnpm e2e          # Playwright against the web app; boots API (mock analyzer) and web itself
+pnpm --filter @gg/extension build   # dist/ to load unpacked in Chrome
+pnpm --filter @gg/extension e2e     # Playwright against the local Moodle (MOODLE_URL, MOODLE_USER, MOODLE_PASSWORD, MOODLE_GRADING_URL)
 ```
 
 `pnpm e2e` uses ports 8787/5173 by default. If dev servers already hold them,
