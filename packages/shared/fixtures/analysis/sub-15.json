@@ -1,0 +1,60 @@
+{
+  "submissionId": "sub-15",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "accompanied by the reverse conversion of ammonia back into nitrogen and hydrogen",
+        "the two rates become equal"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Exemplary",
+      "evidence": [
+        "Raising the temperature shifts the equilibrium toward the endothermic reverse reaction, lowering the equilibrium yield of ammonia"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Exemplary",
+      "evidence": [
+        "ΔH is about -92 kJ per mole of reaction",
+        "near 450 °C with an iron catalyst"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Exemplary",
+      "evidence": [
+        "a state in which the composition of the mixture is constant even though molecules are continuously reacting in both directions"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Exemplary",
+      "evidence": [
+        "In conclusion, reversibility is what allows an equilibrium to exist"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Olivia, this is an exemplary response: reversibility, dynamic equilibrium, the enthalpy value, and the direction of shift are all explained precisely and tied together in the conclusion. To strengthen this response, as an extension, you might comment on how the equilibrium constant itself changes with temperature, which would deepen the link between thermodynamics and yield. Keep building on the reasoning you have already shown."
+}

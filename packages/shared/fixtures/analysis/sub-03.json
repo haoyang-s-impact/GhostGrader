@@ -1,0 +1,60 @@
+{
+  "submissionId": "sub-03",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "ammonia molecules are also breaking apart to re-form nitrogen and hydrogen",
+        "When the rate of the forward reaction equals the rate of the reverse reaction"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Beginning",
+      "evidence": [
+        "the reaction happens faster"
+      ],
+      "missingConcepts": [
+        "temperature_shift_direction",
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Developing",
+      "evidence": [],
+      "missingConcepts": [
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Exemplary",
+      "evidence": [
+        "In conclusion, the Haber process is reversible and reaches equilibrium"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Chloe, your account of reversibility and dynamic equilibrium is clear and correctly framed in terms of equal forward and reverse rates. To strengthen this response, distinguish reaction rate from equilibrium position: the prompt asks how temperature shifts the equilibrium, which for this exothermic reaction means heating lowers the ammonia yield. Keep building on the reasoning you have already shown."
+}

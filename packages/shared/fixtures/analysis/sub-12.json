@@ -1,0 +1,61 @@
+{
+  "submissionId": "sub-12",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "at the same time ammonia breaks down to give back nitrogen and hydrogen",
+        "the forward and reverse reactions reach the same rate"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "le_chatelier_principle",
+        "temperature_shift_direction",
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Proficient",
+      "evidence": [
+        "a high pressure favours the side with fewer gas molecules"
+      ],
+      "missingConcepts": [
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Exemplary",
+      "evidence": [
+        "In conclusion, the Haber process is a reversible reaction"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Liam, your explanation of reversibility and dynamic equilibrium is clear, and the pressure discussion shows you understand how conditions shift an equilibrium. To strengthen this response, the prompt asks specifically about temperature: explain that heating this exothermic equilibrium shifts it toward the reactants and lowers the ammonia yield. Keep building on the reasoning you have already shown."
+}

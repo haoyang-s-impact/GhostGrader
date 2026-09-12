@@ -1,0 +1,182 @@
+{
+  "sub-01": {
+    "strength": "your explanation of dynamic equilibrium as equal forward and reverse rates is precise, and you linked the exothermic forward reaction to the direction of the shift exactly as Le Chatelier's principle requires.",
+    "improvement": "consider stating explicitly why the rate becomes slow at low temperature, so the compromise at 450 °C is fully justified.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["nitrogen and hydrogen combine to form ammonia, and ammonia can also decompose back into nitrogen and hydrogen", "the forward and reverse reactions continue at the same rate"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Exemplary", "evidence": ["raising the temperature favors the endothermic direction, so the equilibrium shifts toward the reactants and the yield of ammonia falls"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Exemplary", "evidence": ["releasing about 92 kJ per mole of nitrogen consumed", "around 450 °C with an iron catalyst"], "missingConcepts": [] },
+      { "criterionId": "clarity", "level": "Exemplary", "evidence": ["dynamic equilibrium, where the forward and reverse reactions continue at the same rate"], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Exemplary", "evidence": ["In summary, reversibility creates an equilibrium"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-02": {
+    "strength": "you correctly predicted that heating favors the endothermic direction and lowers the ammonia yield, and you explained the industrial compromise on temperature.",
+    "improvement": "explain why the reaction is reversible: describe the reverse reaction and the dynamic equilibrium that results, since the prompt asks for this directly.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Beginning", "evidence": [], "missingConcepts": ["reversibility", "dynamic_equilibrium"] },
+      { "criterionId": "le_chatelier", "level": "Proficient", "evidence": ["it favors the endothermic direction and less ammonia is produced"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Developing", "evidence": ["a moderate temperature is chosen in industry"], "missingConcepts": ["quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Proficient", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Proficient", "evidence": ["Overall, temperature controls the amount of ammonia"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-03": {
+    "strength": "your account of reversibility and dynamic equilibrium is clear and correctly framed in terms of equal forward and reverse rates.",
+    "improvement": "distinguish reaction rate from equilibrium position: the prompt asks how temperature shifts the equilibrium, which for this exothermic reaction means heating lowers the ammonia yield.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["ammonia molecules are also breaking apart to re-form nitrogen and hydrogen", "When the rate of the forward reaction equals the rate of the reverse reaction"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Beginning", "evidence": ["the reaction happens faster"], "missingConcepts": ["temperature_shift_direction", "exothermic_endothermic_link"] },
+      { "criterionId": "evidence", "level": "Developing", "evidence": [], "missingConcepts": ["quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Proficient", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Exemplary", "evidence": ["In conclusion, the Haber process is reversible and reaches equilibrium"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-04": {
+    "strength": "your application of Le Chatelier's principle is excellent: you identified the heat-absorbing direction and correctly predicted the yield change for both heating and cooling.",
+    "improvement": "address reversibility explicitly by naming the reaction as reversible and explaining the dynamic equilibrium between the forward and reverse reactions.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Beginning", "evidence": [], "missingConcepts": ["reversibility", "dynamic_equilibrium"] },
+      { "criterionId": "le_chatelier", "level": "Exemplary", "evidence": ["the system responds by favoring the direction that absorbs heat, which is the breakdown of ammonia into nitrogen and hydrogen"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Proficient", "evidence": ["a temperature of about 450 °C is used as a compromise between yield and speed"], "missingConcepts": [] },
+      { "criterionId": "clarity", "level": "Proficient", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Proficient", "evidence": ["Therefore temperature is a key factor"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-05": {
+    "strength": "you explained both reversibility and the temperature shift with precise terminology and a clear logical thread from principle to prediction.",
+    "improvement": "add one quantitative reference, such as the enthalpy change or the operating temperature, to anchor your claims in evidence.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["ammonia decomposes back into nitrogen and hydrogen at the same time", "the forward rate equals the reverse rate"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Exemplary", "evidence": ["an increase in temperature shifts the equilibrium in the endothermic direction, toward nitrogen and hydrogen"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Proficient", "evidence": ["the reaction would then be too slow to be useful"], "missingConcepts": ["quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Exemplary", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Exemplary", "evidence": ["To conclude, the reaction is reversible"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-06": {
+    "strength": "your chemistry is right: you described the reverse reaction, dynamic equilibrium, and the correct direction of shift for heating and cooling.",
+    "improvement": "proofread for spelling (process, reversible, ammonia, temperature, equilibrium) and use formal scientific terms so the reader can focus on your reasoning.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["the amonia can also split back up into nitrogen and hydrogen, so the reaction goes both ways"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Exemplary", "evidence": ["the equilibrium moves to the left (towards nitrogen and hydrogen) because that direction takes in heat"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Proficient", "evidence": ["about 450 degrees in factories"], "missingConcepts": [] },
+      { "criterionId": "clarity", "level": "Proficient", "evidence": [], "missingConcepts": ["precise_terminology"] },
+      { "criterionId": "structure", "level": "Proficient", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Developing", "evidence": ["The haber proccess is a reversable reaction", "Thats why"], "missingConcepts": ["spelling", "grammar"] }
+    ]
+  },
+  "sub-07": {
+    "strength": "you identified the correct direction of the temperature effect and named Le Chatelier's principle.",
+    "improvement": "explain why the reaction is reversible and connect the shift to the exothermic forward reaction, then support your claims with a specific value such as the operating temperature.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Beginning", "evidence": [], "missingConcepts": ["reversibility", "dynamic_equilibrium"] },
+      { "criterionId": "le_chatelier", "level": "Developing", "evidence": ["the heat pushes the reaction the other way"], "missingConcepts": ["exothermic_endothermic_link"] },
+      { "criterionId": "evidence", "level": "Beginning", "evidence": [], "missingConcepts": ["specific_example", "quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Developing", "evidence": [], "missingConcepts": ["explained_reasoning"] },
+      { "criterionId": "structure", "level": "Proficient", "evidence": ["In conclusion, temperature is important"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-08": {
+    "strength": "your explanation of reversibility and dynamic equilibrium is thorough and well organized.",
+    "improvement": "revisit the direction of the shift: because the forward reaction is exothermic, heating shifts the equilibrium toward the reactants and lowers the yield. Rate and equilibrium position are different ideas.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["ammonia simultaneously breaks down into nitrogen and hydrogen", "the forward and reverse reactions occur at equal rates"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Beginning", "evidence": ["the equilibrium shifts toward ammonia, increasing the yield"], "missingConcepts": ["temperature_shift_direction", "exothermic_endothermic_link"] },
+      { "criterionId": "evidence", "level": "Developing", "evidence": ["a high temperature of several hundred degrees"], "missingConcepts": ["quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Proficient", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Exemplary", "evidence": ["To summarise, the reaction is reversible"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-09": {
+    "strength": "you correctly stated that heating an exothermic equilibrium shifts it toward the reactants and reduces the product.",
+    "improvement": "ground each claim in this specific reaction: name the reverse reaction, explain equilibrium as equal rates, and include a value such as the enthalpy change or operating temperature.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Proficient", "evidence": ["the products can turn back into the reactants"], "missingConcepts": ["forward_reverse_rates"] },
+      { "criterionId": "le_chatelier", "level": "Proficient", "evidence": ["more heat means the equilibrium moves toward the reactants and less product is made"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Beginning", "evidence": [], "missingConcepts": ["specific_example", "quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Developing", "evidence": [], "missingConcepts": ["precise_terminology"] },
+      { "criterionId": "structure", "level": "Proficient", "evidence": ["In conclusion, the Haber process is reversible"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-10": {
+    "strength": "this is a precise, well-evidenced response: the enthalpy value, the distinction between macroscopic and molecular behavior, and the correct direction of shift are all present.",
+    "improvement": "you could briefly note why a catalyst does not change the equilibrium position, which would round out the kinetics versus equilibrium distinction.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["ammonia can decompose into nitrogen and hydrogen just as nitrogen and hydrogen can combine to make ammonia"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Exemplary", "evidence": ["heating the system shifts the equilibrium toward the endothermic side to absorb the added heat"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Exemplary", "evidence": ["an enthalpy change of roughly -92 kJ/mol", "about 400 to 450 °C"], "missingConcepts": [] },
+      { "criterionId": "clarity", "level": "Exemplary", "evidence": ["the macroscopic concentrations are fixed while reactions continue at the molecular level"], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Exemplary", "evidence": ["Overall, reversibility produces an equilibrium and temperature sets its position"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-11": {
+    "strength": "your use of Le Chatelier's principle is excellent: you identified the heat-absorbing direction and predicted the yield change correctly for both heating and cooling.",
+    "improvement": "address reversibility explicitly by naming the reaction as reversible and explaining the dynamic equilibrium between the forward and reverse reactions.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Beginning", "evidence": [], "missingConcepts": ["reversibility", "dynamic_equilibrium"] },
+      { "criterionId": "le_chatelier", "level": "Exemplary", "evidence": ["favors the direction that absorbs heat, which is ammonia breaking apart into nitrogen and hydrogen"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Proficient", "evidence": ["roughly 450 °C to balance a reasonable yield against an acceptable rate"], "missingConcepts": [] },
+      { "criterionId": "clarity", "level": "Proficient", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Proficient", "evidence": ["In short, temperature is the main lever"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-12": {
+    "strength": "your explanation of reversibility and dynamic equilibrium is clear, and the pressure discussion shows you understand how conditions shift an equilibrium.",
+    "improvement": "the prompt asks specifically about temperature: explain that heating this exothermic equilibrium shifts it toward the reactants and lowers the ammonia yield.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["at the same time ammonia breaks down to give back nitrogen and hydrogen", "the forward and reverse reactions reach the same rate"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Beginning", "evidence": [], "missingConcepts": ["le_chatelier_principle", "temperature_shift_direction", "exothermic_endothermic_link"] },
+      { "criterionId": "evidence", "level": "Proficient", "evidence": ["a high pressure favours the side with fewer gas molecules"], "missingConcepts": ["quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Proficient", "evidence": [], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Exemplary", "evidence": ["In conclusion, the Haber process is a reversible reaction"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-13": {
+    "strength": "the key ideas are all here: the correct direction of shift, the exothermic link, dynamic equilibrium as equal rates, and a specific temperature.",
+    "improvement": "organize these points into a paragraph that opens with reversibility, moves to equilibrium, and then explains the temperature effect, ending with a conclusion.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Proficient", "evidence": ["ammonia can turn back into nitrogen and hydrogen", "Dynamic equilibrium is when the forward and reverse rates are equal"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Proficient", "evidence": ["the equilibrium shifts to absorb the added heat, which is the reverse direction"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Proficient", "evidence": ["450 °C is used in factories"], "missingConcepts": [] },
+      { "criterionId": "clarity", "level": "Developing", "evidence": [], "missingConcepts": ["explained_reasoning"] },
+      { "criterionId": "structure", "level": "Beginning", "evidence": ["Higher temperature means less ammonia."], "missingConcepts": ["logical_order", "introduction_conclusion"] },
+      { "criterionId": "mechanics", "level": "Proficient", "evidence": ["The reaction is reversible, ammonia can turn back into nitrogen and hydrogen."], "missingConcepts": ["grammar"] }
+    ]
+  },
+  "sub-14": {
+    "strength": "you have the right instinct that heating reduces the ammonia yield and that industry uses a compromise temperature.",
+    "improvement": "explain the reasoning: the reaction is reversible and reaches a dynamic equilibrium, and because the forward reaction is exothermic, heating shifts that equilibrium toward the reactants. Use scientific terms and add a specific value.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Beginning", "evidence": [], "missingConcepts": ["reversibility", "dynamic_equilibrium", "forward_reverse_rates"] },
+      { "criterionId": "le_chatelier", "level": "Developing", "evidence": ["the heat makes it go backwards"], "missingConcepts": ["exothermic_endothermic_link"] },
+      { "criterionId": "evidence", "level": "Beginning", "evidence": [], "missingConcepts": ["specific_example", "quantitative_reference"] },
+      { "criterionId": "clarity", "level": "Beginning", "evidence": [], "missingConcepts": ["precise_terminology", "explained_reasoning"] },
+      { "criterionId": "structure", "level": "Developing", "evidence": [], "missingConcepts": ["introduction_conclusion"] },
+      { "criterionId": "mechanics", "level": "Proficient", "evidence": [], "missingConcepts": [] }
+    ]
+  },
+  "sub-15": {
+    "strength": "this is an exemplary response: reversibility, dynamic equilibrium, the enthalpy value, and the direction of shift are all explained precisely and tied together in the conclusion.",
+    "improvement": "as an extension, you might comment on how the equilibrium constant itself changes with temperature, which would deepen the link between thermodynamics and yield.",
+    "criteria": [
+      { "criterionId": "reversibility", "level": "Exemplary", "evidence": ["accompanied by the reverse conversion of ammonia back into nitrogen and hydrogen", "the two rates become equal"], "missingConcepts": [] },
+      { "criterionId": "le_chatelier", "level": "Exemplary", "evidence": ["Raising the temperature shifts the equilibrium toward the endothermic reverse reaction, lowering the equilibrium yield of ammonia"], "missingConcepts": [] },
+      { "criterionId": "evidence", "level": "Exemplary", "evidence": ["ΔH is about -92 kJ per mole of reaction", "near 450 °C with an iron catalyst"], "missingConcepts": [] },
+      { "criterionId": "clarity", "level": "Exemplary", "evidence": ["a state in which the composition of the mixture is constant even though molecules are continuously reacting in both directions"], "missingConcepts": [] },
+      { "criterionId": "structure", "level": "Exemplary", "evidence": ["In conclusion, reversibility is what allows an equilibrium to exist"], "missingConcepts": [] },
+      { "criterionId": "mechanics", "level": "Exemplary", "evidence": [], "missingConcepts": [] }
+    ]
+  }
+}

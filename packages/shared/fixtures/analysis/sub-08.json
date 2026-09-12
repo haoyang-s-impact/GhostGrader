@@ -1,0 +1,62 @@
+{
+  "submissionId": "sub-08",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "ammonia simultaneously breaks down into nitrogen and hydrogen",
+        "the forward and reverse reactions occur at equal rates"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Beginning",
+      "evidence": [
+        "the equilibrium shifts toward ammonia, increasing the yield"
+      ],
+      "missingConcepts": [
+        "temperature_shift_direction",
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Developing",
+      "evidence": [
+        "a high temperature of several hundred degrees"
+      ],
+      "missingConcepts": [
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Exemplary",
+      "evidence": [
+        "To summarise, the reaction is reversible"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Hassan, your explanation of reversibility and dynamic equilibrium is thorough and well organized. To strengthen this response, revisit the direction of the shift: because the forward reaction is exothermic, heating shifts the equilibrium toward the reactants and lowers the yield. Rate and equilibrium position are different ideas. Keep building on the reasoning you have already shown."
+}

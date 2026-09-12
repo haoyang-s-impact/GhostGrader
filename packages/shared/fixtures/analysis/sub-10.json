@@ -1,0 +1,59 @@
+{
+  "submissionId": "sub-10",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "ammonia can decompose into nitrogen and hydrogen just as nitrogen and hydrogen can combine to make ammonia"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Exemplary",
+      "evidence": [
+        "heating the system shifts the equilibrium toward the endothermic side to absorb the added heat"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Exemplary",
+      "evidence": [
+        "an enthalpy change of roughly -92 kJ/mol",
+        "about 400 to 450 °C"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Exemplary",
+      "evidence": [
+        "the macroscopic concentrations are fixed while reactions continue at the molecular level"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Exemplary",
+      "evidence": [
+        "Overall, reversibility produces an equilibrium and temperature sets its position"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Jonah, this is a precise, well-evidenced response: the enthalpy value, the distinction between macroscopic and molecular behavior, and the correct direction of shift are all present. To strengthen this response, you could briefly note why a catalyst does not change the equilibrium position, which would round out the kinetics versus equilibrium distinction. Keep building on the reasoning you have already shown."
+}

@@ -1,0 +1,66 @@
+{
+  "submissionId": "sub-13",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Proficient",
+      "evidence": [
+        "ammonia can turn back into nitrogen and hydrogen",
+        "Dynamic equilibrium is when the forward and reverse rates are equal"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Proficient",
+      "evidence": [
+        "the equilibrium shifts to absorb the added heat, which is the reverse direction"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Proficient",
+      "evidence": [
+        "450 °C is used in factories"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Developing",
+      "evidence": [],
+      "missingConcepts": [
+        "explained_reasoning"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Beginning",
+      "evidence": [
+        "Higher temperature means less ammonia."
+      ],
+      "missingConcepts": [
+        "logical_order",
+        "introduction_conclusion"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Proficient",
+      "evidence": [
+        "The reaction is reversible, ammonia can turn back into nitrogen and hydrogen."
+      ],
+      "missingConcepts": [
+        "grammar"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Maya, the key ideas are all here: the correct direction of shift, the exothermic link, dynamic equilibrium as equal rates, and a specific temperature. To strengthen this response, organize these points into a paragraph that opens with reversibility, moves to equilibrium, and then explains the temperature effect, ending with a conclusion. Keep building on the reasoning you have already shown."
+}

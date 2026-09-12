@@ -1,0 +1,57 @@
+{
+  "submissionId": "sub-11",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "reversibility",
+        "dynamic_equilibrium"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Exemplary",
+      "evidence": [
+        "favors the direction that absorbs heat, which is ammonia breaking apart into nitrogen and hydrogen"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Proficient",
+      "evidence": [
+        "roughly 450 °C to balance a reasonable yield against an acceptable rate"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Proficient",
+      "evidence": [
+        "In short, temperature is the main lever"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Kavya, your use of Le Chatelier's principle is excellent: you identified the heat-absorbing direction and predicted the yield change correctly for both heating and cooling. To strengthen this response, address reversibility explicitly by naming the reaction as reversible and explaining the dynamic equilibrium between the forward and reverse reactions. Keep building on the reasoning you have already shown."
+}

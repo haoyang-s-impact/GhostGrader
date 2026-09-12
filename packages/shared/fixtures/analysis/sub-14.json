@@ -1,0 +1,64 @@
+{
+  "submissionId": "sub-14",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "reversibility",
+        "dynamic_equilibrium",
+        "forward_reverse_rates"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Developing",
+      "evidence": [
+        "the heat makes it go backwards"
+      ],
+      "missingConcepts": [
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "specific_example",
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "precise_terminology",
+        "explained_reasoning"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Developing",
+      "evidence": [],
+      "missingConcepts": [
+        "introduction_conclusion"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Noah, you have the right instinct that heating reduces the ammonia yield and that industry uses a compromise temperature. To strengthen this response, explain the reasoning: the reaction is reversible and reaches a dynamic equilibrium, and because the forward reaction is exothermic, heating shifts that equilibrium toward the reactants. Use scientific terms and add a specific value. Keep building on the reasoning you have already shown."
+}

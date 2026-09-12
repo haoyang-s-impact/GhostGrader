@@ -1,0 +1,62 @@
+{
+  "submissionId": "sub-06",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "the amonia can also split back up into nitrogen and hydrogen, so the reaction goes both ways"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Exemplary",
+      "evidence": [
+        "the equilibrium moves to the left (towards nitrogen and hydrogen) because that direction takes in heat"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Proficient",
+      "evidence": [
+        "about 450 degrees in factories"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [
+        "precise_terminology"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Developing",
+      "evidence": [
+        "The haber proccess is a reversable reaction",
+        "Thats why"
+      ],
+      "missingConcepts": [
+        "spelling",
+        "grammar"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Felix, your chemistry is right: you described the reverse reaction, dynamic equilibrium, and the correct direction of shift for heating and cooling. To strengthen this response, proofread for spelling (process, reversible, ammonia, temperature, equilibrium) and use formal scientific terms so the reader can focus on your reasoning. Keep building on the reasoning you have already shown."
+}

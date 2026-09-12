@@ -1,0 +1,59 @@
+{
+  "submissionId": "sub-02",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "reversibility",
+        "dynamic_equilibrium"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Proficient",
+      "evidence": [
+        "it favors the endothermic direction and less ammonia is produced"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Developing",
+      "evidence": [
+        "a moderate temperature is chosen in industry"
+      ],
+      "missingConcepts": [
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Proficient",
+      "evidence": [
+        "Overall, temperature controls the amount of ammonia"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Ben, you correctly predicted that heating favors the endothermic direction and lowers the ammonia yield, and you explained the industrial compromise on temperature. To strengthen this response, explain why the reaction is reversible: describe the reverse reaction and the dynamic equilibrium that results, since the prompt asks for this directly. Keep building on the reasoning you have already shown."
+}

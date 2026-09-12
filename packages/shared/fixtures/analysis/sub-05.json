@@ -1,0 +1,59 @@
+{
+  "submissionId": "sub-05",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "ammonia decomposes back into nitrogen and hydrogen at the same time",
+        "the forward rate equals the reverse rate"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Exemplary",
+      "evidence": [
+        "an increase in temperature shifts the equilibrium in the endothermic direction, toward nitrogen and hydrogen"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Proficient",
+      "evidence": [
+        "the reaction would then be too slow to be useful"
+      ],
+      "missingConcepts": [
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Exemplary",
+      "evidence": [
+        "To conclude, the reaction is reversible"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Elena, you explained both reversibility and the temperature shift with precise terminology and a clear logical thread from principle to prediction. To strengthen this response, add one quantitative reference, such as the enthalpy change or the operating temperature, to anchor your claims in evidence. Keep building on the reasoning you have already shown."
+}

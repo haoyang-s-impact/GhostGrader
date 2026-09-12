@@ -1,0 +1,62 @@
+{
+  "submissionId": "sub-07",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "reversibility",
+        "dynamic_equilibrium"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Developing",
+      "evidence": [
+        "the heat pushes the reaction the other way"
+      ],
+      "missingConcepts": [
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "specific_example",
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Developing",
+      "evidence": [],
+      "missingConcepts": [
+        "explained_reasoning"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Proficient",
+      "evidence": [
+        "In conclusion, temperature is important"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Grace, you identified the correct direction of the temperature effect and named Le Chatelier's principle. To strengthen this response, explain why the reaction is reversible and connect the shift to the exothermic forward reaction, then support your claims with a specific value such as the operating temperature. Keep building on the reasoning you have already shown."
+}

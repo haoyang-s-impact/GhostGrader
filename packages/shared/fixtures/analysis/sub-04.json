@@ -1,0 +1,57 @@
+{
+  "submissionId": "sub-04",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "reversibility",
+        "dynamic_equilibrium"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Exemplary",
+      "evidence": [
+        "the system responds by favoring the direction that absorbs heat, which is the breakdown of ammonia into nitrogen and hydrogen"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Proficient",
+      "evidence": [
+        "a temperature of about 450 °C is used as a compromise between yield and speed"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Proficient",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Proficient",
+      "evidence": [
+        "Therefore temperature is a key factor"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Daniel, your application of Le Chatelier's principle is excellent: you identified the heat-absorbing direction and correctly predicted the yield change for both heating and cooling. To strengthen this response, address reversibility explicitly by naming the reaction as reversible and explaining the dynamic equilibrium between the forward and reverse reactions. Keep building on the reasoning you have already shown."
+}

@@ -1,0 +1,104 @@
+{
+  "id": "chem-haber-eq",
+  "title": "Reversibility and Temperature in the Haber Process",
+  "course": "CHEM 101: General Chemistry",
+  "prompt": "The Haber process, N2(g) + 3H2(g) ⇌ 2NH3(g), is used to manufacture ammonia and is exothermic in the forward direction. Explain why this reaction is described as reversible and how changing the temperature affects the position of equilibrium. Support your explanation with specific reasoning or values.",
+  "learningObjectives": [
+    "Explain reversibility and dynamic equilibrium in terms of forward and reverse reaction rates.",
+    "Apply Le Chatelier's principle to predict the effect of temperature on an exothermic equilibrium.",
+    "Support scientific claims with specific evidence."
+  ],
+  "rubric": {
+    "id": "rubric-haber-v1",
+    "criteria": [
+      {
+        "id": "reversibility",
+        "title": "Reversibility and dynamic equilibrium",
+        "description": "Explains that the reaction proceeds in both directions and reaches a dynamic equilibrium in which forward and reverse rates are equal.",
+        "maxPoints": 5,
+        "concepts": ["reversibility", "dynamic_equilibrium", "forward_reverse_rates"],
+        "bands": [
+          { "level": "Exemplary", "points": 5, "descriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates." },
+          { "level": "Proficient", "points": 3.5, "descriptor": "States the reaction is reversible and mentions equilibrium, but the rate explanation is thin or missing." },
+          { "level": "Developing", "points": 2, "descriptor": "Mentions reversibility or equilibrium in passing without explanation." },
+          { "level": "Beginning", "points": 0, "descriptor": "Does not address reversibility or treats the reaction as one-way." }
+        ]
+      },
+      {
+        "id": "le_chatelier",
+        "title": "Effect of temperature on equilibrium position",
+        "description": "Uses Le Chatelier's principle and the exothermic nature of the forward reaction to predict how temperature shifts the equilibrium.",
+        "maxPoints": 5,
+        "concepts": ["le_chatelier_principle", "temperature_shift_direction", "exothermic_endothermic_link"],
+        "bands": [
+          { "level": "Exemplary", "points": 5, "descriptor": "Correct direction of shift for both heating and cooling, explicitly linked to the exothermic forward reaction via Le Chatelier's principle." },
+          { "level": "Proficient", "points": 3.5, "descriptor": "Correct direction of shift with a partial or implicit link to exothermicity." },
+          { "level": "Developing", "points": 2, "descriptor": "States that temperature matters but the direction or reasoning is vague." },
+          { "level": "Beginning", "points": 0, "descriptor": "Direction is wrong, or temperature is discussed only in terms of rate, or not at all." }
+        ]
+      },
+      {
+        "id": "evidence",
+        "title": "Use of specific evidence",
+        "description": "Supports claims with specific examples, values, or industrial context.",
+        "maxPoints": 5,
+        "concepts": ["specific_example", "quantitative_reference"],
+        "bands": [
+          { "level": "Exemplary", "points": 5, "descriptor": "Includes at least one quantitative reference (enthalpy, temperature) and a specific example." },
+          { "level": "Proficient", "points": 3.5, "descriptor": "Includes a specific example or value, but not both." },
+          { "level": "Developing", "points": 2, "descriptor": "Evidence is general or only loosely tied to the claim." },
+          { "level": "Beginning", "points": 0, "descriptor": "No supporting evidence." }
+        ]
+      },
+      {
+        "id": "clarity",
+        "title": "Scientific clarity",
+        "description": "Uses precise terminology and explains reasoning rather than asserting conclusions.",
+        "maxPoints": 5,
+        "concepts": ["precise_terminology", "explained_reasoning"],
+        "bands": [
+          { "level": "Exemplary", "points": 5, "descriptor": "Precise terminology throughout; every claim is explained." },
+          { "level": "Proficient", "points": 3.5, "descriptor": "Mostly precise; minor lapses in terminology or explanation." },
+          { "level": "Developing", "points": 2, "descriptor": "Informal language or several unexplained assertions." },
+          { "level": "Beginning", "points": 0, "descriptor": "Unclear or confusing throughout." }
+        ]
+      },
+      {
+        "id": "structure",
+        "title": "Organization",
+        "description": "Ideas are ordered logically with a clear opening and conclusion.",
+        "maxPoints": 5,
+        "concepts": ["logical_order", "introduction_conclusion"],
+        "bands": [
+          { "level": "Exemplary", "points": 5, "descriptor": "Clear introduction, logical progression, and a conclusion that ties reversibility to temperature." },
+          { "level": "Proficient", "points": 3.5, "descriptor": "Logical order with a weak opening or closing." },
+          { "level": "Developing", "points": 2, "descriptor": "Some order but ideas jump around, or no conclusion." },
+          { "level": "Beginning", "points": 0, "descriptor": "No discernible structure." }
+        ]
+      },
+      {
+        "id": "mechanics",
+        "title": "Writing mechanics",
+        "description": "Grammar, spelling, and punctuation.",
+        "maxPoints": 5,
+        "concepts": ["grammar", "spelling"],
+        "bands": [
+          { "level": "Exemplary", "points": 5, "descriptor": "No errors that affect reading." },
+          { "level": "Proficient", "points": 3.5, "descriptor": "A few minor errors." },
+          { "level": "Developing", "points": 2, "descriptor": "Frequent errors that slow reading." },
+          { "level": "Beginning", "points": 0, "descriptor": "Errors obscure meaning." }
+        ]
+      }
+    ]
+  },
+  "anchors": [
+    {
+      "label": "Exemplary anchor",
+      "text": "The Haber process is reversible: nitrogen and hydrogen form ammonia while ammonia decomposes back into nitrogen and hydrogen. In a closed system the two rates become equal and a dynamic equilibrium is reached, so concentrations stay constant even though both reactions continue. The forward reaction is exothermic (about -92 kJ/mol), so by Le Chatelier's principle raising the temperature shifts the equilibrium toward the reactants and lowers the ammonia yield, while lowering the temperature raises the yield but slows the reaction. Industry compromises at about 450 °C with an iron catalyst."
+    },
+    {
+      "label": "Developing anchor",
+      "text": "The Haber process makes ammonia from nitrogen and hydrogen and gives out heat. If you heat it up you get less ammonia and if you cool it down you get more, but it is slow, so they use a medium temperature."
+    }
+  ]
+}

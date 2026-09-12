@@ -1,0 +1,61 @@
+{
+  "submissionId": "sub-09",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Proficient",
+      "evidence": [
+        "the products can turn back into the reactants"
+      ],
+      "missingConcepts": [
+        "forward_reverse_rates"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Proficient",
+      "evidence": [
+        "more heat means the equilibrium moves toward the reactants and less product is made"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Beginning",
+      "evidence": [],
+      "missingConcepts": [
+        "specific_example",
+        "quantitative_reference"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Developing",
+      "evidence": [],
+      "missingConcepts": [
+        "precise_terminology"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Proficient",
+      "evidence": [
+        "In conclusion, the Haber process is reversible"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Isabel, you correctly stated that heating an exothermic equilibrium shifts it toward the reactants and reduces the product. To strengthen this response, ground each claim in this specific reaction: name the reverse reaction, explain equilibrium as equal rates, and include a value such as the enthalpy change or operating temperature. Keep building on the reasoning you have already shown."
+}

@@ -1,0 +1,60 @@
+{
+  "submissionId": "sub-01",
+  "criteria": [
+    {
+      "criterionId": "reversibility",
+      "level": "Exemplary",
+      "evidence": [
+        "nitrogen and hydrogen combine to form ammonia, and ammonia can also decompose back into nitrogen and hydrogen",
+        "the forward and reverse reactions continue at the same rate"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "le_chatelier",
+      "level": "Exemplary",
+      "evidence": [
+        "raising the temperature favors the endothermic direction, so the equilibrium shifts toward the reactants and the yield of ammonia falls"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "evidence",
+      "level": "Exemplary",
+      "evidence": [
+        "releasing about 92 kJ per mole of nitrogen consumed",
+        "around 450 °C with an iron catalyst"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "clarity",
+      "level": "Exemplary",
+      "evidence": [
+        "dynamic equilibrium, where the forward and reverse reactions continue at the same rate"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "structure",
+      "level": "Exemplary",
+      "evidence": [
+        "In summary, reversibility creates an equilibrium"
+      ],
+      "missingConcepts": [],
+      "confidence": 0.9
+    },
+    {
+      "criterionId": "mechanics",
+      "level": "Exemplary",
+      "evidence": [],
+      "missingConcepts": [],
+      "confidence": 0.9
+    }
+  ],
+  "feedbackDraft": "Aisha, your explanation of dynamic equilibrium as equal forward and reverse rates is precise, and you linked the exothermic forward reaction to the direction of the shift exactly as Le Chatelier's principle requires. To strengthen this response, consider stating explicitly why the rate becomes slow at low temperature, so the compromise at 450 °C is fully justified. Keep building on the reasoning you have already shown."
+}

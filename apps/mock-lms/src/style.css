@@ -1,0 +1,61 @@
+:root {
+  --ic-blue: #0374b5;
+  --ic-blue-dark: #02568a;
+  --ic-border: #c7cdd1;
+  --ic-bg: #f5f5f5;
+  --ic-text: #2d3b45;
+  --ic-muted: #6b7780;
+  --ic-header: #394b58;
+  font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  color: var(--ic-text);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ic-bg); font-size: 14px; line-height: 1.5; }
+button { font: inherit; cursor: pointer; }
+
+.sg-header { display: flex; align-items: center; justify-content: space-between; background: var(--ic-header); color: #fff; padding: 0 16px; height: 52px; position: sticky; top: 0; z-index: 10; }
+.sg-brand { display: flex; align-items: center; gap: 10px; }
+.sg-logo { width: 28px; height: 28px; border-radius: 50%; background: #e0312e; display: grid; place-items: center; font-weight: 700; }
+.sg-crumb { font-size: 13px; opacity: 0.95; }
+.sg-nav { display: flex; align-items: center; gap: 8px; }
+.sg-progress { font-size: 12px; opacity: 0.8; margin-right: 8px; }
+.sg-select { font: inherit; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--ic-border); background: #fff; color: var(--ic-text); max-width: 220px; }
+.sg-counter { font-variant-numeric: tabular-nums; font-size: 13px; margin-left: 8px; }
+.sg-btn { border: 1px solid var(--ic-border); background: #fff; color: var(--ic-text); border-radius: 4px; padding: 4px 12px; font-size: 16px; line-height: 1.2; }
+.sg-btn:disabled { opacity: 0.4; cursor: default; }
+.sg-btn-primary { background: var(--ic-blue); color: #fff; border-color: var(--ic-blue-dark); font-size: 14px; padding: 8px 16px; }
+.sg-btn-primary:hover { background: var(--ic-blue-dark); }
+
+.sg-main { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 16px; padding: 16px; max-width: 1400px; margin: 0 auto; }
+.sg-submission, .sg-grading { background: #fff; border: 1px solid var(--ic-border); border-radius: 4px; padding: 20px 24px; }
+.sg-student { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--ic-border); margin-bottom: 16px; }
+.sg-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--ic-blue); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 18px; }
+.sg-name { font-weight: 700; font-size: 16px; }
+.sg-meta, .sg-muted { color: var(--ic-muted); font-size: 12px; }
+.sg-prompt-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ic-muted); margin: 16px 0 6px; }
+.sg-prompt { background: #f8fafb; border-left: 3px solid var(--ic-blue); padding: 10px 14px; margin: 0; color: #3d4f5c; }
+.sg-essay { font-size: 15px; line-height: 1.7; white-space: pre-wrap; }
+
+.sg-grade-total { display: flex; align-items: baseline; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--ic-border); margin-bottom: 12px; }
+.sg-grade-total strong { font-size: 28px; }
+.sg-grading h3 { font-size: 14px; margin: 16px 0 8px; }
+.sg-rubric { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.sg-rubric th { text-align: left; font-weight: 600; color: var(--ic-muted); padding: 6px 4px; border-bottom: 1px solid var(--ic-border); }
+.sg-rubric td { padding: 8px 4px; border-bottom: 1px solid #e8ebed; vertical-align: top; }
+.sg-crit { width: 150px; }
+.sg-crit-title { font-weight: 700; }
+.sg-crit-desc { color: var(--ic-muted); font-size: 11.5px; margin-top: 2px; }
+.sg-bands { display: flex; flex-wrap: wrap; gap: 4px; }
+.sg-band { display: flex; flex-direction: column; align-items: center; min-width: 52px; padding: 4px 6px; border: 1px solid var(--ic-border); background: #fff; border-radius: 3px; color: var(--ic-text); }
+.sg-band:hover { border-color: var(--ic-blue); }
+.sg-band.is-selected { background: var(--ic-blue); color: #fff; border-color: var(--ic-blue-dark); }
+.sg-band-pts { font-weight: 700; }
+.sg-band-lvl { font-size: 10px; }
+.sg-pts-col, .sg-pts { width: 80px; white-space: nowrap; }
+.sg-pts-input { width: 48px; padding: 4px; border: 1px solid var(--ic-border); border-radius: 3px; font: inherit; text-align: right; }
+.sg-pts-input:focus { outline: 2px solid var(--ic-blue); outline-offset: 1px; }
+.sg-comment { width: 100%; border: 1px solid var(--ic-border); border-radius: 4px; padding: 8px; font: inherit; resize: vertical; }
+.sg-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.sg-saved { color: #0b874b; font-size: 12px; }
+
+@media (max-width: 1100px) { .sg-main { grid-template-columns: 1fr; } }
