@@ -1,5 +1,6 @@
 {
-  "submissionId": "sub-03",
+  "answerId": "sub-03",
+  "questionId": "q-haber-1",
   "criteria": [
     {
       "criterionId": "reversibility",

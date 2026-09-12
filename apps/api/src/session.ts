@@ -10,14 +10,14 @@ export class SessionService {
   }
 
   /**
-   * Record a submitted grade. Decision ids are deterministic per submission,
-   * so re-submitting a student replaces their row: the session holds each
-   * student's latest submission and nothing else. `replay` restores mirrored
-   * rows after a backend restart without re-raising resolved alerts.
+   * Record a submitted grade. Decision ids are deterministic per answer, so
+   * re-grading a student's answer replaces their row: the session holds each
+   * answer's latest grade and nothing else. Drift is checked against other
+   * students on the same question.
    */
-  record(decision: Decision, replay = false): DriftAlert | null {
+  record(decision: Decision): DriftAlert | null {
     const s = this.store.session(decision.assignmentId);
-    const alert = replay ? null : detectDrift(decision, s.decisions, new Set(s.overrides));
+    const alert = detectDrift(decision, s.decisions, new Set(s.overrides));
     const at = s.decisions.findIndex((d) => d.id === decision.id);
     if (at === -1) s.decisions.push(decision);
     else s.decisions[at] = decision;
@@ -34,16 +34,16 @@ export class SessionService {
   }
 
   /**
-   * `submissionId` makes a checksRaised bump idempotent for that student: the
-   * check is evaluated live as the teacher types, so it would otherwise count
-   * once per keystroke. Passing none always counts.
+   * `answerId` makes a checksRaised bump idempotent for that answer: the check
+   * is evaluated live as the teacher types, so it would otherwise count once
+   * per keystroke. Passing none always counts.
    */
-  bump(assignmentId: string, field: "alertsAligned" | "checksRaised" | "checksApproved", submissionId?: string) {
+  bump(assignmentId: string, field: "alertsAligned" | "checksRaised" | "checksApproved", answerId?: string) {
     const s = this.store.session(assignmentId);
-    if (field === "checksRaised" && submissionId) {
+    if (field === "checksRaised" && answerId) {
       const seen = (s.checksRaisedFor ??= []);
-      if (seen.includes(submissionId)) return;
-      seen.push(submissionId);
+      if (seen.includes(answerId)) return;
+      seen.push(answerId);
     }
     s[field] += 1;
     this.store.saveSession(assignmentId, s);

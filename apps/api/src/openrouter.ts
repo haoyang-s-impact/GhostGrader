@@ -1,6 +1,6 @@
-import { finalizeAnalysis, ModelOutputSchema, type AnalysisResult, type Assignment, type Submission } from "@gg/shared";
+import { finalizeAnalysis, ModelOutputSchema, type AnalysisResult, type Answer, type Assignment, type Question } from "@gg/shared";
 import { AnalysisError } from "./claude";
-import { buildSystemPrompt } from "./prompt";
+import { buildSystemPrompt, promptCacheKey } from "./prompt";
 
 /**
  * OpenAI-compatible chat completions: OpenRouter or OpenAI directly. Uses
@@ -38,11 +38,11 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
   const doFetch = opts.fetchImpl ?? fetch;
   const systemCache = new Map<string, string>();
 
-  async function once(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
-    const cacheKey = `${assignment.id}:${assignment.updatedAt}`;
+  async function once(answer: Answer, assignment: Assignment, question: Question): Promise<AnalysisResult> {
+    const cacheKey = promptCacheKey(assignment, question);
     let system = systemCache.get(cacheKey);
     if (!system) {
-      system = `${buildSystemPrompt(assignment)}\n\n# Output format\n${JSON_SHAPE}`;
+      system = `${buildSystemPrompt(assignment, question)}\n\n# Output format\n${JSON_SHAPE}`;
       systemCache.set(cacheKey, system);
     }
     const res = await doFetch(`${baseUrl}/chat/completions`, {
@@ -58,7 +58,7 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
-          { role: "user", content: `Student: ${submission.studentName}\n\nResponse:\n${submission.text}` },
+          { role: "user", content: `Student: ${answer.studentName}\n\nResponse:\n${answer.text}` },
         ],
       }),
     });
@@ -72,7 +72,7 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
     };
     const choice = body.choices?.[0];
     opts.log?.(`[${provider}] usage prompt=${body.usage?.prompt_tokens ?? "?"} completion=${body.usage?.completion_tokens ?? "?"} cost=${body.usage?.cost ?? "?"}`);
-    if (choice?.message?.refusal) throw new AnalysisError("The model declined to analyze this submission.", false);
+    if (choice?.message?.refusal) throw new AnalysisError("The model declined to analyze this answer.", false);
     const content = choice?.message?.content;
     if (!content) throw new AnalysisError("The model returned an empty reply.", true);
     let parsed: unknown;
@@ -83,15 +83,15 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
     }
     const out = ModelOutputSchema.safeParse(parsed);
     if (!out.success) throw new AnalysisError("The model returned output that did not match the schema.", true);
-    return { ...finalizeAnalysis(submission.id, assignment, out.data), provider };
+    return { ...finalizeAnalysis(answer.id, question, out.data), provider };
   }
 
-  return async function analyze(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
+  return async function analyze(answer: Answer, assignment: Assignment, question: Question): Promise<AnalysisResult> {
     try {
-      return await once(submission, assignment);
+      return await once(answer, assignment, question);
     } catch (err) {
       if (err instanceof AnalysisError && !err.retryable) throw err;
-      return await once(submission, assignment);
+      return await once(answer, assignment, question);
     }
   };
 }
