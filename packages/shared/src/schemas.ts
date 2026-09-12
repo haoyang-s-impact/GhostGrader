@@ -23,6 +23,20 @@ export const RubricSchema = z.object({
 
 export const AnchorSchema = z.object({ label: z.string(), text: z.string() });
 
+/**
+ * Material students work from: the clip in a listening task, the menu or chart
+ * they answer about. Answers stay text; media is for the teacher to replay and,
+ * through its transcript, for the analyzer to read. `src` is a URL, relative
+ * ones resolving against the web app (seeded files live in apps/web/public).
+ */
+export const QuestionMediaSchema = z.object({
+  kind: z.enum(["audio", "image"]),
+  src: z.string(),
+  label: z.string(),
+  /** What an audio clip says, transcribed once when the question is set up (scripts/transcribe-media.ts). */
+  transcript: z.string().optional(),
+});
+
 export const TeacherSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -52,6 +66,11 @@ export const QuestionSchema = z.object({
   prompt: z.string(),
   rubric: RubricSchema,
   anchors: z.array(AnchorSchema).default([]),
+  /**
+   * Optional, not defaulted: questions are stored as a JSON column and read back
+   * with a cast, so rows written before this field existed have no `media`.
+   */
+  media: z.array(QuestionMediaSchema).optional(),
   /** Points this question's grade is out of. Defaults to the sum of criterion maxima. */
   totalPoints: z.number().positive().optional(),
   /** Identifier of this question in the LMS. Empty for locally authored questions. */
@@ -252,6 +271,7 @@ export type Band = z.infer<typeof BandSchema>;
 export type Criterion = z.infer<typeof CriterionSchema>;
 export type Rubric = z.infer<typeof RubricSchema>;
 export type Anchor = z.infer<typeof AnchorSchema>;
+export type QuestionMedia = z.infer<typeof QuestionMediaSchema>;
 export type Teacher = z.infer<typeof TeacherSchema>;
 export type Course = z.infer<typeof CourseSchema>;
 export type Question = z.infer<typeof QuestionSchema>;

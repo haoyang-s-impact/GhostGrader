@@ -113,3 +113,26 @@ test("the gradebook rolls per-question grades up per student", async ({ page }) 
   await expect(page.locator('[data-total="stu-04"]')).toContainText("/ 45");
   await expect(page.locator('[data-total="stu-01"]')).toContainText("1 of 2 graded");
 });
+
+test("a listening question plays its clip, shows the transcript and the menu, and scores against the key", async ({ page, request }) => {
+  await page.goto("/#/grade/eng8-open-ended/q-eng-order-barbara/e-q2-10");
+  await expect(page.locator(`[data-gg-panel][data-gg-analysis="ready"]`)).toBeVisible();
+
+  const audio = page.locator('[data-question-media="audio"] audio');
+  await expect(audio).toHaveAttribute("src", "media/eng8/barbara-order.mp3");
+  const clip = await request.get(await audio.evaluate((el: HTMLAudioElement) => el.src));
+  expect(clip.status()).toBe(200);
+  expect(clip.headers()["content-type"]).toMatch(/audio/);
+
+  const transcript = page.locator('[data-question-media="audio"] details');
+  await transcript.locator("summary").click();
+  await expect(transcript).toContainText("I'd like a mixed kebab, please.");
+
+  const menu = page.locator('[data-question-media="image"]');
+  await menu.locator("summary").click();
+  await expect(menu.locator("img")).toBeVisible();
+  expect(await menu.locator("img").evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+
+  // "Kebab" alone is not the Mixed Kebab on the key: three of four items.
+  await expect(panel(page, "[data-gg-apply-grade]")).toContainText("15");
+});
