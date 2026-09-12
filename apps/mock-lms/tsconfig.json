@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "lib": ["ES2022", "DOM", "DOM.Iterable"] },
-  "include": ["src", "../../packages/shared/src", "../../packages/shared/fixtures/*.json"]
+  "compilerOptions": { "lib": ["ES2022", "DOM", "DOM.Iterable"], "types": ["node", "vite/client"] },
+  "include": ["src", "server", "test", "../../packages/shared/src", "../../packages/shared/fixtures/*.json"]
 }

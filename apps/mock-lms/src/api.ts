@@ -1,36 +1,21 @@
-import type { Assignment, AssignmentInput, Course, StoredSubmission, Teacher } from "@gg/shared";
+import type { LmsAssignment, LmsCourse, LmsGrade, LmsSubmission, LmsUser } from "../server/store";
 
-export const API = "http://localhost:8787";
-const TEACHER_KEY = "gg-mock-teacher";
+/** The mock LMS UI reads only its own server. It knows nothing about Ghost Grader. */
+export const LMS_API = import.meta.env.VITE_LMS_API ?? "http://localhost:8788/api/v1";
+export const GHOST_GRADER_URL = import.meta.env.VITE_GHOST_GRADER_URL ?? "http://localhost:5174";
 
-export function currentTeacherId(): string {
-  return localStorage.getItem(TEACHER_KEY) ?? "t-demo";
-}
-export function setCurrentTeacherId(id: string) {
-  localStorage.setItem(TEACHER_KEY, id);
-}
-
-async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
-    ...init,
-    headers: { "content-type": "application/json", "x-teacher-id": currentTeacherId(), ...(init.headers ?? {}) },
-  });
-  if (res.status === 204) return undefined as T;
+async function call<T>(path: string): Promise<T> {
+  const res = await fetch(`${LMS_API}${path}`);
   const body = await res.json().catch(() => null);
   if (!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
   return body as T;
 }
 
 export const lms = {
-  teachers: () => call<Teacher[]>("/lms/teachers"),
-  me: () => call<Teacher>("/lms/me"),
-  courses: () => call<Course[]>("/lms/courses"),
-  createCourse: (name: string, term: string) => call<Course>("/lms/courses", { method: "POST", body: JSON.stringify({ name, term }) }),
-  assignments: (courseId?: string) => call<Assignment[]>(`/lms/assignments${courseId ? `?courseId=${encodeURIComponent(courseId)}` : ""}`),
-  assignment: (id: string) => call<Assignment>(`/lms/assignments/${id}`),
-  createAssignment: (input: AssignmentInput) => call<Assignment>("/lms/assignments", { method: "POST", body: JSON.stringify(input) }),
-  updateAssignment: (id: string, input: AssignmentInput) => call<Assignment>(`/lms/assignments/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-  submissions: (assignmentId: string) => call<StoredSubmission[]>(`/lms/assignments/${assignmentId}/submissions`),
-  addSubmission: (assignmentId: string, studentName: string, text: string) =>
-    call<StoredSubmission>(`/lms/assignments/${assignmentId}/submissions`, { method: "POST", body: JSON.stringify({ studentName, text }) }),
+  courses: () => call<LmsCourse[]>("/courses"),
+  assignments: () => call<LmsAssignment[]>("/assignments"),
+  assignment: (id: string) => call<LmsAssignment>(`/assignments/${encodeURIComponent(id)}`),
+  users: () => call<LmsUser[]>("/users"),
+  submissions: (id: string) => call<LmsSubmission[]>(`/assignments/${encodeURIComponent(id)}/submissions`),
+  grades: (id: string) => call<LmsGrade[]>(`/assignments/${encodeURIComponent(id)}/grades`),
 };

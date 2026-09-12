@@ -1,27 +1,12 @@
-import type { Teacher } from "@gg/shared";
-import { currentTeacherId, setCurrentTeacherId } from "../api";
-import { esc } from "../util";
+import { GHOST_GRADER_URL } from "../api";
 
-export function renderHeader(teachers: Teacher[], crumb: string, right = ""): string {
-  const me = teachers.find((t) => t.id === currentTeacherId()) ?? teachers[0];
+export function renderHeader(crumb: string): string {
   return `
-  <header class="sg-header" data-gg-teacher-id="${esc(me?.id ?? "")}">
-    <div class="sg-brand"><a class="sg-logo" href="#/courses" title="Dashboard">C</a><span class="sg-crumb">${crumb}</span></div>
+  <header class="sg-header">
+    <div class="sg-brand"><a class="sg-logo" href="#/courses" title="Courses">C</a><span class="sg-crumb">${crumb}</span></div>
     <div class="sg-nav">
-      ${right}
-      <label class="sg-user">Signed in as
-        <select id="teacher-switch" class="sg-select" aria-label="Switch teacher">
-          ${teachers.map((t) => `<option value="${t.id}" ${t.id === me?.id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}
-        </select>
-      </label>
+      <span class="sg-user">Mock LMS · instructor view</span>
+      <a class="sg-btn sg-btn-sm sg-btn-ghost" href="${GHOST_GRADER_URL}" target="_blank" rel="noreferrer">Open Ghost Grader ↗</a>
     </div>
   </header>`;
-}
-
-export function bindHeader() {
-  document.getElementById("teacher-switch")?.addEventListener("change", (e) => {
-    setCurrentTeacherId((e.target as HTMLSelectElement).value);
-    location.hash = "#/courses";
-    location.reload();
-  });
 }
