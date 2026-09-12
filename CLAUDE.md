@@ -85,6 +85,94 @@ Hash routes: `#/` home, `#/grade/:assignmentId/:questionId[/:answerId]`,
 Grading logic is the `useGrading` hook (`grading/useGrading.ts`); the page owns
 the grade and comment as form state. Panel tabs are in `grading/tabs/`.
 
+## Database (`apps/api`)
+
+One SQLite file holds everything. Drizzle ORM (`drizzle-orm/better-sqlite3`)
+is the query layer; `better-sqlite3` is the driver (synchronous, so store
+methods return plain values, no `await`).
+
+### Lifecycle
+
+1. `openDb(path)` (`src/db/index.ts`) creates the directory if needed, opens
+   the file, sets `journal_mode = WAL` and `foreign_keys = ON`, and runs every
+   migration in `apps/api/drizzle/` that the `__drizzle_migrations` table has
+   not recorded yet. A file that is not SQLite makes it throw with a clear
+   message instead of failing later.
+2. `new Store(path, seed, log)` (`src/store.ts`) calls `openDb`, then, if the
+   `teachers` table is empty, inserts `seedData()` from `json-store.ts` in one
+   transaction (two teachers, two courses, the chemistry assignment with both
+   questions, the fifteen plus five seeded answers). An existing database is
+   never reseeded.
+3. `index.ts` builds the store once with `GG_DB_PATH` (default
+   `apps/api/data/ghost-grader.sqlite`) and hands it to `createApp`. Tests use
+   `new Store()` for an in-memory database; call `store.close()` when a test
+   opens a file-backed one.
+
+The WAL mode leaves `.sqlite-wal` and `.sqlite-shm` beside the file while the
+API is running. All three are gitignored; deleting the `.sqlite` file resets
+the demo.
+
+### Tables (`src/db/schema.ts`)
+
+| Table | Keyed by | Holds |
+|---|---|---|
+| `teachers` | id | name, email |
+| `courses` | id | teacher_id, name, term, lms_course_id |
+| `students` | id | name, lms_student_id |
+| `assignments` | id | teacher_id, course_id, title, course, `learning_objectives` JSON, `questions` JSON (every question with its rubric, anchors, totalPoints, lmsQuestionId), updated_at, lms_assignment_id, last_pulled_at |
+| `answers` | id | assignment_id, question_id, student_id, student_name, student_index, text, lms_answer_id, submitted_at, pulled_at |
+| `decisions` | id (`${answerId}:grade`) | assignment_id, question_id, answer_id, student_id, points, max_points, suggested_points (nullable), `missing_concepts` JSON, comment, at |
+| `overrides` | (assignment_id, key) unique | "Keep mine" pairs, `key` from `overrideKey` |
+| `session_stats` | assignment_id | alerts_raised, alerts_aligned, checks_raised, checks_approved, `checks_raised_for` JSON |
+| `pushes` | seq autoincrement | assignment_id plus every `PushRecord` field; several rows per answer, the latest wins |
+
+Column names are snake_case in SQL and camelCase in TypeScript; Drizzle maps
+them. Indexes exist on every foreign key and on `(assignment_id, question_id)`
+for answers and decisions. Rubrics are not normalized on purpose: a question's
+rubric is always read and written whole, and `finalizeAnalysis` needs the whole
+thing anyway.
+
+### How the store maps the domain
+
+- `Store` is the only module that imports Drizzle. Its methods mirror the JSON
+  store it replaced one for one, returning the same shared types.
+- **Sessions** are not a table. `session(assignmentId)` assembles a
+  `SessionState` from `decisions`, `overrides` and `session_stats`;
+  `saveSession` writes all three in one transaction: decisions upserted by id
+  and stale rows pruned, overrides deleted and reinserted, stats upserted.
+  `SessionService` mutates the in-memory `SessionState` and calls `saveSession`,
+  exactly as it did with the JSON file. `resetSession` deletes the three tables'
+  rows for that assignment and leaves `pushes` alone.
+- **Pushes** are replaced wholesale per assignment by `savePushes`, matching how
+  `SyncService` rebuilds the list from `latestPushes`.
+- `upsertStudent` / `upsertAnswer` are `INSERT ... ON CONFLICT(id) DO UPDATE`.
+- LMS-id lookups (`courseByLmsId`, `assignmentByLmsId`, `studentByLmsId`,
+  `answerByLmsId`) return nothing for an empty id, so locally created rows
+  never match a pull.
+- `newId(prefix)` makes ids; nothing relies on autoincrement except `pushes.seq`.
+
+### Changing the schema
+
+1. Edit `src/db/schema.ts` (and the Zod schema in `@gg/shared` if the domain
+   type changes).
+2. Run `pnpm --filter @gg/api db:generate`. It writes a new SQL file and
+   updates `drizzle/meta/`. Commit both.
+3. Adjust `Store` so the domain type still round-trips (see
+   `toAssignmentRow` / `fromAssignmentRow` for the JSON-column pattern).
+4. Add or update a test in `test/store.test.ts`.
+
+Never edit a migration that is already committed; add a new one. Every
+developer's database applies pending migrations on the next API start.
+
+### Inspecting and resetting
+
+```bash
+sqlite3 apps/api/data/ghost-grader.sqlite '.tables'
+sqlite3 apps/api/data/ghost-grader.sqlite 'select id, points, suggested_points from decisions;'
+rm apps/api/data/ghost-grader.sqlite*      # start over; the next API start reseeds
+pnpm --filter @gg/api import-json [file]   # copy a pre-SQLite data/ghost-grader.json in (JsonStore is kept only for this)
+```
+
 ## Invariants: do not break these
 
 - **Points come from the rubric, never from the model.** `finalizeAnalysis`
