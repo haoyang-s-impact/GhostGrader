@@ -257,6 +257,7 @@ pnpm typecheck
 pnpm test         # vitest in every package
 pnpm --filter @gg/api db:generate   # after changing apps/api/src/db/schema.ts
 pnpm --filter @gg/api import-json   # one-time import of an old data/ghost-grader.json
+pnpm --filter @gg/api compare-models <assignmentId> <questionId> --models=a,b --expected=f.json   # model bake-off on a synced question
 pnpm e2e          # Playwright against the web app; boots API (mock analyzer) and web itself
 pnpm --filter @gg/extension build   # dist/ to load unpacked in Chrome
 pnpm --filter @gg/extension e2e     # Playwright against the local Moodle (MOODLE_URL, MOODLE_USER, MOODLE_PASSWORD, MOODLE_GRADING_URL)

@@ -49,9 +49,15 @@ loaded:
 Copy `apps/api/.env.example` to `apps/api/.env` and set any of:
 
 - `OPENROUTER_API_KEY` (optional `OPENROUTER_MODEL`, default
-  `openai/gpt-4o-mini`). Any OpenAI-compatible model on OpenRouter.
-- `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-4o-mini`).
+  `openai/gpt-5-mini`). Any OpenAI-compatible model on OpenRouter.
+- `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-5-mini`).
 - `ANTHROPIC_API_KEY` for Claude Opus 5 with structured outputs.
+
+Before changing the model, run
+`pnpm --filter @gg/api compare-models <assignmentId> <questionId> --models=...`
+to see each candidate's marks side by side on a question's real answers; on
+the seeded Moodle question gpt-5-mini matched the rubric on 16 of 16 answers
+where gpt-4o-mini matched 10.
 
 They form a chain in that order. The first configured provider is primary.
 When a call fails for any reason (outage, rate limit, refusal, or malformed

@@ -45,6 +45,7 @@ ${anchors}
 
 # Rules
 1. Judge the answer only against the criteria above. Do not invent criteria and do not reward or penalize anything the rubric does not name.
+1b. When the question supplies data (a table, figures, a passage), verify every factual claim in the answer against that data before choosing a band. A comparison that contradicts the data is wrong no matter how well it is written; a claim the data supports is right even with spelling mistakes, unless the rubric says otherwise. Use the anchor responses as calibration: an answer equivalent to an anchor earns that anchor's score.
 2. For each criterion choose exactly one band from that criterion's list and return its level name exactly as written (for example "Score 5", not "5").
 3. evidence must be verbatim substrings copied from the student's text, up to two per criterion. If nothing in the text supports the criterion, return an empty list.
 4. missingConcepts may only contain tags from that criterion's allowed list. Include a tag only when the concept is absent or wrong in the answer. An Exemplary band means no missing concepts.

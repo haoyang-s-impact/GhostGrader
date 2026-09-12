@@ -53,7 +53,8 @@ export function createJsonChat(opts: OpenRouterOptions): JsonChat {
       },
       body: JSON.stringify({
         model: opts.model,
-        temperature: 0.2,
+        // Reasoning models (gpt-5 family, o-series) reject a custom temperature.
+        ...(/(^|\/)(gpt-5|o[1-9])/.test(opts.model) ? {} : { temperature: 0.2 }),
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },

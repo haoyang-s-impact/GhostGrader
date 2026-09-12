@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Answer, Assignment, Question } from "@gg/shared";
-import { draftRubric } from "../rubric-draft";
+import { draftRubric, parseExampleAnchors } from "../rubric-draft";
 import type { JsonChat } from "../openrouter";
 import { newId, type Store } from "../store";
 
@@ -73,7 +73,7 @@ export async function syncGradingPage(store: Store, teacherId: string, input: Mo
       title: input.question.title,
       prompt: input.question.text,
       rubric: draft.rubric,
-      anchors: [],
+      anchors: parseExampleAnchors(input.question.graderInfo),
       totalPoints: input.question.maxMark,
       lmsQuestionId: moodleIds.question(input.question.lmsId),
     };
@@ -94,10 +94,21 @@ export async function syncGradingPage(store: Store, teacherId: string, input: Mo
       const { id, teacherId: _t, ...rest } = assignment;
       assignment = store.updateAssignment(teacherId, id, { ...rest, questions: [...assignment.questions, question], updatedAt: now, lastPulledAt: now })!;
     }
-  } else if (assignment) {
-    // Keep the pull timestamp fresh without touching rubrics the teacher may have edited.
+  } else if (assignment && question) {
+    // The question text is LMS-owned and follows the page; the rubric is
+    // teacher-owned and never touched here. Anchors are filled from the grader
+    // notes only while the teacher has not written any.
+    const anchors = question.anchors.length ? question.anchors : parseExampleAnchors(input.question.graderInfo);
+    const changed = question.prompt !== input.question.text || anchors !== question.anchors;
+    const refreshed: Question = { ...question, prompt: input.question.text, anchors };
     const { id, teacherId: _t, ...rest } = assignment;
-    assignment = store.updateAssignment(teacherId, id, { ...rest, lastPulledAt: now })!;
+    assignment = store.updateAssignment(teacherId, id, {
+      ...rest,
+      questions: assignment.questions.map((q) => (q.id === refreshed.id ? refreshed : q)),
+      updatedAt: changed ? now : rest.updatedAt,
+      lastPulledAt: now,
+    })!;
+    question = refreshed;
   }
   const a: Assignment = assignment!;
 

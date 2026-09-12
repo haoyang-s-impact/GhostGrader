@@ -63,6 +63,46 @@ function text(el: Element | null | undefined): string {
   return (el?.textContent ?? "").replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Text that keeps the structure a model needs: table rows become
+ * "cell | cell" lines, block elements become line breaks. Plain textContent
+ * would glue "Country Weather Population" into one word soup.
+ */
+export function richText(el: Element | null | undefined): string {
+  if (!el) return "";
+  const out: string[] = [];
+  const walk = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      out.push((node.textContent ?? "").replace(/\s+/g, " "));
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const e = node as Element;
+    const tag = e.tagName;
+    if (tag === "SCRIPT" || tag === "STYLE") return;
+    if (tag === "TR") {
+      const cells = [...e.children].map((c) => richText(c).trim());
+      out.push(cells.join(" | ") + "\n");
+      return;
+    }
+    if (tag === "BR") {
+      out.push("\n");
+      return;
+    }
+    const block = /^(P|DIV|TABLE|UL|OL|LI|H[1-6]|BLOCKQUOTE|PRE)$/.test(tag);
+    if (block) out.push("\n");
+    for (const child of e.childNodes) walk(child);
+    if (block) out.push("\n");
+  };
+  walk(el);
+  return out
+    .join("")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export function parseGradingPage(root: Document = document): GradingPage | null {
   const form = root.getElementById("manualgradingform") as HTMLFormElement | null;
   if (!form) return null;
@@ -93,9 +133,9 @@ export function parseGradingPage(root: Document = document): GradingPage | null 
     questionLmsId,
     slot,
     questionTitle,
-    questionText: text(first.querySelector(".qtext")),
+    questionText: richText(first.querySelector(".qtext")),
     maxMark: Number(form.querySelector<HTMLInputElement>('input[name$="-maxmark"]')?.value ?? 0) || 0,
-    graderInfo: text(first.querySelector(".graderinfo")),
+    graderInfo: richText(first.querySelector(".graderinfo")),
     attemptsTotal,
   };
 
@@ -121,7 +161,7 @@ export function parseGradingPage(root: Document = document): GradingPage | null 
           attemptNumber: Number(hm?.[1] ?? 1) || 1,
           studentName: hm?.[2]?.trim() || `Attempt ${qubaId}`,
           studentEmail: hm?.[3]?.trim() ?? "",
-          text: text(node.querySelector(".qtype_essay_response") ?? node.querySelector(".answer")),
+          text: richText(node.querySelector(".qtype_essay_response") ?? node.querySelector(".answer")),
           element: node,
           markInput,
           commentEditorId: textarea?.id ?? `q${lmsId}_-comment_id`,

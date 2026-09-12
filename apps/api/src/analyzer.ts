@@ -17,8 +17,8 @@ export interface AnalyzerInfo extends ProviderInfo {
   analyze: Analyzer;
 }
 
-export const DEFAULT_OPENROUTER_MODEL = "openai/gpt-4o-mini";
-export const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
+export const DEFAULT_OPENROUTER_MODEL = "openai/gpt-5-mini";
+export const DEFAULT_OPENAI_MODEL = "gpt-5-mini";
 
 /**
  * Provider chain, in order: OpenRouter, OpenAI, Claude, for whichever keys

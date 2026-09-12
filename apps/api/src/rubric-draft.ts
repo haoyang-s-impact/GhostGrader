@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Rubric } from "@gg/shared";
+import type { Anchor, Rubric } from "@gg/shared";
 import type { JsonChat } from "./openrouter";
 
 /**
@@ -32,6 +32,27 @@ const DraftSchema = z.object({
     )
     .min(1),
 });
+
+/**
+ * Worked examples from grader notes become anchors: "Score 10: ... Examples:
+ * A. / B." yields one anchor per example, labelled with its score, so the
+ * analysis prompt can show the model what each band looks like in practice.
+ */
+export function parseExampleAnchors(graderInfo: string): Anchor[] {
+  const text = graderInfo.replace(/\s+/g, " ").trim();
+  const anchors: Anchor[] = [];
+  const re = /Score\s+(\d+(?:[.,]\d+)?)\s*[:\-–]\s*(.*?)(?=Score\s+\d|$)/gi;
+  for (const m of text.matchAll(re)) {
+    const score = m[1]!.replace(",", ".");
+    const examples = m[2]!.match(/Examples?:\s*(.*)$/i)?.[1];
+    if (!examples) continue;
+    for (const ex of examples.split(/\s+\/\s+/)) {
+      const t = ex.replace(/\(([^)]*)\)\s*$/, " ($1)").trim();
+      if (t) anchors.push({ label: `Example earning ${score}`, text: t });
+    }
+  }
+  return anchors;
+}
 
 export function slugTag(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "concept";

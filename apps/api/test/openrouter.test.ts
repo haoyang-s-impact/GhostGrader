@@ -46,10 +46,10 @@ describe("OpenRouter analyzer", () => {
     expect(r.provider).toBe("openrouter");
   });
 
-  it("talks to OpenAI directly with the same protocol and no OpenRouter headers", async () => {
-    const calls: { url: string; headers: Record<string, string> }[] = [];
+  it("talks to OpenAI directly with the same protocol and no OpenRouter headers, and omits temperature for reasoning models", async () => {
+    const calls: { url: string; headers: Record<string, string>; body: { temperature?: number } }[] = [];
     const fetchImpl = (async (url: string, init?: RequestInit) => {
-      calls.push({ url, headers: init?.headers as Record<string, string> });
+      calls.push({ url, headers: init?.headers as Record<string, string>, body: JSON.parse(String(init?.body)) });
       return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(goodReply) } }] }), { status: 200 });
     }) as unknown as typeof fetch;
     const r = await createOpenAIAnalyzer({ apiKey: "k", model: "gpt-4o-mini", fetchImpl })(sub4, assignment, q1);
@@ -78,7 +78,7 @@ describe("selectAnalyzer", () => {
     const all = selectAnalyzer({ OPENROUTER_API_KEY: "k", OPENAI_API_KEY: "o", ANTHROPIC_API_KEY: "a" });
     expect(all.mode).toBe("openrouter");
     expect(all.fallbacks).toEqual([
-      { mode: "openai", model: "gpt-4o-mini" },
+      { mode: "openai", model: "gpt-5-mini" },
       { mode: "claude", model: "claude-opus-5" },
     ]);
     expect(selectAnalyzer({ OPENAI_API_KEY: "o", OPENAI_MODEL: "gpt-4.1" })).toMatchObject({ mode: "openai", model: "gpt-4.1", fallbacks: [] });

@@ -13,8 +13,8 @@ const HTML = `
   <input type="hidden" name="qubaids" value="78,59">
   <h4>Attempt number 1 for Fatma Kaya (fatma.kaya@example.com)</h4>
   <div id="question-78-1" class="que essay manualgraded complete"><div class="content">
-    <div class="formulation"><div class="qtext">Look at the table. Compare the countries.</div><div class="qtype_essay_response readonly">Canada colder than New Zealand.</div></div>
-    <div class="comment"><div class="graderinfo">Rubric 1 (10 points) Score 10: both. Score 5: one. Score 0: none.</div>
+    <div class="formulation"><div class="qtext"><p><strong>Outcome:</strong> comparisons</p><table><thead><tr><th>Country</th><th>Weather</th></tr></thead><tbody><tr><td>New Zealand</td><td>Up to 45 °C</td></tr><tr><td>Canada</td><td>Up to 25 °C</td></tr></tbody></table><p>Look at the table. Compare the countries.</p></div><div class="qtype_essay_response readonly"><p>Canada colder than New Zealand.</p></div></div>
+    <div class="comment"><div class="graderinfo"><h5>Rubric 1 (10 points)</h5><p><strong>Score 10:</strong> both.<br>Examples: <em>NZ is hotter.</em></p><p><strong>Score 5:</strong> one.</p><p><strong>Score 0:</strong> none.</p></div>
       <textarea name="q78:1_-comment" id="q78:1_-comment_id"></textarea>
       <input type="text" name="q78:1_-mark" value=""><input type="hidden" name="q78:1_-maxmark" value="10">
     </div></div></div>
@@ -42,7 +42,8 @@ describe("parseGradingPage", () => {
       attemptsTotal: 24,
     });
     expect(page.context.graderInfo).toMatch(/^Rubric 1/);
-    expect(page.context.questionText).toMatch(/Compare the countries/);
+    expect(page.context.graderInfo).toMatch(/Score 10: both\.\s*\nExamples: NZ is hotter\./);
+    expect(page.context.questionText).toBe("Outcome: comparisons\n\nCountry | Weather\nNew Zealand | Up to 45 °C\nCanada | Up to 25 °C\n\nLook at the table. Compare the countries.");
   });
 
   it("reads every attempt with its student, answer, mark input and editor id", () => {

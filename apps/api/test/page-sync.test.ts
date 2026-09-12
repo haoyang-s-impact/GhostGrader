@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { selectAnalyzer } from "../src/analyzer";
 import { createApp } from "../src/app";
 import { moodleIds, type MoodlePageInput } from "../src/lms/page-sync";
-import { parseGraderInfo } from "../src/rubric-draft";
+import { parseExampleAnchors, parseGraderInfo } from "../src/rubric-draft";
 import { Store } from "../src/store";
 
 const T1 = "t-demo";
@@ -50,6 +50,18 @@ describe("parseGraderInfo", () => {
   });
 });
 
+describe("parseExampleAnchors", () => {
+  it("turns each worked example into an anchor labelled with its score", () => {
+    const anchors = parseExampleAnchors(GRADER_INFO);
+    expect(anchors).toEqual([
+      { label: "Example earning 10", text: "New Zealand is hotter than Canada." },
+      { label: "Example earning 5", text: "New Zealand is hotter than Canada." },
+      { label: "Example earning 0", text: "Canada colder than New Zealand." },
+    ]);
+    expect(parseExampleAnchors("Score 10: perfect. Score 0: blank.")).toEqual([]);
+  });
+});
+
 describe("POST /lms/moodle/page", () => {
   it("creates course, assignment, question with a drafted rubric, students and answers on first sight", async () => {
     const { app, store } = mkApp();
@@ -67,6 +79,7 @@ describe("POST /lms/moodle/page", () => {
     expect(a.questions).toHaveLength(1);
     expect(a.questions[0]).toMatchObject({ lmsQuestionId: moodleIds.question("172"), totalPoints: 10, index: 1 });
     expect(a.questions[0]!.rubric.criteria[0]!.bands.map((b) => b.points)).toEqual([10, 5, 0]);
+    expect(a.questions[0]!.anchors).toHaveLength(3);
 
     const answers = store.answersFor(a.id);
     expect(answers.map((x) => [x.studentName, x.studentIndex])).toEqual([["Fatma Kaya", 1], ["Zeynep Kara", 2]]);
@@ -87,6 +100,10 @@ describe("POST /lms/moodle/page", () => {
     expect(second.questionId).toBe(first.questionId);
     expect(second.rubricDrafted).toBe(false);
     expect(second.answers["78:1"]).toEqual(first.answers["78:1"]);
+    expect(store.assignment(T1, first.assignmentId)!.questions[0]!.rubric.criteria[0]!.concepts).toContain("weather_comparison");
+    // The question text follows the page; the rubric stays as the teacher left it.
+    const refreshed = await (await app.request("/lms/moodle/page", { method: "POST", headers: hdr(T1), body: JSON.stringify(page({ question: { ...page().question, text: "Country | Weather\nNew Zealand | 45 °C" } })) })).json();
+    expect(refreshed.question.prompt).toBe("Country | Weather\nNew Zealand | 45 °C");
     expect(store.assignment(T1, first.assignmentId)!.questions[0]!.rubric.criteria[0]!.concepts).toContain("weather_comparison");
     expect(store.answersFor(first.assignmentId).map((x) => [x.studentName, x.studentIndex])).toEqual([["Fatma Kaya", 1], ["Zeynep Kara", 2], ["Ali Demir", 3]]);
   });
