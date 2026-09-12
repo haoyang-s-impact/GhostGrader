@@ -1,14 +1,11 @@
-:host { all: initial; }
-* { box-sizing: border-box; }
 .gg-root {
   --gg-bg: #ffffff; --gg-fg: #1f2a33; --gg-muted: #66737d; --gg-border: #dfe4e8; --gg-accent: #5b3df5; --gg-accent-soft: #efeaff;
   --gg-ok: #0b874b; --gg-warn: #b45309; --gg-warn-soft: #fff4e5; --gg-bad: #c0392b;
-  position: fixed; top: 52px; right: 0; bottom: 0; width: 380px; background: var(--gg-bg); color: var(--gg-fg);
-  border-left: 1px solid var(--gg-border); box-shadow: -8px 0 24px rgba(20, 30, 40, 0.08); z-index: 2147483000;
-  font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif; display: flex; flex-direction: column;
-  transition: transform 180ms ease;
+  background: var(--gg-bg); color: var(--gg-fg); border: 1px solid var(--gg-border); border-radius: 12px;
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
 }
-.gg-root.is-collapsed { transform: translateX(340px); }
+.gg-root * { box-sizing: border-box; }
 .gg-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--gg-border); }
 .gg-ghost { width: 26px; height: 26px; border-radius: 8px; background: var(--gg-accent); color: #fff; display: grid; place-items: center; font-size: 15px; }
 .gg-title { font-weight: 700; font-size: 14px; letter-spacing: -0.01em; }

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["chrome", "node", "vite/client"]
+    "types": ["node", "vite/client"]
   },
   "include": ["src", "test", "e2e", "playwright.config.ts", "vite.config.ts", "../../packages/shared/src", "../../packages/shared/fixtures/*.json"]
 }

@@ -1,5 +1,5 @@
-import type { AnalysisResult } from "@gg/shared";
-import type { PageSubmission } from "../selectors";
+import type { AnalysisResult, Question } from "@gg/shared";
+import type { GradingTarget } from "../decisions";
 
 export type AnalysisState =
   | { status: "idle" }
@@ -8,7 +8,10 @@ export type AnalysisState =
   | { status: "error"; message: string; retryable: boolean };
 
 interface Props {
-  page: PageSubmission | null;
+  target: GradingTarget | null;
+  question: Question | null;
+  /** The draft grade in the form. */
+  grade: number | null;
   analysis: AnalysisState;
   inserted: boolean;
   onRetry: () => void;
@@ -16,19 +19,20 @@ interface Props {
   onApplyGrade: () => void;
 }
 
-export function AlignmentTab({ page, analysis, inserted, onRetry, onInsert, onApplyGrade }: Props) {
-  if (!page) return <div className="gg-status">Waiting for a submission to open…</div>;
+export function AlignmentTab({ target, question, grade, analysis, inserted, onRetry, onInsert, onApplyGrade }: Props) {
+  if (!target) return <div className="gg-status">Pick a student to start grading.</div>;
+  const titleOf = (id: string) => question?.rubric.criteria.find((c) => c.id === id)?.title ?? humanize(id);
 
   return (
     <>
       <div className="gg-student">
-        Reviewing <strong>{page.studentName}</strong> · submission #{page.submissionIndex}
+        Reviewing <strong>{target.answer.studentName}</strong> · student #{target.answer.studentIndex}
       </div>
 
       {analysis.status === "loading" && (
         <div className="gg-status" data-gg-state="loading">
           <div className="gg-spinner" />
-          Reading the response against this course's rubric…
+          Reading the answer against this question's rubric…
         </div>
       )}
 
@@ -57,7 +61,7 @@ export function AlignmentTab({ page, analysis, inserted, onRetry, onInsert, onAp
               <button className="gg-btn gg-btn-primary" onClick={onApplyGrade} data-gg-apply-grade>
                 Use {analysis.result.suggestedTotal}
               </button>
-              <span className="gg-none">{page.grade === null ? "No grade entered yet." : `You entered ${page.grade}.`}</span>
+              <span className="gg-none">{grade === null ? "No grade entered yet." : `You entered ${grade}.`}</span>
             </div>
           </div>
 
@@ -94,7 +98,7 @@ export function AlignmentTab({ page, analysis, inserted, onRetry, onInsert, onAp
             <p data-gg-feedback-draft>{analysis.result.feedbackDraft}</p>
             <div className="gg-row">
               <button className="gg-btn" onClick={onInsert} data-gg-insert>
-                {inserted ? "Inserted ✓" : "Insert into comment"}
+                {inserted ? "Inserted ✓" : "Use as feedback"}
               </button>
               <span className="gg-none">You can edit it before submitting.</span>
             </div>
@@ -105,6 +109,6 @@ export function AlignmentTab({ page, analysis, inserted, onRetry, onInsert, onAp
   );
 }
 
-function titleOf(id: string) {
+function humanize(id: string) {
   return id.replace(/_/g, " ").replace(/^\w/, (ch) => ch.toUpperCase());
 }

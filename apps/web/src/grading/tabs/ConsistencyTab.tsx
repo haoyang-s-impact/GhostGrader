@@ -1,9 +1,7 @@
 import type { DriftAlert, ScoreCheck } from "@gg/shared";
-import type { PageSubmission } from "../selectors";
 
 interface Props {
-  page: PageSubmission | null;
-  /** The grade in the box has not been committed with Submit yet. */
+  /** The grade in the form has not been committed with Submit yet. */
   unsubmitted: boolean;
   alert: DriftAlert | null;
   check: ScoreCheck | null;
@@ -22,8 +20,7 @@ function signed(n: number) {
   return n > 0 ? `+${n}` : `${n}`;
 }
 
-export function ConsistencyTab({ page, unsubmitted, alert, check, history, onAlign, onKeep, onApproveCheck, onDismissCheck }: Props) {
-  void page;
+export function ConsistencyTab({ unsubmitted, alert, check, history, onAlign, onKeep, onApproveCheck, onDismissCheck }: Props) {
   return (
     <>
       {unsubmitted && (
@@ -35,7 +32,7 @@ export function ConsistencyTab({ page, unsubmitted, alert, check, history, onAli
         <div className="gg-alert gg-check" data-gg-check>
           <h4>⚑ Rubric check</h4>
           <p>
-            You gave <strong>{check.enteredPoints}</strong> of {check.maxPoints}. Referenced against this course's rubric, this response earns{" "}
+            You gave <strong>{check.enteredPoints}</strong> of {check.maxPoints}. Referenced against this question's rubric, this answer earns{" "}
             <strong>{check.suggestedPoints}</strong>
             {check.missingConcepts.length > 0 && (
               <>
@@ -80,7 +77,7 @@ export function ConsistencyTab({ page, unsubmitted, alert, check, history, onAli
         <div className="gg-alert" data-gg-alert>
           <h4>⚠ Consistency alert</h4>
           <p>
-            <strong>{alert.priorStudentName || `Submission #${alert.priorSubmissionIndex}`}</strong> (#{alert.priorSubmissionIndex}) had the same gap
+            <strong>{alert.priorStudentName || `Student #${alert.priorStudentIndex}`}</strong> (#{alert.priorStudentIndex}) had the same gap on this question
             {alert.sharedConcepts.length > 0 && (
               <>
                 , <strong>{alert.sharedConcepts.map(humanize).join(", ")}</strong>,
@@ -92,7 +89,7 @@ export function ConsistencyTab({ page, unsubmitted, alert, check, history, onAli
           <div className="gg-compare">
             <div>
               <div className="gg-n">{alert.priorPoints}</div>
-              <div className="gg-l">#{alert.priorSubmissionIndex} · {signed(alert.priorOffset)} vs rubric</div>
+              <div className="gg-l">#{alert.priorStudentIndex} · {signed(alert.priorOffset)} vs rubric</div>
             </div>
             <div>
               <div className="gg-n">{alert.currentPoints}</div>
@@ -112,7 +109,7 @@ export function ConsistencyTab({ page, unsubmitted, alert, check, history, onAli
       ) : (
         !check && (
           <div className="gg-status" data-gg-no-alert>
-            No issues. Ghost Grader checks each grade against this course's rubric and against the grades you gave other students with the same gaps.
+            No issues. Ghost Grader checks each grade against this question's rubric and against the grades you gave other students with the same gaps on the same question.
           </div>
         )
       )}
@@ -124,7 +121,7 @@ export function ConsistencyTab({ page, unsubmitted, alert, check, history, onAli
             {history.map((h, i) => (
               <li key={`${h.currentDecisionId}-${i}`}>
                 <span>
-                  #{h.priorSubmissionIndex} vs #{h.currentSubmissionIndex} · {h.sharedConcepts.map(humanize).join(", ")}
+                  #{h.priorStudentIndex} vs #{h.currentStudentIndex} · {h.sharedConcepts.map(humanize).join(", ")}
                 </span>
                 <span>
                   {h.priorPoints} / {h.currentPoints}
