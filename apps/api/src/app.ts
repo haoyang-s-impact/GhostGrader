@@ -5,7 +5,6 @@ import { AssignmentInputSchema, DecisionSchema, questionById, rollUp, type Assig
 import type { AnalyzerInfo } from "./analyzer";
 import { AnalysisError } from "./claude";
 import { LmsError, type LmsAdapter } from "./lms/adapter";
-import { createMockLmsAdapter } from "./lms/mock";
 import { SessionService } from "./session";
 import { newId, Store } from "./store";
 import { SyncError, SyncService } from "./sync";
@@ -24,16 +23,19 @@ export const TEACHER_HEADER = "x-teacher-id";
 export interface AppDeps {
   analyzer: AnalyzerInfo;
   store?: Store;
-  lms?: LmsAdapter;
+  /** The LMS to sync with. Omitted: no LMS; the seeded answers are graded as they are. */
+  lms?: LmsAdapter | null;
 }
 
 type Env = { Variables: { teacherId: string } };
 
 const PUBLIC_PATHS = new Set(["/health", "/teachers"]);
 
-export function createApp({ analyzer, store = new Store(), lms = createMockLmsAdapter() }: AppDeps) {
+export function createApp({ analyzer, store = new Store(), lms = null }: AppDeps) {
   const sessions = new SessionService(store);
-  const sync = new SyncService(store, lms);
+  const sync = lms ? new SyncService(store, lms) : null;
+  const noLms = (c: { json: (body: unknown, status: 400) => Response }) =>
+    c.json({ error: "No LMS is configured. Set GG_LMS to connect one." }, 400);
   const app = new Hono<Env>();
 
   app.use(
@@ -49,7 +51,7 @@ export function createApp({ analyzer, store = new Store(), lms = createMockLmsAd
     }),
   );
 
-  app.get("/health", (c) => c.json({ ok: true, analyzer: analyzer.mode, model: analyzer.model, fallbacks: analyzer.fallbacks, lms: lms.name }));
+  app.get("/health", (c) => c.json({ ok: true, analyzer: analyzer.mode, model: analyzer.model, fallbacks: analyzer.fallbacks, lms: lms?.name ?? null }));
   app.get("/teachers", (c) => c.json(store.teachers()));
 
   // Every other route is scoped to one teacher. A real deployment would put
@@ -236,6 +238,7 @@ export function createApp({ analyzer, store = new Store(), lms = createMockLmsAd
 
   // ----- LMS sync: pull question/answer pairs in, push grades out -----
   app.get("/sync/available", async (c) => {
+    if (!sync) return noLms(c);
     try {
       return c.json(await sync.listAvailable());
     } catch (err) {
@@ -244,6 +247,7 @@ export function createApp({ analyzer, store = new Store(), lms = createMockLmsAd
   });
 
   app.post("/sync/pull", async (c) => {
+    if (!sync) return noLms(c);
     const parsed = PullBody.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: "Invalid body" }, 400);
     try {
@@ -255,10 +259,12 @@ export function createApp({ analyzer, store = new Store(), lms = createMockLmsAd
 
   app.get("/sync/status/:assignmentId", (c) => {
     const a = requireAssignment(c, c.req.param("assignmentId"));
-    return a ? c.json(sync.status(a)) : c.json({ error: "Unknown assignment" }, 404);
+    if (!a) return c.json({ error: "Unknown assignment" }, 404);
+    return sync ? c.json(sync.status(a)) : c.json({ linked: false, lms: null });
   });
 
   app.post("/sync/push", async (c) => {
+    if (!sync) return noLms(c);
     const parsed = PushBody.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: "Invalid body" }, 400);
     const a = requireAssignment(c, parsed.data.assignmentId);

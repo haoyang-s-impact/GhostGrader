@@ -54,7 +54,7 @@ export interface PushResult {
 }
 
 export interface LmsAdapter {
-  readonly name: "mock" | "canvas";
+  readonly name: "canvas" | "fake";
   listAssignments(): Promise<LmsAssignmentSummary[]>;
   pullAssignment(lmsAssignmentId: string): Promise<PullResult>;
   pushGrades(lmsAssignmentId: string, grades: PushGrade[]): Promise<PushResult>;

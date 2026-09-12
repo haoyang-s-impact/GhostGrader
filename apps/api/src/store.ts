@@ -46,14 +46,15 @@ export function emptySession(): SessionState {
 
 export interface SeedOptions {
   /**
-   * Seed the demo answers as if they had already been pulled from the LMS.
-   * Off by default: in the running system answers arrive through a pull.
-   * Tests turn it on so they can grade without standing up an LMS.
+   * Seed the demo questions' answers into the store. On by default, so the
+   * demo has student answers to grade without any LMS. Sync tests turn it off
+   * to watch answers arrive through a pull.
    */
   withAnswers?: boolean;
 }
 
 export function seedData(opts: SeedOptions = {}): StoreData {
+  const withAnswers = opts.withAnswers ?? true;
   return {
     schemaVersion: SCHEMA_VERSION,
     teachers: [
@@ -64,11 +65,11 @@ export function seedData(opts: SeedOptions = {}): StoreData {
       { id: "c-chem101", teacherId: "t-demo", name: "CHEM 101: General Chemistry", term: "Fall 2026", lmsCourseId: "lms-c-chem101" },
       { id: "c-hist210", teacherId: "t-second", name: "HIST 210: Modern Europe", term: "Fall 2026", lmsCourseId: "" },
     ],
-    students: opts.withAnswers ? [...seededStudents] : [],
-    // The seeded assignment ships with its rubrics already written and linked to
-    // the LMS, so a pull brings in the answers without clobbering the rubrics.
+    students: withAnswers ? [...seededStudents] : [],
+    // The seeded assignment ships with its rubrics written. Its LMS ids let a
+    // configured LMS pull into it later without clobbering those rubrics.
     assignments: [{ ...seededAssignment, updatedAt: Date.now() }],
-    answers: opts.withAnswers ? seededAnswers.map((a) => ({ ...a, pulledAt: Date.now() })) : [],
+    answers: withAnswers ? seededAnswers.map((a) => ({ ...a, pulledAt: Date.now() })) : [],
     sessions: {},
     pushes: {},
   };

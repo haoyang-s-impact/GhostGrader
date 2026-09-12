@@ -3,15 +3,14 @@ import { answers, assignment, type AnalysisResult, type Assignment, type Decisio
 import { selectAnalyzer } from "../src/analyzer";
 import { createApp } from "../src/app";
 import { SCHEMA_VERSION, Store } from "../src/store";
-import { fakeLms } from "./fake-lms";
 
 const T1 = "t-demo";
 const T2 = "t-second";
 const Q1 = "q-haber-1";
 const Q2 = "q-haber-2";
 
-function mkApp(store = new Store(undefined, { withAnswers: true })) {
-  return createApp({ analyzer: selectAnalyzer({ GG_MOCK: "1", NODE_ENV: "test" }), store, lms: fakeLms().adapter });
+function mkApp(store = new Store()) {
+  return createApp({ analyzer: selectAnalyzer({ GG_MOCK: "1", NODE_ENV: "test" }), store });
 }
 type App = ReturnType<typeof mkApp>;
 
@@ -50,9 +49,18 @@ const editable = (a: Assignment) => {
 };
 
 describe("auth and health", () => {
-  it("reports the analyzer and LMS adapter without a teacher header", async () => {
+  it("reports the analyzer, and that no LMS is configured, without a teacher header", async () => {
     const res = await mkApp().request("/health");
-    expect(await res.json()).toEqual({ ok: true, analyzer: "mock", model: "mock", fallbacks: [], lms: "mock" });
+    expect(await res.json()).toEqual({ ok: true, analyzer: "mock", model: "mock", fallbacks: [], lms: null });
+  });
+
+  it("answers sync routes with a clear error when no LMS is configured", async () => {
+    const app = mkApp();
+    const res = await post(app, "/sync/push", { assignmentId: assignment.id });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/No LMS is configured/);
+    expect((await post(app, "/sync/pull", { lmsAssignmentId: "x" })).status).toBe(400);
+    expect(await (await get(app, `/sync/status/${assignment.id}`)).json()).toEqual({ linked: false, lms: null });
   });
 
   it("lists teachers publicly and rejects scoped routes without a known teacher", async () => {
@@ -351,10 +359,11 @@ describe("Store persistence", () => {
     expect(s2.course(T1, course.id)?.name).toBe("Persisted");
   });
 
-  it("starts with rubrics but no answers, so answers arrive by pulling from the LMS", () => {
+  it("seeds both questions with their rubrics and the demo answers, ready to grade without an LMS", () => {
     const s = new Store();
     expect(s.assignment(T1, assignment.id)?.questions).toHaveLength(2);
-    expect(s.answersFor(assignment.id)).toEqual([]);
+    expect(s.answersFor(assignment.id)).toHaveLength(20);
+    expect(new Store(undefined, { withAnswers: false }).answersFor(assignment.id)).toEqual([]);
   });
 
   it("reseeds a data file written by an older schema instead of loading it", async () => {

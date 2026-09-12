@@ -42,7 +42,7 @@ export function fakeLms(opts: { failPush?: boolean; rejectRefs?: string[] } = {}
   });
 
   const adapter: LmsAdapter = {
-    name: "mock",
+    name: "fake",
     listAssignments: async () => [{ lmsId: assignment.lmsAssignmentId, courseName: assignment.course, title: assignment.title, questionCount: assignment.questions.length }],
     pullAssignment: async (id) => {
       if (id !== assignment.lmsAssignmentId) throw new LmsError(`mock-lms 404: no assignment ${id}`, false, 404);

@@ -12,7 +12,7 @@ const LMS_ID = "lms-a-haber";
 
 function setup(opts: Parameters<typeof fakeLms>[0] = {}) {
   // No answers seeded: they have to come from the LMS.
-  const store = new Store();
+  const store = new Store(undefined, { withAnswers: false });
   const lms = fakeLms(opts);
   const app = createApp({ analyzer: selectAnalyzer({ GG_MOCK: "1", NODE_ENV: "test" }), store, lms: lms.adapter });
   const hdr = (t: string) => ({ "content-type": "application/json", "x-teacher-id": t });
