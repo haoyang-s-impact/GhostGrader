@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { assignment, submissions } from "@gg/shared";
+import { answers, assignment } from "@gg/shared";
 import { createOpenAIAnalyzer, createOpenRouterAnalyzer } from "../src/openrouter";
 import { selectAnalyzer } from "../src/analyzer";
 
-const sub4 = submissions.find((s) => s.index === 4)!;
+const sub4 = answers.find((a) => a.id === "sub-04")!;
+const q1 = assignment.questions[0]!;
 
 const goodReply = {
-  criteria: assignment.rubric.criteria.map((c) => ({ criterionId: c.id, level: "Proficient", evidence: [], missingConcepts: [], confidence: 0.8 })),
+  criteria: q1.rubric.criteria.map((c) => ({ criterionId: c.id, level: "Proficient", evidence: [], missingConcepts: [], confidence: 0.8 })),
   summary: "Solid response.",
   feedbackDraft: "Daniel, nice work.",
 };
@@ -28,13 +29,18 @@ describe("OpenRouter analyzer", () => {
   it("sends the rubric-bound prompt in JSON mode and finalizes the reply", async () => {
     const { fetchImpl, calls } = fakeFetch([JSON.stringify(goodReply)]);
     const analyze = createOpenRouterAnalyzer({ apiKey: "k", model: "openai/gpt-4o-mini", fetchImpl });
-    const r = await analyze(sub4, assignment);
+    const r = await analyze(sub4, assignment, q1);
     expect(calls[0]!.url).toBe("https://openrouter.ai/api/v1/chat/completions");
     const body = calls[0]!.body as { model: string; response_format: { type: string }; messages: { role: string; content: string }[] };
     expect(body.model).toBe("openai/gpt-4o-mini");
     expect(body.response_format.type).toBe("json_object");
     expect(body.messages[0]!.content).toContain("allowed missingConcepts tags: reversibility, dynamic_equilibrium, forward_reverse_rates");
+    expect(body.messages[0]!.content).toContain("# Question 1: Reversibility and temperature");
+    // Only this question's rubric is in the prompt, never another question's.
+    expect(body.messages[0]!.content).not.toContain("pressure_shift_direction");
     expect(body.messages[1]!.content).toContain(sub4.text.slice(0, 40));
+    expect(r.answerId).toBe("sub-04");
+    expect(r.questionId).toBe("q-haber-1");
     expect(r.suggestedTotal).toBe(21);
     expect(r.summary).toBe("Solid response.");
     expect(r.provider).toBe("openrouter");
@@ -46,7 +52,7 @@ describe("OpenRouter analyzer", () => {
       calls.push({ url, headers: init?.headers as Record<string, string> });
       return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(goodReply) } }] }), { status: 200 });
     }) as unknown as typeof fetch;
-    const r = await createOpenAIAnalyzer({ apiKey: "k", model: "gpt-4o-mini", fetchImpl })(sub4, assignment);
+    const r = await createOpenAIAnalyzer({ apiKey: "k", model: "gpt-4o-mini", fetchImpl })(sub4, assignment, q1);
     expect(calls[0]!.url).toBe("https://api.openai.com/v1/chat/completions");
     expect(calls[0]!.headers["x-title"]).toBeUndefined();
     expect(r.provider).toBe("openai");
@@ -55,7 +61,7 @@ describe("OpenRouter analyzer", () => {
   it("retries once on malformed JSON, then succeeds", async () => {
     const { fetchImpl, calls } = fakeFetch(["not json", "```json\n" + JSON.stringify(goodReply) + "\n```"]);
     const analyze = createOpenRouterAnalyzer({ apiKey: "k", model: "m", fetchImpl });
-    const r = await analyze(sub4, assignment);
+    const r = await analyze(sub4, assignment, q1);
     expect(calls).toHaveLength(2);
     expect(r.criteria).toHaveLength(6);
   });
@@ -63,7 +69,7 @@ describe("OpenRouter analyzer", () => {
   it("surfaces a non-retryable API error", async () => {
     const { fetchImpl } = fakeFetch([{ status: 401, body: "bad key" }]);
     const analyze = createOpenRouterAnalyzer({ apiKey: "k", model: "m", fetchImpl });
-    await expect(analyze(sub4, assignment)).rejects.toThrow(/OpenRouter 401/);
+    await expect(analyze(sub4, assignment, q1)).rejects.toThrow(/OpenRouter 401/);
   });
 });
 
@@ -94,7 +100,7 @@ describe("selectAnalyzer", () => {
     try {
       const logs: string[] = [];
       const info = selectAnalyzer({ OPENROUTER_API_KEY: "k", OPENAI_API_KEY: "o" }, (m) => logs.push(m));
-      const r = await info.analyze(sub4, assignment);
+      const r = await info.analyze(sub4, assignment, q1);
       expect(r.provider).toBe("openai");
       // OpenRouter is tried twice (its own retry on a 5xx), then OpenAI once.
       expect(urls.filter((u) => u.startsWith("https://openrouter.ai"))).toHaveLength(2);
@@ -110,7 +116,7 @@ describe("selectAnalyzer", () => {
     globalThis.fetch = (async () => new Response("nope", { status: 401 })) as unknown as typeof fetch;
     try {
       const info = selectAnalyzer({ OPENROUTER_API_KEY: "k", OPENAI_API_KEY: "o" });
-      await expect(info.analyze(sub4, assignment)).rejects.toThrow(/OpenAI 401/);
+      await expect(info.analyze(sub4, assignment, q1)).rejects.toThrow(/OpenAI 401/);
     } finally {
       globalThis.fetch = realFetch;
     }

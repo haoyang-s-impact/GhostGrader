@@ -1,15 +1,15 @@
-import type { AnalysisResult, Assignment, GroundTruth, Submission } from "./schemas";
+import type { AnalysisResult, Answer, Assignment, GroundTruth, Question } from "./schemas";
 import { finalizeAnalysis } from "./rubric";
 
 /**
  * Deterministic stand-in for the Claude analysis call. Used when no API key is
  * configured and in tests. Produces the same shape the model is asked for.
- * Only the seeded assignment has ground truth; for teacher-created assignments
- * it falls back to a heuristic keyword scan so the demo still works offline.
+ * Only the seeded question has ground truth (keyed by answer id); every other
+ * question falls back to a heuristic keyword scan so the demo still works offline.
  */
-export function mockAnalyze(submission: Submission, assignment: Assignment, truth: GroundTruth): AnalysisResult {
-  const gt = truth[submission.id];
-  const firstName = submission.studentName.split(" ")[0] ?? "there";
+export function mockAnalyze(answer: Answer, assignment: Assignment, question: Question, truth: GroundTruth): AnalysisResult {
+  const gt = truth[answer.id];
+  const firstName = answer.studentName.split(" ")[0] ?? "there";
   if (gt) {
     const feedbackDraft =
       `${firstName}, ${gt.strength} ` +
@@ -19,8 +19,8 @@ export function mockAnalyze(submission: Submission, assignment: Assignment, trut
     const summary = missing.length
       ? `Strong in places, but the rubric penalizes the missing ${[...new Set(missing)].slice(0, 3).join(", ")}.`
       : "Meets every criterion at the top band.";
-    return finalizeAnalysis(submission.id, assignment, {
-      criteria: assignment.rubric.criteria.map((c) => {
+    return finalizeAnalysis(answer.id, question, {
+      criteria: question.rubric.criteria.map((c) => {
         const g = gt.criteria.find((x) => x.criterionId === c.id);
         return {
           criterionId: c.id,
@@ -34,7 +34,7 @@ export function mockAnalyze(submission: Submission, assignment: Assignment, trut
       feedbackDraft,
     });
   }
-  return heuristicAnalyze(submission, assignment, firstName);
+  return heuristicAnalyze(answer, assignment, question, firstName);
 }
 
 /** Crude stem so "reversibility" matches "reversible" and "equilibrium" matches "equilibria". */
@@ -42,12 +42,12 @@ function stem(word: string): string {
   return word.length >= 6 ? word.slice(0, 6) : word;
 }
 
-/** Keyword heuristic for assignments without ground truth: a concept counts as present if its words appear. */
-function heuristicAnalyze(submission: Submission, assignment: Assignment, firstName: string): AnalysisResult {
-  const text = submission.text.toLowerCase();
-  const sentences = submission.text.split(/(?<=[.!?])\s+/).filter((s) => s.trim().length > 0);
+/** Keyword heuristic for questions without ground truth: a concept counts as present if its words appear. */
+function heuristicAnalyze(answer: Answer, assignment: Assignment, question: Question, firstName: string): AnalysisResult {
+  const text = answer.text.toLowerCase();
+  const sentences = answer.text.split(/(?<=[.!?])\s+/).filter((s) => s.trim().length > 0);
   const missingAll: string[] = [];
-  const criteria = assignment.rubric.criteria.map((c) => {
+  const criteria = question.rubric.criteria.map((c) => {
     const present: string[] = [];
     const missing: string[] = [];
     for (const tag of c.concepts) {
@@ -70,5 +70,5 @@ function heuristicAnalyze(submission: Submission, assignment: Assignment, firstN
       : `You addressed the key ideas the assignment asks for. `) +
     `Keep building on the reasoning you have already shown.`;
   const summary = missingAll.length ? `Keyword scan: missing ${[...new Set(missingAll)].slice(0, 3).join(", ")}.` : "Keyword scan: all concept tags present.";
-  return finalizeAnalysis(submission.id, assignment, { criteria, summary, feedbackDraft });
+  return finalizeAnalysis(answer.id, question, { criteria, summary, feedbackDraft });
 }

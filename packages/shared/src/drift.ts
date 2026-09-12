@@ -22,9 +22,12 @@ export function roundHalf(n: number): number {
 }
 
 /**
- * Compare the current grade against earlier grades in the same session.
- * Two decisions are comparable when they share a missing concept (or are
- * both complete) and both have an AI suggestion. The comparison is on the
+ * Compare the current grade against earlier grades given to other students
+ * on the same question. Two decisions are comparable when they answer the
+ * same question, share a missing concept (or are both complete), and both
+ * have an AI suggestion. Scoping to one question matters: concept tags and
+ * the offset scale are rubric-scoped, so a shared tag across two different
+ * questions is a coincidence of vocabulary, not the same gap. The comparison is on the
  * offset from the suggestion, so "you were 2 points lenient with Ada for
  * the same gap but 4 points strict here" is what gets flagged.
  * Deterministic; no model call.
@@ -36,15 +39,16 @@ export function detectDrift(current: Decision, history: Decision[], overrides: R
   const mine = conceptsOf(current);
   let best: DriftAlert | null = null;
 
-  // Only the latest grade per prior submission counts: re-grading replaces.
-  const latestBySubmission = new Map<string, Decision>();
+  // Only the latest grade per other student on this question counts: re-grading replaces.
+  const latestByStudent = new Map<string, Decision>();
   for (const d of history) {
-    if (d.submissionId === current.submissionId || d.assignmentId !== current.assignmentId) continue;
-    const prev = latestBySubmission.get(d.submissionId);
-    if (!prev || d.at > prev.at) latestBySubmission.set(d.submissionId, d);
+    if (d.assignmentId !== current.assignmentId || d.questionId !== current.questionId) continue;
+    if (d.studentId === current.studentId) continue;
+    const prev = latestByStudent.get(d.studentId);
+    if (!prev || d.at > prev.at) latestByStudent.set(d.studentId, d);
   }
 
-  for (const prior of latestBySubmission.values()) {
+  for (const prior of latestByStudent.values()) {
     if (prior.suggestedPoints === null) continue;
     if (overrides.has(overrideKey(current.id, prior.id))) continue;
     const shared = conceptsOf(prior).filter((c) => mine.includes(c));
@@ -54,10 +58,11 @@ export function detectDrift(current: Decision, history: Decision[], overrides: R
     if (spread < threshold) continue;
     if (!best || spread > best.spread) {
       best = {
+        questionId: current.questionId,
         currentDecisionId: current.id,
         priorDecisionId: prior.id,
-        currentSubmissionIndex: current.submissionIndex,
-        priorSubmissionIndex: prior.submissionIndex,
+        currentStudentIndex: current.studentIndex,
+        priorStudentIndex: prior.studentIndex,
         priorStudentName: prior.studentName,
         sharedConcepts: shared,
         currentPoints: current.points,

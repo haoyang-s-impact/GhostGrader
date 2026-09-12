@@ -1,0 +1,32 @@
+[
+  {
+    "id": "q2-sub-01",
+    "studentIndex": 1,
+    "studentName": "Aisha Rahman",
+    "text": "Increasing the pressure shifts the equilibrium in the direction of fewer moles of gas. The reactants have four moles of gas and the product side has only two, so the shift is toward ammonia and the yield rises. Using 200 atm as a quantitative reference, going higher would add a little more yield, but the industrial conditions are a trade-off: very high pressure needs thicker pipes and more energy for compressors, and it raises safety risks. The yield rate tradeoff is also why the iron catalyst matters. The catalyst role is to speed up the rate at which equilibrium is reached without changing the yield, so a moderate pressure plus a catalyst gives an economic result."
+  },
+  {
+    "id": "q2-sub-04",
+    "studentIndex": 4,
+    "studentName": "Daniel Okafor",
+    "text": "Higher pressure makes the equilibrium shift in the direction with fewer moles of gas, which is the ammonia side. So more pressure means more ammonia. Plants use about 200 atm because those are the normal industrial conditions for the process. Going higher would be expensive."
+  },
+  {
+    "id": "q2-sub-07",
+    "studentIndex": 7,
+    "studentName": "Grace Kim",
+    "text": "Pressure is important in the Haber process. When you change it, the reaction changes too. Factories have to be careful with pressure because it can be dangerous."
+  },
+  {
+    "id": "q2-sub-11",
+    "studentIndex": 11,
+    "studentName": "Kavya Sharma",
+    "text": "If the pressure goes up, the equilibrium will shift in the direction of the side with fewer moles of gas, so it moves toward ammonia and makes more of it. The industrial conditions use around 200 atm. They do not go higher because it costs a lot more money to build and run."
+  },
+  {
+    "id": "q2-sub-15",
+    "studentIndex": 15,
+    "studentName": "Olivia Chen",
+    "text": "Raising the pressure shifts the equilibrium in the direction that has fewer moles of gas. Nitrogen and hydrogen make four moles of gas while ammonia is two, so the yield of ammonia goes up. The industrial conditions of 200 atm are a compromise: higher pressure would give more yield but costs more and is less safe. The catalyst role is that iron speeds up the reaction so equilibrium is reached quickly, even though it does not change how much ammonia you get at equilibrium."
+  }
+]
