@@ -3,6 +3,8 @@ import type { PageSubmission } from "../selectors";
 
 interface Props {
   page: PageSubmission | null;
+  /** The grade in the box has not been committed with Submit yet. */
+  unsubmitted: boolean;
   alert: DriftAlert | null;
   check: ScoreCheck | null;
   history: DriftAlert[];
@@ -20,10 +22,15 @@ function signed(n: number) {
   return n > 0 ? `+${n}` : `${n}`;
 }
 
-export function ConsistencyTab({ page, alert, check, history, onAlign, onKeep, onApproveCheck, onDismissCheck }: Props) {
+export function ConsistencyTab({ page, unsubmitted, alert, check, history, onAlign, onKeep, onApproveCheck, onDismissCheck }: Props) {
   void page;
   return (
     <>
+      {unsubmitted && (
+        <div className="gg-status gg-unsubmitted" data-gg-unsubmitted-note>
+          This grade is not recorded until you click Submit.
+        </div>
+      )}
       {check && (
         <div className="gg-alert gg-check" data-gg-check>
           <h4>⚑ Rubric check</h4>

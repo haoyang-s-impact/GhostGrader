@@ -48,14 +48,15 @@ export const api = {
   analyze: (assignmentId: string, submission: Submission) =>
     request("/analyze", { method: "POST", body: JSON.stringify({ assignmentId, submission }) }, AnalysisResultSchema),
 
-  decision: (decision: Decision) =>
-    request("/decision", { method: "POST", body: JSON.stringify({ decision }) }, z.object({ alert: DriftAlertSchema.nullable() })),
+  decision: (decision: Decision, replay = false) =>
+    request("/decision", { method: "POST", body: JSON.stringify({ decision, replay }) }, z.object({ alert: DriftAlertSchema.nullable() })),
 
   override: (assignmentId: string, decisionIdA: string, decisionIdB: string) =>
     request<void>("/override", { method: "POST", body: JSON.stringify({ assignmentId, decisionIdA, decisionIdB }) }),
 
   aligned: (assignmentId: string) => request<void>("/aligned", { method: "POST", body: JSON.stringify({ assignmentId }) }),
-  checkRaised: (assignmentId: string) => request<void>("/check-raised", { method: "POST", body: JSON.stringify({ assignmentId }) }),
+  checkRaised: (assignmentId: string, submissionId?: string) =>
+    request<void>("/check-raised", { method: "POST", body: JSON.stringify({ assignmentId, submissionId }) }),
   checkApproved: (assignmentId: string) => request<void>("/check-approved", { method: "POST", body: JSON.stringify({ assignmentId }) }),
 
   session: (assignmentId: string) =>

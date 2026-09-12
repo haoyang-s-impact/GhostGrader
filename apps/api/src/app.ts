@@ -8,9 +8,9 @@ import { SessionService } from "./session";
 import { newId, Store } from "./store";
 
 const AnalyzeBody = z.object({ assignmentId: z.string(), submission: SubmissionSchema });
-const DecisionBody = z.object({ decision: DecisionSchema });
+const DecisionBody = z.object({ decision: DecisionSchema, replay: z.boolean().default(false) });
 const OverrideBody = z.object({ assignmentId: z.string(), decisionIdA: z.string(), decisionIdB: z.string() });
-const AssignmentIdBody = z.object({ assignmentId: z.string() });
+const AssignmentIdBody = z.object({ assignmentId: z.string(), submissionId: z.string().optional() });
 const CourseBody = z.object({ name: z.string().min(1), term: z.string().default("") });
 const SubmissionBody = z.object({ studentName: z.string().min(1), text: z.string().min(1) });
 
@@ -130,10 +130,10 @@ export function createApp({ analyzer, store = new Store() }: AppDeps) {
   app.post("/decision", async (c) => {
     const parsed = DecisionBody.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: "Invalid body", issues: parsed.error.issues }, 400);
-    const { decision } = parsed.data;
+    const { decision, replay } = parsed.data;
     const assignment = requireAssignment(c, decision.assignmentId);
     if (!assignment) return c.json({ error: "Unknown assignment" }, 404);
-    return c.json({ alert: sessions.record(decision) });
+    return c.json({ alert: sessions.record(decision, replay) });
   });
 
   app.post("/override", async (c) => {
@@ -153,14 +153,14 @@ export function createApp({ analyzer, store = new Store() }: AppDeps) {
       const parsed = AssignmentIdBody.safeParse(await c.req.json().catch(() => null));
       if (!parsed.success) return c.json({ error: "Invalid body" }, 400);
       if (!requireAssignment(c, parsed.data.assignmentId)) return c.json({ error: "Unknown assignment" }, 404);
-      sessions.bump(parsed.data.assignmentId, field);
+      sessions.bump(parsed.data.assignmentId, field, parsed.data.submissionId);
       return c.body(null, 204);
     });
   }
 
   app.get("/session/:assignmentId", (c) => {
     if (!requireAssignment(c, c.req.param("assignmentId"))) return c.json({ error: "Unknown assignment" }, 404);
-    const { overrides: _o, ...rest } = sessions.get(c.req.param("assignmentId"));
+    const { overrides: _o, checksRaisedFor: _c, ...rest } = sessions.get(c.req.param("assignmentId"));
     return c.json(rest);
   });
 

@@ -39,9 +39,22 @@ async function openSubmission(index: number, assignmentId = ASSIGNMENT) {
   await expect(page.locator("[data-gg-panel]")).toHaveAttribute("data-gg-analysis", "ready");
 }
 
-async function setGrade(points: number) {
-  await gradeInput().fill(String(points));
+/** Type a grade without committing it. A draft: nothing is recorded. */
+async function typeGrade(points: number) {
+  await gradeInput().fill("");
+  await gradeInput().pressSequentially(String(points), { delay: 30 });
   await page.waitForTimeout(700); // observer debounce (400 ms) plus the round trip
+}
+
+/** Type a grade and click Submit, which is what makes it a decision. */
+async function submitGrade(points: number) {
+  await typeGrade(points);
+  await submit();
+}
+
+async function submit() {
+  await page.locator("[data-gg-submit]").click();
+  await page.waitForTimeout(700); // marker mutation plus the round trip
 }
 
 test("panel shows one rubric-referenced grade and the per-criterion reasoning", async () => {
@@ -60,7 +73,7 @@ test("rubric check: a wrong grade is flagged with the rubric-referenced grade; a
   await expect(panel("[data-gg-criterion-card='reversibility'] .gg-tag").first()).toHaveText("missing: reversibility");
 
   // Teacher gives 28 of 30 to a response the rubric rates 20.5.
-  await setGrade(28);
+  await submitGrade(28);
   const check = panel("[data-gg-check]");
   await expect(check).toBeVisible();
   await expect(check).toContainText("You gave 28 of 30");
@@ -71,6 +84,7 @@ test("rubric check: a wrong grade is flagged with the rubric-referenced grade; a
 
   await panel("[data-gg-approve-check]").click();
   await expect(gradeInput()).toHaveValue("20.5");
+  await submit();
   await expect(page.locator("[data-gg-comment]")).toHaveValue(/^Daniel,/);
   await expect(panel("[data-gg-check]")).toHaveCount(0);
   await page.waitForTimeout(700);
@@ -80,7 +94,7 @@ test("rubric check: a wrong grade is flagged with the rubric-referenced grade; a
 test("first student has no one to compare with; the second is compared with the first", async () => {
   // Student #4: lenient by 3.5 over the rubric. Keep it despite the rubric check.
   await openSubmission(4);
-  await setGrade(24);
+  await submitGrade(24);
   await expect(panel("[data-gg-check]")).toBeVisible();
   await panel("[data-gg-dismiss-check]").click();
   await expect(panel("[data-gg-no-alert]")).toBeVisible();
@@ -88,7 +102,7 @@ test("first student has no one to compare with; the second is compared with the 
   // Student #11 has the same gap. Grading 16 is 4.5 under the rubric: 8 points harsher than #4.
   await openSubmission(11);
   await expect(panel(".gg-suggest-n")).toContainText("20.5");
-  await setGrade(16);
+  await submitGrade(16);
   const alert = panel("[data-gg-alert]");
   await expect(alert).toBeVisible();
   await expect(alert).toContainText("Daniel Okafor");
@@ -108,7 +122,10 @@ test("first student has no one to compare with; the second is compared with the 
   await panel("[data-gg-align]").click();
   await expect(gradeInput()).toHaveValue("24");
   await expect(panel("[data-gg-alert]")).toHaveCount(0);
-  await page.waitForTimeout(700);
+  // Align writes into the LMS but does not commit; the panel says so.
+  await expect(panel("[data-gg-unsubmitted]")).toBeVisible();
+  await submit();
+  await expect(panel("[data-gg-unsubmitted]")).toHaveCount(0);
   await expect(panel("[data-gg-alert]")).toHaveCount(0);
 
   // Session dashboard reflects both students and the alert.
@@ -122,16 +139,57 @@ test("first student has no one to compare with; the second is compared with the 
 
 test("keep mine suppresses the same pair on re-grade", async () => {
   await openSubmission(4);
-  await setGrade(24);
+  await submitGrade(24);
   await panel("[data-gg-dismiss-check]").click();
   await openSubmission(11);
-  await setGrade(16);
+  await submitGrade(16);
   await expect(panel("[data-gg-alert]")).toBeVisible();
   await panel("[data-gg-keep]").click();
   await expect(panel("[data-gg-alert]")).toHaveCount(0);
-  await setGrade(15);
+  await submitGrade(15);
   await panel("[data-gg-tab='consistency']").click();
   await expect(panel("[data-gg-alert]")).toHaveCount(0);
+});
+
+test("a grade that is typed but never submitted is not compared with other students", async () => {
+  await context.request.delete(`${API}/session/${ASSIGNMENT}`, { headers: TEACHER });
+  await openSubmission(4);
+  await submitGrade(24);
+  await panel("[data-gg-dismiss-check]").click();
+
+  // #11 has the same gap. Typing 16 digit by digit passes through 1, which is
+  // wildly out of line with #4 — neither it nor the final 16 may raise an alert
+  // while the grade is still a draft.
+  await openSubmission(11);
+  await gradeInput().fill("");
+  await gradeInput().pressSequentially("16", { delay: 250 });
+  await page.waitForTimeout(700);
+  await expect(panel("[data-gg-alert]")).toHaveCount(0);
+  await expect(panel("[data-gg-unsubmitted]")).toBeVisible();
+
+  // The rubric check, which only involves this student, is live regardless.
+  await expect(panel("[data-gg-check]")).toBeVisible();
+
+  // The server has heard about #4 only.
+  const before = await (await context.request.get(`${API}/session/${ASSIGNMENT}`, { headers: TEACHER })).json();
+  expect(before.decisions).toHaveLength(1);
+
+  // Submit is what makes it a decision.
+  await submit();
+  await expect(panel("[data-gg-alert]")).toBeVisible();
+  await expect(panel("[data-gg-alert]")).toContainText("Daniel Okafor");
+  const after = await (await context.request.get(`${API}/session/${ASSIGNMENT}`, { headers: TEACHER })).json();
+  expect(after.decisions).toHaveLength(2);
+});
+
+test("reopening an already submitted student does not record it again", async () => {
+  const before = await (await context.request.get(`${API}/session/${ASSIGNMENT}`, { headers: TEACHER })).json();
+  await openSubmission(4);
+  await openSubmission(11);
+  await page.waitForTimeout(700);
+  const after = await (await context.request.get(`${API}/session/${ASSIGNMENT}`, { headers: TEACHER })).json();
+  expect(after.decisions).toHaveLength(before.decisions.length);
+  expect(after.alertsRaised).toBe(before.alertsRaised);
 });
 
 test("'Use' applies the rubric-referenced grade directly from the Grade tab", async () => {
@@ -175,9 +233,10 @@ test("multi-tenant: a second teacher defines their own rubric, graded out of 100
   await expect(panel("[data-gg-feedback-draft]")).toContainText("Ada,");
 
   // 95/100 for a response missing nationalism entirely contradicts the rubric; approve writes the referenced grade.
-  await setGrade(95);
+  await submitGrade(95);
   await expect(panel("[data-gg-check]")).toBeVisible();
   await panel("[data-gg-approve-check]").click();
   await expect(gradeInput()).toHaveValue("50");
+  await submit();
   await expect(page.locator("[data-gg-comment]")).toHaveValue(/^Ada,/);
 });

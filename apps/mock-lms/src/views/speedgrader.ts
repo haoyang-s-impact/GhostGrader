@@ -3,7 +3,13 @@ import { lms } from "../api";
 import { esc, go } from "../util";
 import { bindHeader, renderHeader } from "./header";
 
-type Grades = Record<string, { grade: number | null; comment: string }>;
+/**
+ * `grade` is the draft in the input box; `submittedPoints`/`submittedAt` are
+ * what the teacher actually committed with the Submit button. Ghost Grader
+ * only ever compares submitted grades.
+ */
+type GradeEntry = { grade: number | null; comment: string; submittedPoints: number | null; submittedAt: number };
+type Grades = Record<string, GradeEntry>;
 
 export async function speedGraderView(app: HTMLElement, assignmentId: string, index: number) {
   const [teachers, assignment, submissions] = await Promise.all([lms.teachers(), lms.assignment(assignmentId), lms.submissions(assignmentId)]);
@@ -17,10 +23,12 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
     }
   }
   const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(grades));
-  const gradeFor = (s: StoredSubmission) => {
-    const g = grades[s.id] as { grade?: number | null; comment?: string } | undefined;
-    // Migrate entries saved by the earlier per-criterion grader.
-    if (!g || !("grade" in g)) grades[s.id] = { grade: null, comment: g?.comment ?? "" };
+  const gradeFor = (s: StoredSubmission): GradeEntry => {
+    const g = grades[s.id] as Partial<GradeEntry> | undefined;
+    // Migrate entries saved by the earlier per-criterion grader, and entries
+    // saved before Submit distinguished a draft from a committed grade.
+    if (!g || !("grade" in g)) grades[s.id] = { grade: null, comment: g?.comment ?? "", submittedPoints: null, submittedAt: 0 };
+    else if (!("submittedPoints" in g)) grades[s.id] = { grade: g.grade ?? null, comment: g.comment ?? "", submittedPoints: null, submittedAt: 0 };
     return grades[s.id]!;
   };
   const max = gradeMax(assignment);
@@ -37,10 +45,10 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
   const safeIndex = Math.min(Math.max(1, index), submissions.length);
   const sub = submissions.find((s) => s.index === safeIndex) ?? submissions[0]!;
   const g = gradeFor(sub);
-  const graded = submissions.filter((s) => gradeFor(s).grade !== null).length;
+  const submittedCount = () => submissions.filter((s) => gradeFor(s).submittedPoints !== null).length;
 
   const nav = `
-      <span class="sg-progress">${graded}/${submissions.length} graded</span>
+      <span class="sg-progress" id="progress">${submittedCount()}/${submissions.length} graded</span>
       <button class="sg-btn" id="prev" ${sub.index === 1 ? "disabled" : ""} aria-label="Previous student">‹</button>
       <select id="picker" class="sg-select" aria-label="Select student">
         ${submissions.map((s) => `<option value="${s.index}" ${s.index === sub.index ? "selected" : ""}>${s.index}. ${esc(s.studentName)}</option>`).join("")}
@@ -52,7 +60,7 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
   app.innerHTML = `
   ${renderHeader(teachers, crumb, nav)}
   <div class="sg-assignment-meta" data-gg-assignment-id="${assignment.id}" hidden></div>
-  <main class="sg-main" data-gg-submission-id="${sub.id}" data-gg-submission-index="${sub.index}" data-gg-submission-total="${submissions.length}">
+  <main class="sg-main" data-gg-submission-id="${sub.id}" data-gg-submission-index="${sub.index}" data-gg-submission-total="${submissions.length}"${submittedAttrs(g)}>
     <section class="sg-submission">
       <div class="sg-student"><div class="sg-avatar">${esc(sub.studentName[0] ?? "?")}</div><div><div class="sg-name" data-gg-student-name>${esc(sub.studentName)}</div><div class="sg-meta">Submitted on time · Text entry</div></div></div>
       <h2 class="sg-prompt-title">Prompt</h2>
@@ -70,7 +78,7 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
       <p class="sg-help sg-grade-help">One overall grade. Ghost Grader compares it with the rubric and with the grades you gave other students.</p>
       <h3>Assignment Comments</h3>
       <textarea class="sg-comment" data-gg-comment placeholder="Add a comment" rows="8">${esc(g.comment)}</textarea>
-      <div class="sg-actions"><button class="sg-btn sg-btn-primary" id="submit">Submit</button><span class="sg-saved" id="saved"></span></div>
+      <div class="sg-actions"><button class="sg-btn sg-btn-primary" id="submit" data-gg-submit>Submit</button><span class="sg-saved" id="saved"></span></div>
     </aside>
   </main>`;
   bindHeader();
@@ -93,14 +101,35 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
     save();
   });
 
+  // Submit is the commit: only now does the grade become a decision Ghost
+  // Grader compares with other students. Typing only ever updates the draft.
+  const main = app.querySelector<HTMLElement>("[data-gg-submission-id]")!;
   document.getElementById("submit")!.addEventListener("click", () => {
+    g.submittedPoints = g.grade;
+    if (g.submittedPoints === null) {
+      g.submittedAt = 0;
+      main.removeAttribute("data-gg-submitted-points");
+      main.removeAttribute("data-gg-submitted-at");
+    } else {
+      // Monotonic so a fast re-submit of the same grade is still a change.
+      g.submittedAt = Math.max(Date.now(), g.submittedAt + 1);
+      main.setAttribute("data-gg-submitted-points", String(g.submittedPoints));
+      main.setAttribute("data-gg-submitted-at", String(g.submittedAt));
+    }
     save();
+    document.getElementById("progress")!.textContent = `${submittedCount()}/${submissions.length} graded`;
     const s = document.getElementById("saved")!;
     s.textContent = "Saved";
     setTimeout(() => (s.textContent = ""), 1500);
   });
 
   bindAddSubmission(app, assignment.id, () => speedGraderView(app, assignmentId, submissions.length + 1));
+}
+
+/** The committed grade, republished on every render so it survives navigation. */
+function submittedAttrs(g: GradeEntry): string {
+  if (g.submittedPoints === null) return "";
+  return ` data-gg-submitted-points="${g.submittedPoints}" data-gg-submitted-at="${g.submittedAt}"`;
 }
 
 function addSubmissionForm(): string {

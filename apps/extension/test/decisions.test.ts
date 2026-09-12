@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AnalysisResult } from "@gg/shared";
 import { buildDecision, decisionId } from "../src/content/decisions";
-import { parsePoints, type PageSubmission } from "../src/content/selectors";
+import { parsePoints, submitMarker, type PageSubmission } from "../src/content/selectors";
 
 const page: PageSubmission = {
   assignmentId: "chem-haber-eq",
@@ -13,6 +13,8 @@ const page: PageSubmission = {
   text: "…",
   grade: null,
   maxPoints: 30,
+  submittedPoints: null,
+  submittedAt: null,
 };
 
 const analysis: AnalysisResult = {
@@ -61,5 +63,22 @@ describe("parsePoints", () => {
     expect(parsePoints(" 0 ")).toBe(0);
     expect(parsePoints("")).toBeNull();
     expect(parsePoints("abc")).toBeNull();
+  });
+});
+
+describe("submitMarker", () => {
+  it("is null until the teacher submits", () => {
+    expect(submitMarker(page)).toBeNull();
+  });
+
+  it("changes when the same grade is submitted again", () => {
+    const first = submitMarker({ ...page, submittedPoints: 24, submittedAt: 100 });
+    const again = submitMarker({ ...page, submittedPoints: 24, submittedAt: 101 });
+    expect(first).not.toBe(again); // points alone would look unchanged
+  });
+
+  it("is stable for one submission, so reopening a graded student is not a new submit", () => {
+    const s = { ...page, submittedPoints: 24, submittedAt: 100 };
+    expect(submitMarker(s)).toBe(submitMarker({ ...s }));
   });
 });

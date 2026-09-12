@@ -202,13 +202,47 @@ describe("decision flow", () => {
     expect((await post(app, "/check-approved", { assignmentId: assignment.id })).status).toBe(204);
 
     const session = await (await get(app, `/session/${assignment.id}`)).json();
-    expect(session.decisions).toHaveLength(3);
+    // One row per student: the re-submitted d11 replaced the first one.
+    expect(session.decisions).toHaveLength(2);
     expect(session).toMatchObject({ alertsRaised: 1, checksRaised: 1, checksApproved: 1 });
     expect(session.overrides).toBeUndefined();
 
     // Another teacher cannot read or record into this session.
     expect((await get(app, `/session/${assignment.id}`, T2)).status).toBe(404);
     expect((await post(app, "/decision", { decision: decision(1, 30, []) }, T2)).status).toBe(404);
+  });
+
+  it("keeps only the latest submission per student", async () => {
+    const app = mkApp();
+    await post(app, "/decision", { decision: { ...decision(4, 24, ["reversibility"]), at: 1 } });
+    await post(app, "/decision", { decision: { ...decision(4, 21, ["reversibility"]), at: 2 } });
+
+    const session = await (await get(app, `/session/${assignment.id}`)).json();
+    expect(session.decisions).toHaveLength(1);
+    expect(session.decisions[0]).toMatchObject({ id: "d4", points: 21 });
+  });
+
+  it("replayed decisions restore the row without re-raising a resolved alert", async () => {
+    const app = mkApp();
+    await post(app, "/decision", { decision: decision(4, 24, ["reversibility"]) });
+    const res = await post(app, "/decision", { decision: decision(11, 16, ["reversibility"]), replay: true });
+    expect((await res.json()).alert).toBeNull();
+
+    const session = await (await get(app, `/session/${assignment.id}`)).json();
+    expect(session.decisions).toHaveLength(2);
+    expect(session.alertsRaised).toBe(0);
+  });
+
+  it("counts a rubric check once per submission, however often it is raised", async () => {
+    const app = mkApp();
+    // The check is evaluated live as the teacher types, so the same student
+    // can raise it on every keystroke.
+    for (const _ of [1, 2, 3]) await post(app, "/check-raised", { assignmentId: assignment.id, submissionId: "sub-04" });
+    await post(app, "/check-raised", { assignmentId: assignment.id, submissionId: "sub-11" });
+
+    const session = await (await get(app, `/session/${assignment.id}`)).json();
+    expect(session.checksRaised).toBe(2);
+    expect(session.checksRaisedFor).toBeUndefined();
   });
 
   it("rejects malformed decisions", async () => {

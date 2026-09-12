@@ -13,6 +13,8 @@ import {
 export interface SessionState {
   decisions: Decision[];
   overrides: string[];
+  /** Submissions whose rubric check has already been counted. Absent in older data files. */
+  checksRaisedFor?: string[];
   alertsRaised: number;
   alertsAligned: number;
   checksRaised: number;
@@ -28,7 +30,7 @@ export interface StoreData {
 }
 
 export function emptySession(): SessionState {
-  return { decisions: [], overrides: [], alertsRaised: 0, alertsAligned: 0, checksRaised: 0, checksApproved: 0 };
+  return { decisions: [], overrides: [], checksRaisedFor: [], alertsRaised: 0, alertsAligned: 0, checksRaised: 0, checksApproved: 0 };
 }
 
 export function seedData(): StoreData {

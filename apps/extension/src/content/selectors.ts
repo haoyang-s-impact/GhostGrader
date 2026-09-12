@@ -13,6 +13,9 @@ export interface PageSubmission {
   /** The single grade input's current value and scale. */
   grade: number | null;
   maxPoints: number;
+  /** The grade the teacher committed with Submit, and when. Null until submitted. */
+  submittedPoints: number | null;
+  submittedAt: number | null;
 }
 
 export function readSubmission(root: ParentNode = document): PageSubmission | null {
@@ -26,6 +29,12 @@ export function readSubmission(root: ParentNode = document): PageSubmission | nu
   if (!submissionId || !assignmentId || !Number.isFinite(submissionIndex)) return null;
 
   const gradeInput = root.querySelector<HTMLInputElement>("[data-gg-grade]");
+  // Both halves of the submit marker are read in one pass, so a partially
+  // applied pair can never be observed.
+  const submittedRaw = main.dataset.ggSubmittedPoints;
+  const submittedAtRaw = main.dataset.ggSubmittedAt;
+  const submittedPoints = submittedRaw === undefined ? null : parsePoints(submittedRaw);
+  const submittedAt = submittedAtRaw === undefined ? null : Number(submittedAtRaw) || 0;
   return {
     assignmentId,
     teacherId: root.querySelector<HTMLElement>("[data-gg-teacher-id]")?.dataset.ggTeacherId ?? null,
@@ -36,7 +45,17 @@ export function readSubmission(root: ParentNode = document): PageSubmission | nu
     text: essay.textContent ?? "",
     grade: gradeInput ? parsePoints(gradeInput.value) : null,
     maxPoints: Number(gradeInput?.dataset.ggGradeMax ?? gradeInput?.max ?? 0) || 0,
+    submittedPoints,
+    submittedAt,
   };
+}
+
+/**
+ * Identity of the current submit. The timestamp is part of it: re-submitting
+ * the same number is still a new submit, and points alone would not change.
+ */
+export function submitMarker(s: PageSubmission): string | null {
+  return s.submittedPoints === null ? null : `${s.submittedPoints}@${s.submittedAt}`;
 }
 
 export function parsePoints(raw: string): number | null {

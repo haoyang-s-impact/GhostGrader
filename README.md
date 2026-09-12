@@ -137,9 +137,11 @@ The end-to-end run starts the API in mock mode and the mock LMS itself.
 
 ## How the comparison works
 
-Every grade the teacher enters becomes a decision: points, the
+Every grade the teacher submits becomes a decision: points, the
 rubric-referenced suggestion at that moment, and the missing-concept tags the
-analysis found. Earlier decisions in the session that share a tag (or are
+analysis found. Re-submitting a student replaces their decision, so the session
+holds each student's latest submission and only that is ever compared. Earlier
+decisions in the session that share a tag (or are
 both complete) are compared by offset, teacher points minus suggested points.
 If the offsets differ by more than `max(1.5, 10% of the scale)`, an alert
 names the earlier student and recommends the grade that applies the same
