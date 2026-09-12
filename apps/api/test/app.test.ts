@@ -348,10 +348,10 @@ describe("Store persistence", () => {
     const { mkdtempSync } = await import("node:fs");
     const { tmpdir } = await import("node:os");
     const { join } = await import("node:path");
-    return join(mkdtempSync(join(tmpdir(), "gg-store-")), "data.json");
+    return join(mkdtempSync(join(tmpdir(), "gg-store-")), "data.sqlite");
   };
 
-  it("round-trips through a JSON file", async () => {
+  it("round-trips through a database file", async () => {
     const path = await tmpPath();
     const s1 = new Store(path);
     const course = s1.createCourse(T1, "Persisted", "");
@@ -366,16 +366,21 @@ describe("Store persistence", () => {
     expect(new Store(undefined, { withAnswers: false }).answersFor(assignment.id)).toEqual([]);
   });
 
-  it("reseeds a data file written by an older schema instead of loading it", async () => {
-    const { writeFileSync, readFileSync } = await import("node:fs");
+  it("seeds an empty database once and refuses a file that is not a database", async () => {
+    const { writeFileSync } = await import("node:fs");
     const path = await tmpPath();
-    // The pre-pivot shape: flat submissions, rubric on the assignment, no version.
-    writeFileSync(path, JSON.stringify({ teachers: [], courses: [], assignments: [{ id: "old", rubric: {} }], submissions: [], sessions: {} }));
     const logs: string[] = [];
-    const s = new Store(path, {}, (m) => logs.push(m));
-    expect(s.teacher(T1)).toBeDefined();
-    expect(s.assignment(T1, assignment.id)?.questions).toHaveLength(2);
-    expect(logs.some((l) => l.includes("Reseeding"))).toBe(true);
-    expect(JSON.parse(readFileSync(path, "utf8")).schemaVersion).toBe(SCHEMA_VERSION);
+    const s1 = new Store(path, {}, (m) => logs.push(m));
+    expect(logs.some((l) => l.includes("Seeding"))).toBe(true);
+    s1.close();
+    const again: string[] = [];
+    const s2 = new Store(path, {}, (m) => again.push(m));
+    expect(again).toEqual([]); // existing data is loaded, not reseeded
+    expect(s2.assignment(T1, assignment.id)?.questions).toHaveLength(2);
+    s2.close();
+
+    const notDb = await tmpPath();
+    writeFileSync(notDb, JSON.stringify({ teachers: [], schemaVersion: SCHEMA_VERSION }));
+    expect(() => new Store(notDb)).toThrow(/not a SQLite database|Cannot open/);
   });
 });

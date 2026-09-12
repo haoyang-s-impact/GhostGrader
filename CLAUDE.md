@@ -39,7 +39,7 @@ pnpm workspace (`apps/*`, `packages/*`), TypeScript everywhere.
 | Package | Path | Owns |
 |---|---|---|
 | `@gg/shared` | `packages/shared` | Zod schemas and types, rubric math and rollup (`rubric.ts`), drift detection (`drift.ts`), push diffing (`sync.ts`), the deterministic mock analyzer, and the seeded dataset (`data.ts`, `fixtures/`). |
-| `@gg/api` | `apps/api` | Hono server on port 8787. JSON-file store, teacher scoping, LLM provider chain, grading sessions, and LMS sync behind the `LmsAdapter` interface. |
+| `@gg/api` | `apps/api` | Hono server on port 8787. SQLite store through Drizzle (`store.ts`, schema in `db/schema.ts`, migrations in `drizzle/`), teacher scoping, LLM provider chain, grading sessions, and LMS sync behind the `LmsAdapter` interface. |
 | `@gg/web` | `apps/web` | React + Vite app on port 5173: courses, grading workspace, gradebook, rubric editor. Playwright e2e lives here. |
 
 ### Data model (`packages/shared/src/schemas.ts`)
@@ -101,9 +101,17 @@ the grade and comment as form state. Panel tabs are in `grading/tabs/`.
   `pushReference(answerId, points, comment)` is the upsert key, and
   `pendingPush` compares against the **latest** push per answer.
 - **Teacher scoping:** a foreign resource returns 404, never 403.
-- **Store schema:** `Store` (`apps/api/src/store.ts`) reads its JSON file with a
-  plain cast. Any change to `StoreData`'s shape must bump `SCHEMA_VERSION`; a
-  file on another version is discarded and reseeded.
+- **Store schema lives in `apps/api/src/db/schema.ts` and changes only with a
+  migration.** After editing the schema run `pnpm --filter @gg/api db:generate`
+  and commit the new file under `apps/api/drizzle/`. Migrations are applied at
+  API startup (`openDb`), so pulling and starting is enough. Never edit an
+  existing migration. Documents read and written whole (questions with their
+  rubrics, learning objectives, missing-concept lists) are JSON columns.
+- **`Store` keeps its public surface** (`teachers`, `coursesFor`, `answersFor`,
+  `session`/`saveSession`/`resetSession`, `pushesFor`/`savePushes`, ...).
+  Routes, `SessionService` and `SyncService` never touch Drizzle directly.
+  `new Store()` with no path is an in-memory database for tests; an empty
+  database is seeded with the demo data on first open.
 - **`@gg/shared` is consumed as TypeScript source.** It has no build step;
   consumers include `../../packages/shared/src` in their tsconfig.
 - **Adding an LMS** means implementing `LmsAdapter` (`apps/api/src/lms/`) and
@@ -118,6 +126,8 @@ pnpm dev          # API on 8787 and web app on 5173
 pnpm build
 pnpm typecheck
 pnpm test         # vitest in every package
+pnpm --filter @gg/api db:generate   # after changing apps/api/src/db/schema.ts
+pnpm --filter @gg/api import-json   # one-time import of an old data/ghost-grader.json
 pnpm e2e          # Playwright against the web app; boots API (mock analyzer) and web itself
 ```
 
@@ -134,6 +144,6 @@ scripts shell out to bare `pnpm`, so a shim on PATH is needed.
   `OPENROUTER_API_KEY` (+`OPENROUTER_MODEL`) → `OPENAI_API_KEY` (+`OPENAI_MODEL`)
   → `ANTHROPIC_API_KEY`. No key: deterministic mock analyzer. `GG_MOCK=1`
   forces the mock (tests do this).
-- `PORT` (8787), `GG_DATA_PATH` (default `apps/api/data/ghost-grader.json`, gitignored).
+- `PORT` (8787), `GG_DB_PATH` (default `apps/api/data/ghost-grader.sqlite`, gitignored).
 - `GG_LMS` (unset: no LMS; `canvas`: stub, not implemented), `GG_LMS_BASE_URL`, `GG_LMS_TOKEN`.
 - Web: `VITE_API_BASE` (default `http://localhost:8787`).
