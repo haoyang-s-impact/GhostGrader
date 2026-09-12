@@ -11,6 +11,7 @@
     "test": "vitest run",
     "analyze-all": "tsx scripts/analyze-all.ts",
     "import-json": "tsx scripts/import-json.ts",
+    "transcribe-media": "tsx scripts/transcribe-media.ts",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
