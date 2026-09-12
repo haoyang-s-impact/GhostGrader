@@ -45,7 +45,7 @@ ${anchors}
 
 # Rules
 1. Judge the answer only against the criteria above. Do not invent criteria and do not reward or penalize anything the rubric does not name.
-2. For each criterion choose exactly one band level from that criterion's list.
+2. For each criterion choose exactly one band from that criterion's list and return its level name exactly as written (for example "Score 5", not "5").
 3. evidence must be verbatim substrings copied from the student's text, up to two per criterion. If nothing in the text supports the criterion, return an empty list.
 4. missingConcepts may only contain tags from that criterion's allowed list. Include a tag only when the concept is absent or wrong in the answer. An Exemplary band means no missing concepts.
 5. confidence is your 0 to 1 estimate that a careful teacher would choose the same band.

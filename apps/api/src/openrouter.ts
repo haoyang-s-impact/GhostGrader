@@ -32,19 +32,18 @@ const JSON_SHAPE = `Respond with a single JSON object and nothing else, shaped e
   "feedbackDraft": "<two to four sentences addressed to the student>"
 }`;
 
-export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
+export type JsonChat = (system: string, user: string) => Promise<string>;
+
+/**
+ * One JSON-mode chat completion against an OpenAI-compatible endpoint.
+ * Returns the raw content string (fences stripped); callers validate it.
+ * Throws AnalysisError with `retryable` set from the HTTP status.
+ */
+export function createJsonChat(opts: OpenRouterOptions): JsonChat {
   const provider = opts.provider ?? "openrouter";
   const baseUrl = (opts.baseUrl ?? PROVIDER_BASE_URLS[provider]).replace(/\/$/, "");
   const doFetch = opts.fetchImpl ?? fetch;
-  const systemCache = new Map<string, string>();
-
-  async function once(answer: Answer, assignment: Assignment, question: Question): Promise<AnalysisResult> {
-    const cacheKey = promptCacheKey(assignment, question);
-    let system = systemCache.get(cacheKey);
-    if (!system) {
-      system = `${buildSystemPrompt(assignment, question)}\n\n# Output format\n${JSON_SHAPE}`;
-      systemCache.set(cacheKey, system);
-    }
+  return async (system, user) => {
     const res = await doFetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
@@ -58,7 +57,7 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
-          { role: "user", content: `Student: ${answer.studentName}\n\nResponse:\n${answer.text}` },
+          { role: "user", content: user },
         ],
       }),
     });
@@ -67,17 +66,34 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
       throw new AnalysisError(`${provider === "openai" ? "OpenAI" : "OpenRouter"} ${res.status}: ${text.slice(0, 200)}`, res.status === 429 || res.status >= 500);
     }
     const body = (await res.json()) as {
-      choices?: { message?: { content?: string | null; refusal?: string | null }; finish_reason?: string }[];
+      choices?: { message?: { content?: string | null; refusal?: string | null } }[];
       usage?: { prompt_tokens?: number; completion_tokens?: number; cost?: number };
     };
     const choice = body.choices?.[0];
     opts.log?.(`[${provider}] usage prompt=${body.usage?.prompt_tokens ?? "?"} completion=${body.usage?.completion_tokens ?? "?"} cost=${body.usage?.cost ?? "?"}`);
-    if (choice?.message?.refusal) throw new AnalysisError("The model declined to analyze this answer.", false);
+    if (choice?.message?.refusal) throw new AnalysisError("The model declined the request.", false);
     const content = choice?.message?.content;
     if (!content) throw new AnalysisError("The model returned an empty reply.", true);
+    return stripFences(content);
+  };
+}
+
+export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
+  const provider = opts.provider ?? "openrouter";
+  const chat = createJsonChat(opts);
+  const systemCache = new Map<string, string>();
+
+  async function once(answer: Answer, assignment: Assignment, question: Question): Promise<AnalysisResult> {
+    const cacheKey = promptCacheKey(assignment, question);
+    let system = systemCache.get(cacheKey);
+    if (!system) {
+      system = `${buildSystemPrompt(assignment, question)}\n\n# Output format\n${JSON_SHAPE}`;
+      systemCache.set(cacheKey, system);
+    }
+    const content = await chat(system, `Student: ${answer.studentName}\n\nResponse:\n${answer.text}`);
     let parsed: unknown;
     try {
-      parsed = JSON.parse(stripFences(content));
+      parsed = JSON.parse(content);
     } catch {
       throw new AnalysisError("The model returned output that was not valid JSON.", true);
     }

@@ -10,6 +10,22 @@ const q2 = assignment.questions[1]!;
 const answer = (id: string): Answer => answers.find((a) => a.id === id)!;
 const analyzeQ1 = (id: string) => mockAnalyze(answer(id), assignment, q1, groundTruth);
 
+describe("bandPoints with drafted band names", () => {
+  const crit = { id: "c", title: "c", description: "", maxPoints: 10, concepts: ["x"], bands: [
+    { level: "Score 10", points: 10, descriptor: "both" },
+    { level: "Score 5", points: 5, descriptor: "one" },
+    { level: "Score 0", points: 0, descriptor: "none" },
+  ] };
+  it("matches the model's bare number, the points value, and case-insensitive names", () => {
+    expect(bandPoints(crit, "5")).toBe(5);
+    expect(bandPoints(crit, "10")).toBe(10);
+    expect(bandPoints(crit, "score 5")).toBe(5);
+    expect(bandPoints(crit, "Score 0")).toBe(0);
+    expect(bandPoints(crit, "Level 5")).toBe(5);
+    expect(bandPoints(crit, "Nonsense")).toBe(0);
+  });
+});
+
 describe("bandPoints", () => {
   it("maps levels to rubric points, case-insensitively, with a safe fallback", () => {
     expect(bandPoints(rev, "Exemplary")).toBe(5);

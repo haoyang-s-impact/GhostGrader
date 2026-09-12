@@ -1,17 +1,39 @@
-import type { Assignment, Criterion, Decision, ModelOutput, AnalysisResult, CriterionAnalysis, Question, ScoreCheck } from "./schemas";
+import type { Band, Assignment, Criterion, Decision, ModelOutput, AnalysisResult, CriterionAnalysis, Question, ScoreCheck } from "./schemas";
 import { driftThreshold, roundHalf } from "./drift";
 
-/** Points for a band level; falls back to the closest-named band, then the lowest band. */
+/**
+ * Find the band the model meant. Models return the level name most of the
+ * time, but also "5" for a band called "Score 5", "score 5", or the points
+ * alone. Falls back to the lowest band only when nothing matches.
+ */
+export function findBand(criterion: Criterion, level: string): Band | undefined {
+  const wanted = level.trim();
+  const lower = wanted.toLowerCase();
+  const exact = criterion.bands.find((b) => b.level === wanted) ?? criterion.bands.find((b) => b.level.toLowerCase() === lower);
+  if (exact) return exact;
+  const asNumber = Number(wanted.replace(",", "."));
+  if (wanted !== "" && Number.isFinite(asNumber)) {
+    const byPoints = criterion.bands.find((b) => b.points === asNumber);
+    if (byPoints) return byPoints;
+  }
+  const digits = wanted.match(/-?\d+(?:[.,]\d+)?/)?.[0];
+  if (digits) {
+    const n = Number(digits.replace(",", "."));
+    const byNumberInName = criterion.bands.find((b) => b.level.match(/-?\d+(?:[.,]\d+)?/)?.[0] !== undefined && Number(b.level.match(/-?\d+(?:[.,]\d+)?/)![0]!.replace(",", ".")) === n);
+    if (byNumberInName) return byNumberInName;
+  }
+  return undefined;
+}
+
+/** Points for a band level; see findBand for the matching rules. Unknown level: the lowest band. */
 export function bandPoints(criterion: Criterion, level: string): number {
-  const exact = criterion.bands.find((b) => b.level === level);
-  if (exact) return exact.points;
-  const loose = criterion.bands.find((b) => b.level.toLowerCase() === level.toLowerCase());
-  if (loose) return loose.points;
+  const band = findBand(criterion, level);
+  if (band) return band.points;
   return Math.min(...criterion.bands.map((b) => b.points));
 }
 
 export function bandDescriptor(criterion: Criterion, level: string): string {
-  return criterion.bands.find((b) => b.level.toLowerCase() === level.toLowerCase())?.descriptor ?? "";
+  return findBand(criterion, level)?.descriptor ?? "";
 }
 
 export function rubricMax(question: Pick<Question, "rubric">): number {

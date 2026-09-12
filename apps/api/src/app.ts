@@ -1,10 +1,15 @@
 import { Hono } from "hono";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { cors } from "hono/cors";
 import { z } from "zod";
 import { AssignmentInputSchema, DecisionSchema, questionById, rollUp, type Assignment } from "@gg/shared";
 import type { AnalyzerInfo } from "./analyzer";
 import { AnalysisError } from "./claude";
 import { LmsError, type LmsAdapter } from "./lms/adapter";
+import { MoodlePageBody, syncGradingPage } from "./lms/page-sync";
+import type { JsonChat } from "./openrouter";
 import { SessionService } from "./session";
 import { newId, Store } from "./store";
 import { SyncError, SyncService } from "./sync";
@@ -25,13 +30,20 @@ export interface AppDeps {
   store?: Store;
   /** The LMS to sync with. Omitted: no LMS; the seeded answers are graded as they are. */
   lms?: LmsAdapter | null;
+  /** JSON chat for auxiliary model calls (rubric drafting). Null: deterministic fallbacks. */
+  chat?: JsonChat | null;
+  log?: (m: string) => void;
 }
 
 type Env = { Variables: { teacherId: string } };
 
 const PUBLIC_PATHS = new Set(["/health", "/teachers"]);
 
-export function createApp({ analyzer, store = new Store(), lms = null }: AppDeps) {
+/** The built extension, served so the panel can be injected into an LMS page without installing it (demos, screen shares). */
+const EXTENSION_DIST = join(dirname(fileURLToPath(import.meta.url)), "../../extension/dist");
+const EMBED_FILES: Record<string, string> = { "content.js": "text/javascript; charset=utf-8" };
+
+export function createApp({ analyzer, store = new Store(), lms = null, chat = null, log }: AppDeps) {
   const sessions = new SessionService(store);
   const sync = lms ? new SyncService(store, lms) : null;
   const noLms = (c: { json: (body: unknown, status: 400) => Response }) =>
@@ -54,10 +66,19 @@ export function createApp({ analyzer, store = new Store(), lms = null }: AppDeps
   app.get("/health", (c) => c.json({ ok: true, analyzer: analyzer.mode, model: analyzer.model, fallbacks: analyzer.fallbacks, lms: lms?.name ?? null }));
   app.get("/teachers", (c) => c.json(store.teachers()));
 
+  // Embed mode: <script src="http://localhost:8787/embed/content.js"> on a Moodle page mounts the panel.
+  app.get("/embed/:file", (c) => {
+    const file = c.req.param("file");
+    const type = EMBED_FILES[file];
+    const path = join(EXTENSION_DIST, file);
+    if (!type || !existsSync(path)) return c.text("Build the extension first: pnpm --filter @gg/extension build", 404);
+    return c.body(readFileSync(path), 200, { "content-type": type, "cache-control": "no-store" });
+  });
+
   // Every other route is scoped to one teacher. A real deployment would put
   // an LTI launch or OAuth session here; the demo uses a header.
   app.use("*", async (c, next) => {
-    if (PUBLIC_PATHS.has(c.req.path)) return next();
+    if (PUBLIC_PATHS.has(c.req.path) || c.req.path.startsWith("/embed/")) return next();
     const id = c.req.header(TEACHER_HEADER);
     if (!id || !store.teacher(id)) return c.json({ error: "Missing or unknown X-Teacher-Id" }, 401);
     c.set("teacherId", id);
@@ -167,6 +188,20 @@ export function createApp({ analyzer, store = new Store(), lms = null }: AppDeps
     const decisions = sessions.get(a.id).decisions;
     const roster = new Map(store.answersFor(a.id).map((x) => [x.studentId, { id: x.studentId, name: x.studentName, index: x.studentIndex }]));
     return c.json([...roster.values()].sort((x, y) => x.index - y.index).map((s) => rollUp(a, s, decisions)));
+  });
+
+  // ----- Browser extension: sync a Moodle grading page into the store -----
+  // The extension reads the quiz manual-grading page the teacher already has
+  // open and posts it here. First sight of a question drafts its rubric from
+  // the "Information for graders" text; later syncs only refresh answers.
+  app.post("/lms/moodle/page", async (c) => {
+    const parsed = MoodlePageBody.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: "Invalid body", issues: parsed.error.issues }, 400);
+    try {
+      return c.json(await syncGradingPage(store, c.get("teacherId"), parsed.data, chat, log));
+    } catch (err) {
+      return c.json({ error: err instanceof Error ? err.message : "Sync failed" }, 500);
+    }
   });
 
   // ----- Grading -----

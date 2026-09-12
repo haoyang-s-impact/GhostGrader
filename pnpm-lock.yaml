@@ -56,7 +56,53 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.0
-        version: 4.1.11(@types/node@20.19.43)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.13))
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@18.0.1)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.13))
+
+  apps/extension:
+    dependencies:
+      '@gg/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      react:
+        specifier: ^19.1.0
+        version: 19.3.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.3.0(react@19.3.0)
+      zod:
+        specifier: ^4.1.0
+        version: 4.6.2
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.55.0
+        version: 1.63.0
+      '@types/chrome':
+        specifier: ^0.1.0
+        version: 0.1.43
+      '@types/node':
+        specifier: ^20.19.0
+        version: 20.19.43
+      '@types/react':
+        specifier: ^19.1.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.1.0
+        version: 19.3.0(@types/react@19.3.0)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13))
+      happy-dom:
+        specifier: ^18.0.0
+        version: 18.0.1
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vite:
+        specifier: ^7.1.0
+        version: 7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13)
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@18.0.1)(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13))
 
   apps/web:
     dependencies:
@@ -96,7 +142,7 @@ importers:
         version: 7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13)
       vitest:
         specifier: ^4.0.0
-        version: 4.1.11(@types/node@20.19.43)(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13))
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@18.0.1)(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13))
 
   packages/shared:
     dependencies:
@@ -109,7 +155,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.0
-        version: 4.1.11(@types/node@20.19.43)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.13))
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@18.0.1)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.13))
 
 packages:
 
@@ -965,11 +1011,23 @@ packages:
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
+  '@types/chrome@0.1.43':
+    resolution: {integrity: sha512-ukH/HhmR6ht+UTX3PLUWJxgJ/RQcK2Foj4lBzsF24SIWsXgqhGuXqjd8FFuwioPP7d/JUKLM4g8GZxw3F4HTcA==}
+
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
+
+  '@types/filesystem@0.0.36':
+    resolution: {integrity: sha512-vPDXOZuannb9FZdxgHnqSwAG/jvdGM8Wq+6N4D/d80z+D4HWH+bItqsZaVRQykAn6WEVeEkLm2oQigyHtgb0RA==}
+
+  '@types/filewriter@0.0.33':
+    resolution: {integrity: sha512-xFU8ZXTw4gd358lb2jw25nxY9QAgqn2+bKKjKOYfNCzN4DKCFetK7sPtrlpg66Ywe3vWY9FNxprZawAh9wfJ3g==}
+
+  '@types/har-format@1.2.16':
+    resolution: {integrity: sha512-fluxdy7ryD3MV6h8pTfTYpy/xQzCFC7m89nOH9y94cNqJ1mDIDPut7MnRHI3F6qRmh/cT2fUjG1MLdCNb4hE9A==}
 
   '@types/node@20.19.43':
     resolution: {integrity: sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA==}
@@ -981,6 +1039,9 @@ packages:
 
   '@types/react@19.3.0':
     resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
+
+  '@types/whatwg-mimetype@3.0.2':
+    resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
 
   '@vitejs/plugin-react@5.2.0':
     resolution: {integrity: sha512-YmKkfhOAi3wsB1PhJq5Scj3GXMn3WvtQ/JC0xoopuHoXSdmtdStOpFrYaT1kie2YgFBcIe64ROzMYRjCrYOdYw==}
@@ -1258,6 +1319,10 @@ packages:
 
   github-from-package@0.0.0:
     resolution: {integrity: sha512-SyHy3T1v2NUXn29OsWdxmK6RwHD+vkj3v8en8AOBZ1wBQ/hCAQ5bAQTD02kW4W9tUp/3Qh6J8r9EvntiyCmOOw==}
+
+  happy-dom@18.0.1:
+    resolution: {integrity: sha512-qn+rKOW7KWpVTtgIUi6RVmTBZJSe2k0Db0vh1f7CWrWclkkc7/Q+FrOfkZIb2eiErLyqu5AXEzE7XthO9JVxRA==}
+    engines: {node: '>=20.0.0'}
 
   hono@4.13.7:
     resolution: {integrity: sha512-c8/gF9ac8Y78/agExVocyLevgR+JlpNB444Py0FSX8pJoPdYUfUzRcXtYEYGwt6l19qIlVZPN5Mfsw9jFShmQQ==}
@@ -1696,6 +1761,10 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  whatwg-mimetype@3.0.0:
+    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
+    engines: {node: '>=12'}
 
   why-is-node-running@2.3.0:
     resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}
@@ -2258,9 +2327,22 @@ snapshots:
       '@types/deep-eql': 4.0.2
       assertion-error: 2.0.1
 
+  '@types/chrome@0.1.43':
+    dependencies:
+      '@types/filesystem': 0.0.36
+      '@types/har-format': 1.2.16
+
   '@types/deep-eql@4.0.2': {}
 
   '@types/estree@1.0.9': {}
+
+  '@types/filesystem@0.0.36':
+    dependencies:
+      '@types/filewriter': 0.0.33
+
+  '@types/filewriter@0.0.33': {}
+
+  '@types/har-format@1.2.16': {}
 
   '@types/node@20.19.43':
     dependencies:
@@ -2273,6 +2355,8 @@ snapshots:
   '@types/react@19.3.0':
     dependencies:
       csstype: 3.2.3
+
+  '@types/whatwg-mimetype@3.0.2': {}
 
   '@vitejs/plugin-react@5.2.0(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13))':
     dependencies:
@@ -2528,6 +2612,12 @@ snapshots:
       resolve-pkg-maps: 1.0.0
 
   github-from-package@0.0.0: {}
+
+  happy-dom@18.0.1:
+    dependencies:
+      '@types/node': 20.19.43
+      '@types/whatwg-mimetype': 3.0.2
+      whatwg-mimetype: 3.0.0
 
   hono@4.13.7: {}
 
@@ -2863,7 +2953,7 @@ snapshots:
       fsevents: 2.3.3
       tsx: 4.23.13
 
-  vitest@4.1.11(@types/node@20.19.43)(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13)):
+  vitest@4.1.11(@types/node@20.19.43)(happy-dom@18.0.1)(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13)):
     dependencies:
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(vite@7.3.6(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.13))
@@ -2887,10 +2977,11 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.43
+      happy-dom: 18.0.1
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.11(@types/node@20.19.43)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.13)):
+  vitest@4.1.11(@types/node@20.19.43)(happy-dom@18.0.1)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.13)):
     dependencies:
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(vite@8.3.0(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.13))
@@ -2914,8 +3005,11 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.43
+      happy-dom: 18.0.1
     transitivePeerDependencies:
       - msw
+
+  whatwg-mimetype@3.0.0: {}
 
   why-is-node-running@2.3.0:
     dependencies:
