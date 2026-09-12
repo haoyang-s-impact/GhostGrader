@@ -47,6 +47,8 @@ export const AssignmentSchema = z.object({
   learningObjectives: z.array(z.string()),
   rubric: RubricSchema,
   anchors: z.array(AnchorSchema),
+  /** Points the single grade is out of. Defaults to the sum of criterion maxima. */
+  totalPoints: z.number().positive().optional(),
   updatedAt: z.number().default(0),
 });
 
@@ -74,6 +76,8 @@ export const ModelCriterionSchema = z.object({
 /** What the model is asked to return. submissionId and suggestedPoints are stamped by the server. */
 export const ModelOutputSchema = z.object({
   criteria: z.array(ModelCriterionSchema),
+  /** One sentence for the teacher explaining the suggested grade. */
+  summary: z.string(),
   feedbackDraft: z.string(),
 });
 
@@ -82,49 +86,77 @@ export const CriterionAnalysisSchema = ModelCriterionSchema.extend({
   suggestedPoints: z.number(),
   /** Descriptor of that band, copied from the rubric so the panel can quote it. */
   bandDescriptor: z.string().default(""),
+  maxPoints: z.number().default(0),
 });
 
 export const AnalysisResultSchema = z.object({
   submissionId: z.string(),
   criteria: z.array(CriterionAnalysisSchema),
+  /** Rubric-derived grade on the assignment's scale. */
+  suggestedTotal: z.number(),
+  maxTotal: z.number(),
+  /** Union of missing concepts across criteria; what the comparisons key on. */
+  missingConcepts: z.array(z.string()),
+  summary: z.string(),
   feedbackDraft: z.string(),
 });
 
-/** Raised when a teacher's score diverges from the rubric-bound analysis. */
+/** Raised when a teacher's grade diverges from the rubric-bound analysis. */
 export const ScoreCheckSchema = z.object({
-  criterionId: z.string(),
   enteredPoints: z.number(),
   suggestedPoints: z.number(),
-  suggestedLevel: z.string(),
-  bandDescriptor: z.string(),
-  missingConcepts: z.array(z.string()),
-  evidence: z.array(z.string()),
+  maxPoints: z.number(),
   diff: z.number(),
+  summary: z.string(),
+  missingConcepts: z.array(z.string()),
+  breakdown: z.array(
+    z.object({
+      criterionId: z.string(),
+      level: z.string(),
+      suggestedPoints: z.number(),
+      maxPoints: z.number(),
+      missingConcepts: z.array(z.string()),
+    }),
+  ),
 });
 
+/** One overall grade the teacher entered for one submission. */
 export const DecisionSchema = z.object({
   id: z.string(),
   assignmentId: z.string(),
   submissionId: z.string(),
   submissionIndex: z.number().int().positive(),
-  criterionId: z.string(),
+  studentName: z.string().default(""),
   points: z.number(),
-  deduction: z.number(),
+  maxPoints: z.number(),
+  /** What the rubric-bound analysis suggested at the time, if it was available. */
+  suggestedPoints: z.number().nullable(),
   missingConcepts: z.array(z.string()),
   at: z.number(),
 });
 
+/**
+ * Raised when this grade treats the same gaps differently from an earlier
+ * student's grade. Offsets are (teacher points - suggested points), so the
+ * comparison is about leniency relative to the rubric, not raw scores.
+ */
 export const DriftAlertSchema = z.object({
   currentDecisionId: z.string(),
   priorDecisionId: z.string(),
   currentSubmissionIndex: z.number(),
   priorSubmissionIndex: z.number(),
-  criterionId: z.string(),
-  sharedConcept: z.string(),
-  currentDeduction: z.number(),
-  priorDeduction: z.number(),
+  priorStudentName: z.string(),
+  sharedConcepts: z.array(z.string()),
+  currentPoints: z.number(),
   priorPoints: z.number(),
+  currentSuggested: z.number(),
+  priorSuggested: z.number(),
+  currentOffset: z.number(),
+  priorOffset: z.number(),
   spread: z.number(),
+  /** The grade that would treat this student the way the earlier one was treated. */
+  recommendedPoints: z.number(),
+  maxPoints: z.number(),
 });
 
 export const GroundTruthSchema = z.record(

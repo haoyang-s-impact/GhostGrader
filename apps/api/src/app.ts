@@ -41,7 +41,7 @@ export function createApp({ analyzer, store = new Store() }: AppDeps) {
     }),
   );
 
-  app.get("/health", (c) => c.json({ ok: true, analyzer: analyzer.mode }));
+  app.get("/health", (c) => c.json({ ok: true, analyzer: analyzer.mode, model: analyzer.model }));
   app.get("/lms/teachers", (c) => c.json(store.teachers()));
 
   // Every other route is scoped to one teacher. A real deployment would put
@@ -133,9 +133,7 @@ export function createApp({ analyzer, store = new Store() }: AppDeps) {
     const { decision } = parsed.data;
     const assignment = requireAssignment(c, decision.assignmentId);
     if (!assignment) return c.json({ error: "Unknown assignment" }, 404);
-    const criterion = assignment.rubric.criteria.find((x) => x.id === decision.criterionId);
-    if (!criterion) return c.json({ error: "Unknown criterion" }, 404);
-    return c.json({ alert: sessions.record(decision, criterion) });
+    return c.json({ alert: sessions.record(decision) });
   });
 
   app.post("/override", async (c) => {
@@ -178,6 +176,7 @@ export function createApp({ analyzer, store = new Store() }: AppDeps) {
 /** Rubric sanity beyond the schema: at least one criterion, bands sorted and within range, unique ids. */
 function validateRubric(a: z.infer<typeof AssignmentInputSchema>): string | null {
   if (a.rubric.criteria.length === 0) return "A rubric needs at least one criterion.";
+  if (a.totalPoints !== undefined && a.totalPoints <= 0) return "Total points must be positive.";
   const ids = new Set<string>();
   for (const c of a.rubric.criteria) {
     if (ids.has(c.id)) return `Duplicate criterion id "${c.id}".`;

@@ -1,103 +1,83 @@
 import type { Decision } from "@gg/shared";
-import type { PageSubmission } from "../selectors";
 
 interface Props {
-  page: PageSubmission | null;
   decisions: Decision[];
   alertsRaised: number;
   alertsAligned: number;
   checksRaised: number;
   checksApproved: number;
   totalSubmissions: number;
+  maxPoints: number;
 }
 
-const COLORS = ["#2563eb", "#d97706", "#059669", "#dc2626", "#7c3aed", "#0891b2"];
-
-/** Latest decision per (criterion, submission), sorted by submission index. */
-function latestSeries(decisions: Decision[]) {
-  const latest = new Map<string, Decision>();
+/** Latest decision per submission, sorted by submission index. */
+function latest(decisions: Decision[]) {
+  const m = new Map<string, Decision>();
   for (const d of decisions) {
-    const k = `${d.criterionId}|${d.submissionId}`;
-    const prev = latest.get(k);
-    if (!prev || d.at > prev.at) latest.set(k, d);
+    const prev = m.get(d.submissionId);
+    if (!prev || d.at > prev.at) m.set(d.submissionId, d);
   }
-  const byCrit = new Map<string, Decision[]>();
-  for (const d of latest.values()) {
-    const arr = byCrit.get(d.criterionId) ?? [];
-    arr.push(d);
-    byCrit.set(d.criterionId, arr);
-  }
-  for (const arr of byCrit.values()) arr.sort((a, b) => a.submissionIndex - b.submissionIndex);
-  return { byCrit, all: [...latest.values()].sort((a, b) => a.submissionIndex - b.submissionIndex || a.at - b.at) };
+  return [...m.values()].sort((a, b) => a.submissionIndex - b.submissionIndex);
 }
 
-export function SessionTab({ page, decisions, alertsRaised, alertsAligned, checksRaised, checksApproved, totalSubmissions }: Props) {
-  const { byCrit, all } = latestSeries(decisions);
-  const maxDeduction = Math.max(5, ...(page?.rubric.map((r) => r.maxPoints) ?? []));
+export function SessionTab({ decisions, alertsRaised, alertsAligned, checksRaised, checksApproved, totalSubmissions, maxPoints }: Props) {
+  const all = latest(decisions);
+  const yMax = Math.max(maxPoints, ...all.map((d) => d.maxPoints), 1);
   const maxIndex = Math.max(2, totalSubmissions, ...all.map((d) => d.submissionIndex));
 
-  const W = 340, H = 170, PL = 28, PR = 8, PT = 10, PB = 22;
+  const W = 340, H = 180, PL = 30, PR = 8, PT = 10, PB = 22;
   const x = (i: number) => PL + ((i - 1) / Math.max(1, maxIndex - 1)) * (W - PL - PR);
-  const y = (v: number) => PT + (1 - v / maxDeduction) * (H - PT - PB);
+  const y = (v: number) => PT + (1 - v / yMax) * (H - PT - PB);
 
-  // Running mean deduction by submission order.
-  const meanPts: string[] = [];
-  let sum = 0, n = 0, lastIdx = -1;
-  for (const d of all) {
-    sum += d.deduction; n += 1;
-    if (d.submissionIndex !== lastIdx) { lastIdx = d.submissionIndex; meanPts.push(`${x(d.submissionIndex)},${y(sum / n)}`); }
-    else meanPts[meanPts.length - 1] = `${x(d.submissionIndex)},${y(sum / n)}`;
-  }
-
-  const critIds = page?.rubric.map((r) => r.criterionId) ?? [...byCrit.keys()];
-  const gradedSubs = new Set(all.map((d) => d.submissionId)).size;
+  const withSuggestion = all.filter((d) => d.suggestedPoints !== null);
+  const offsets = withSuggestion.map((d) => d.points - (d.suggestedPoints as number));
+  const meanOffset = offsets.length ? offsets.reduce((a, b) => a + b, 0) / offsets.length : 0;
 
   return (
     <>
       <div className="gg-stats">
-        <div className="gg-stat"><div className="gg-n" data-gg-stat-graded>{gradedSubs}</div><div className="gg-l">graded</div></div>
+        <div className="gg-stat"><div className="gg-n" data-gg-stat-graded>{all.length}</div><div className="gg-l">graded</div></div>
         <div className="gg-stat"><div className="gg-n" data-gg-stat-alerts>{alertsRaised}</div><div className="gg-l">alerts</div></div>
         <div className="gg-stat"><div className="gg-n" data-gg-stat-aligned>{alertsAligned}</div><div className="gg-l">aligned</div></div>
       </div>
-      <div className="gg-stats gg-stats-2">
+      <div className="gg-stats gg-stats-3">
         <div className="gg-stat"><div className="gg-n" data-gg-stat-checks>{checksRaised}</div><div className="gg-l">rubric checks</div></div>
         <div className="gg-stat"><div className="gg-n" data-gg-stat-approved>{checksApproved}</div><div className="gg-l">approved</div></div>
+        <div className="gg-stat"><div className="gg-n" data-gg-stat-offset>{offsets.length ? (meanOffset > 0 ? "+" : "") + meanOffset.toFixed(1) : "–"}</div><div className="gg-l">mean vs rubric</div></div>
       </div>
 
       {all.length === 0 ? (
-        <div className="gg-status">Score a few criteria and the strictness curve will appear here.</div>
+        <div className="gg-status">Grade a few students and the comparison chart will appear here.</div>
       ) : (
         <>
-          <svg className="gg-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Deduction per criterion over submission order" data-gg-chart>
-            {[0, maxDeduction / 2, maxDeduction].map((v) => (
+          <svg className="gg-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Your grade and the rubric-referenced grade per student" data-gg-chart>
+            {[0, yMax / 2, yMax].map((v) => (
               <g key={v}>
                 <line x1={PL} x2={W - PR} y1={y(v)} y2={y(v)} stroke="#e6e9ec" strokeWidth={1} />
-                <text x={PL - 4} y={y(v) + 3} fontSize={9} textAnchor="end" fill="#8a949c">−{v}</text>
+                <text x={PL - 4} y={y(v) + 3} fontSize={9} textAnchor="end" fill="#8a949c">{v}</text>
               </g>
             ))}
             {Array.from({ length: maxIndex }, (_, i) => i + 1).filter((i) => i === 1 || i % 5 === 0 || i === maxIndex).map((i) => (
               <text key={i} x={x(i)} y={H - 6} fontSize={9} textAnchor="middle" fill="#8a949c">#{i}</text>
             ))}
-            {critIds.map((cid, ci) => {
-              const pts = byCrit.get(cid);
-              if (!pts || pts.length === 0) return null;
-              const color = COLORS[ci % COLORS.length]!;
-              return (
-                <g key={cid} data-gg-series={cid}>
-                  {pts.length > 1 && <polyline fill="none" stroke={color} strokeWidth={1.6} points={pts.map((d) => `${x(d.submissionIndex)},${y(d.deduction)}`).join(" ")} />}
-                  {pts.map((d) => <circle key={d.id} cx={x(d.submissionIndex)} cy={y(d.deduction)} r={2.6} fill={color} />)}
-                </g>
-              );
-            })}
-            {meanPts.length > 1 && <polyline fill="none" stroke="#1f2a33" strokeWidth={1.4} strokeDasharray="4 3" points={meanPts.join(" ")} data-gg-mean />}
+            {withSuggestion.length > 1 && (
+              <polyline fill="none" stroke="#8a949c" strokeWidth={1.4} strokeDasharray="4 3" points={withSuggestion.map((d) => `${x(d.submissionIndex)},${y(d.suggestedPoints as number)}`).join(" ")} data-gg-suggested-line />
+            )}
+            {withSuggestion.map((d) => (
+              <line key={`o${d.id}`} x1={x(d.submissionIndex)} x2={x(d.submissionIndex)} y1={y(d.suggestedPoints as number)} y2={y(d.points)} stroke={d.points >= (d.suggestedPoints as number) ? "#0b874b" : "#c0392b"} strokeWidth={2} opacity={0.5} />
+            ))}
+            {all.length > 1 && <polyline fill="none" stroke="#5b3df5" strokeWidth={1.8} points={all.map((d) => `${x(d.submissionIndex)},${y(d.points)}`).join(" ")} data-gg-grade-line />}
+            {all.map((d) => (
+              <circle key={d.id} cx={x(d.submissionIndex)} cy={y(d.points)} r={3} fill="#5b3df5" data-gg-point />
+            ))}
           </svg>
           <div className="gg-legend">
-            {critIds.map((cid, ci) => (
-              <span key={cid} style={{ color: COLORS[ci % COLORS.length] }}>{page?.rubric.find((r) => r.criterionId === cid)?.title ?? cid}</span>
-            ))}
-            <span style={{ color: "#1f2a33" }}>running mean</span>
+            <span style={{ color: "#5b3df5" }}>your grade</span>
+            <span style={{ color: "#8a949c" }}>rubric-referenced</span>
+            <span style={{ color: "#0b874b" }}>above rubric</span>
+            <span style={{ color: "#c0392b" }}>below rubric</span>
           </div>
-          <div className="gg-footnote">Higher means harsher. A rising mean with the same omissions is intra-rater drift.</div>
+          <div className="gg-footnote">A mean that drifts up or down across the session, for the same kinds of gaps, is intra-rater drift.</div>
         </>
       )}
     </>

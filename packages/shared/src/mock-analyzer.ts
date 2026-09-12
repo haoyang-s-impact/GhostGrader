@@ -15,6 +15,10 @@ export function mockAnalyze(submission: Submission, assignment: Assignment, trut
       `${firstName}, ${gt.strength} ` +
       `To strengthen this response, ${gt.improvement} ` +
       `Keep building on the reasoning you have already shown.`;
+    const missing = gt.criteria.flatMap((c) => c.missingConcepts.map((t) => t.replace(/_/g, " ")));
+    const summary = missing.length
+      ? `Strong in places, but the rubric penalizes the missing ${[...new Set(missing)].slice(0, 3).join(", ")}.`
+      : "Meets every criterion at the top band.";
     return finalizeAnalysis(submission.id, assignment, {
       criteria: assignment.rubric.criteria.map((c) => {
         const g = gt.criteria.find((x) => x.criterionId === c.id);
@@ -26,6 +30,7 @@ export function mockAnalyze(submission: Submission, assignment: Assignment, trut
           confidence: 0.9,
         };
       }),
+      summary,
       feedbackDraft,
     });
   }
@@ -64,5 +69,6 @@ function heuristicAnalyze(submission: Submission, assignment: Assignment, firstN
       ? `To strengthen it, address ${missingAll.slice(0, 2).join(" and ")} explicitly, as the assignment asks. `
       : `You addressed the key ideas the assignment asks for. `) +
     `Keep building on the reasoning you have already shown.`;
-  return finalizeAnalysis(submission.id, assignment, { criteria, feedbackDraft });
+  const summary = missingAll.length ? `Keyword scan: missing ${[...new Set(missingAll)].slice(0, 3).join(", ")}.` : "Keyword scan: all concept tags present.";
+  return finalizeAnalysis(submission.id, assignment, { criteria, summary, feedbackDraft });
 }

@@ -5,62 +5,93 @@
       "criterionId": "reversibility",
       "level": "Proficient",
       "evidence": [
-        "ammonia can turn back into nitrogen and hydrogen",
-        "Dynamic equilibrium is when the forward and reverse rates are equal"
+        "The reaction is reversible, ammonia can turn back into nitrogen and hydrogen.",
+        "Dynamic equilibrium is when the forward and reverse rates are equal so the concentrations do not change."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "States the reaction is reversible and mentions equilibrium, but the rate explanation is thin or missing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
-      "level": "Proficient",
+      "level": "Exemplary",
       "evidence": [
-        "the equilibrium shifts to absorb the added heat, which is the reverse direction"
+        "the forward reaction is exothermic and Le Chatelier's principle says the equilibrium shifts to absorb the added heat, which is the reverse direction.",
+        "Higher temperature means less ammonia."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Correct direction of shift for both heating and cooling, explicitly linked to the exothermic forward reaction via Le Chatelier's principle.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Proficient",
       "evidence": [
-        "450 °C is used in factories"
+        "450 °C is used in factories.",
+        "Lower temperature means more ammonia but it is slow."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "specific_example"
+      ],
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Includes a specific example or value, but not both.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
-      "level": "Developing",
-      "evidence": [],
-      "missingConcepts": [
-        "explained_reasoning"
+      "level": "Proficient",
+      "evidence": [
+        "Dynamic equilibrium is when the forward and reverse rates are equal so the concentrations do not change.",
+        "Higher temperature means less ammonia."
       ],
-      "confidence": 0.9
+      "missingConcepts": [],
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
-      "level": "Beginning",
+      "level": "Developing",
       "evidence": [
-        "Higher temperature means less ammonia."
+        "Higher temperature means less ammonia.",
+        "Lower temperature means more ammonia but it is slow."
       ],
       "missingConcepts": [
         "logical_order",
         "introduction_conclusion"
       ],
-      "confidence": 0.9
+      "confidence": 0.6,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Some order but ideas jump around, or no conclusion.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Proficient",
       "evidence": [
-        "The reaction is reversible, ammonia can turn back into nitrogen and hydrogen."
+        "Dynamic equilibrium is when the forward and reverse rates are equal so the concentrations do not change.",
+        "Higher temperature means less ammonia."
       ],
-      "missingConcepts": [
-        "grammar"
-      ],
-      "confidence": 0.9
+      "missingConcepts": [],
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "A few minor errors.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Maya, the key ideas are all here: the correct direction of shift, the exothermic link, dynamic equilibrium as equal rates, and a specific temperature. To strengthen this response, organize these points into a paragraph that opens with reversibility, moves to equilibrium, and then explains the temperature effect, ending with a conclusion. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 21,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "specific_example",
+    "logical_order",
+    "introduction_conclusion"
+  ],
+  "summary": "Maya demonstrates a solid understanding of reversibility and Le Chatelier's principle, but the organization of ideas could be improved for clarity.",
+  "feedbackDraft": "Great job, Maya! You clearly explained how temperature affects ammonia production and referenced Le Chatelier's principle effectively. To strengthen your response, consider organizing your ideas more clearly with a structured introduction and conclusion."
 }

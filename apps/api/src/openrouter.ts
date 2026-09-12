@@ -1,0 +1,95 @@
+import { finalizeAnalysis, ModelOutputSchema, type AnalysisResult, type Assignment, type Submission } from "@gg/shared";
+import { AnalysisError } from "./claude";
+import { buildSystemPrompt } from "./prompt";
+
+/**
+ * OpenAI-compatible chat completions through OpenRouter. Uses JSON mode and
+ * validates the reply against the shared Zod schema, retrying once on a
+ * malformed answer. The rubric-bound system prompt is identical to the
+ * Claude path so the two providers are interchangeable.
+ */
+export interface OpenRouterOptions {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+  log?: (msg: string) => void;
+  fetchImpl?: typeof fetch;
+}
+
+const JSON_SHAPE = `Respond with a single JSON object and nothing else, shaped exactly like:
+{
+  "criteria": [
+    { "criterionId": "<id from the rubric>", "level": "<one band level for that criterion>", "evidence": ["<verbatim quote>", "..."], "missingConcepts": ["<allowed tag>", "..."], "confidence": 0.0 }
+  ],
+  "summary": "<one sentence for the teacher explaining the overall judgment>",
+  "feedbackDraft": "<two to four sentences addressed to the student>"
+}`;
+
+export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
+  const baseUrl = (opts.baseUrl ?? "https://openrouter.ai/api/v1").replace(/\/$/, "");
+  const doFetch = opts.fetchImpl ?? fetch;
+  const systemCache = new Map<string, string>();
+
+  async function once(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
+    const cacheKey = `${assignment.id}:${assignment.updatedAt}`;
+    let system = systemCache.get(cacheKey);
+    if (!system) {
+      system = `${buildSystemPrompt(assignment)}\n\n# Output format\n${JSON_SHAPE}`;
+      systemCache.set(cacheKey, system);
+    }
+    const res = await doFetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${opts.apiKey}`,
+        "content-type": "application/json",
+        "http-referer": "https://github.com/onrbzkrt/GhostGrader",
+        "x-title": "Ghost Grader",
+      },
+      body: JSON.stringify({
+        model: opts.model,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: `Student: ${submission.studentName}\n\nResponse:\n${submission.text}` },
+        ],
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new AnalysisError(`OpenRouter ${res.status}: ${text.slice(0, 200)}`, res.status === 429 || res.status >= 500);
+    }
+    const body = (await res.json()) as {
+      choices?: { message?: { content?: string | null; refusal?: string | null }; finish_reason?: string }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number; cost?: number };
+    };
+    const choice = body.choices?.[0];
+    opts.log?.(`usage prompt=${body.usage?.prompt_tokens ?? "?"} completion=${body.usage?.completion_tokens ?? "?"} cost=${body.usage?.cost ?? "?"}`);
+    if (choice?.message?.refusal) throw new AnalysisError("The model declined to analyze this submission.", false);
+    const content = choice?.message?.content;
+    if (!content) throw new AnalysisError("The model returned an empty reply.", true);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(stripFences(content));
+    } catch {
+      throw new AnalysisError("The model returned output that was not valid JSON.", true);
+    }
+    const out = ModelOutputSchema.safeParse(parsed);
+    if (!out.success) throw new AnalysisError("The model returned output that did not match the schema.", true);
+    return finalizeAnalysis(submission.id, assignment, out.data);
+  }
+
+  return async function analyze(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
+    try {
+      return await once(submission, assignment);
+    } catch (err) {
+      if (err instanceof AnalysisError && !err.retryable) throw err;
+      return await once(submission, assignment);
+    }
+  };
+}
+
+function stripFences(s: string): string {
+  const m = s.trim().match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+  return m ? m[1]! : s;
+}

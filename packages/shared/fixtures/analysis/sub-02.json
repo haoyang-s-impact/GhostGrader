@@ -3,57 +3,103 @@
   "criteria": [
     {
       "criterionId": "reversibility",
-      "level": "Beginning",
-      "evidence": [],
-      "missingConcepts": [
-        "reversibility",
-        "dynamic_equilibrium"
+      "level": "Proficient",
+      "evidence": [
+        "The reaction is exothermic, which means heat is given out as the products form.",
+        "Temperature is important because it changes how much ammonia is made."
       ],
-      "confidence": 0.9
+      "missingConcepts": [
+        "dynamic_equilibrium",
+        "forward_reverse_rates"
+      ],
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "States the reaction is reversible and mentions equilibrium, but the rate explanation is thin or missing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Proficient",
       "evidence": [
-        "it favors the endothermic direction and less ammonia is produced"
+        "Le Chatelier's principle tells us the system will try to remove the extra heat, so it favors the endothermic direction and less ammonia is produced.",
+        "the system favors the exothermic direction and more ammonia is produced."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Correct direction of shift with a partial or implicit link to exothermicity.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Developing",
       "evidence": [
-        "a moderate temperature is chosen in industry"
+        "the reaction gives out heat.",
+        "the system will try to remove the extra heat."
       ],
       "missingConcepts": [
+        "specific_example",
         "quantitative_reference"
       ],
-      "confidence": 0.9
+      "confidence": 0.6,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Evidence is general or only loosely tied to the claim.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Proficient",
-      "evidence": [],
+      "evidence": [
+        "Temperature is important because it changes how much ammonia is made.",
+        "Overall, temperature controls the amount of ammonia because the reaction gives out heat."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Proficient",
       "evidence": [
-        "Overall, temperature controls the amount of ammonia"
+        "In the Haber process nitrogen gas reacts with hydrogen gas to produce ammonia.",
+        "However, at low temperature the molecules move slowly and the reaction takes a long time, so a moderate temperature is chosen in industry."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "introduction_conclusion"
+      ],
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Logical order with a weak opening or closing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
-      "level": "Exemplary",
-      "evidence": [],
+      "level": "Proficient",
+      "evidence": [
+        "The reaction is exothermic, which means heat is given out as the products form.",
+        "Temperature is important because it changes how much ammonia is made."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "A few minor errors.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Ben, you correctly predicted that heating favors the endothermic direction and lowers the ammonia yield, and you explained the industrial compromise on temperature. To strengthen this response, explain why the reaction is reversible: describe the reverse reaction and the dynamic equilibrium that results, since the prompt asks for this directly. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 19.5,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "dynamic_equilibrium",
+    "forward_reverse_rates",
+    "exothermic_endothermic_link",
+    "specific_example",
+    "quantitative_reference",
+    "introduction_conclusion"
+  ],
+  "summary": "The response demonstrates a solid understanding of the Haber process and Le Chatelier's principle, but lacks specific evidence and a clear introduction and conclusion.",
+  "feedbackDraft": "Ben, you did a great job explaining how temperature affects ammonia production in the Haber process! To strengthen your response, consider including specific examples or values to support your claims more effectively."
 }

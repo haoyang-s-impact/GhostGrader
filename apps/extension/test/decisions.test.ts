@@ -11,47 +11,47 @@ const page: PageSubmission = {
   submissionIndex: 11,
   studentName: "Kavya Sharma",
   text: "…",
-  rubric: [
-    { criterionId: "reversibility", title: "Reversibility", maxPoints: 5, points: null, input: {} as HTMLInputElement },
-    { criterionId: "clarity", title: "Clarity", maxPoints: 5, points: 3.5, input: {} as HTMLInputElement },
-  ],
+  grade: null,
+  maxPoints: 30,
 };
 
 const analysis: AnalysisResult = {
   submissionId: "sub-11",
+  suggestedTotal: 20.5,
+  maxTotal: 30,
+  missingConcepts: ["reversibility", "dynamic_equilibrium"],
+  summary: "Missing reversibility.",
   feedbackDraft: "Kavya, …",
-  criteria: [
-    { criterionId: "reversibility", level: "Beginning", evidence: [], missingConcepts: ["reversibility", "dynamic_equilibrium"], confidence: 0.9, suggestedPoints: 0, bandDescriptor: "" },
-    { criterionId: "clarity", level: "Proficient", evidence: [], missingConcepts: [], confidence: 0.8, suggestedPoints: 3.5, bandDescriptor: "" },
-  ],
+  criteria: [],
 };
 
 describe("buildDecision", () => {
-  it("carries the analysis's missing concepts and computes the deduction", () => {
-    const d = buildDecision(page, "reversibility", 0, analysis, 123)!;
+  it("carries the analysis's suggestion and missing concepts", () => {
+    const d = buildDecision(page, 16, analysis, 123)!;
     expect(d).toMatchObject({
-      id: "sub-11:reversibility",
+      id: "sub-11:grade",
       submissionIndex: 11,
-      points: 0,
-      deduction: 5,
+      studentName: "Kavya Sharma",
+      points: 16,
+      maxPoints: 30,
+      suggestedPoints: 20.5,
       missingConcepts: ["reversibility", "dynamic_equilibrium"],
       at: 123,
     });
   });
 
-  it("falls back to no concepts when analysis is not ready", () => {
-    const d = buildDecision(page, "reversibility", 2.5, null)!;
+  it("records a null suggestion when analysis is not ready", () => {
+    const d = buildDecision(page, 25, null)!;
+    expect(d.suggestedPoints).toBeNull();
     expect(d.missingConcepts).toEqual([]);
-    expect(d.deduction).toBe(2.5);
   });
 
-  it("never produces a negative deduction and rejects unknown criteria", () => {
-    expect(buildDecision(page, "clarity", 7, analysis)!.deduction).toBe(0);
-    expect(buildDecision(page, "nope", 1, analysis)).toBeNull();
+  it("refuses to build a decision without a grade scale", () => {
+    expect(buildDecision({ ...page, maxPoints: 0 }, 1, analysis)).toBeNull();
   });
 
-  it("uses a deterministic id so re-scoring replaces and overrides stay stable", () => {
-    expect(decisionId("sub-04", "reversibility")).toBe("sub-04:reversibility");
+  it("uses a deterministic id so re-grading replaces and overrides stay stable", () => {
+    expect(decisionId("sub-04")).toBe("sub-04:grade");
   });
 });
 

@@ -16,15 +16,16 @@ function sub(index: number) {
   return submissions.find((s) => s.index === index)!;
 }
 
-function decision(index: number, points: number, missing: string[], id = `d${index}`): Decision {
+function decision(index: number, points: number, missing: string[], suggested: number | null = 20.5, id = `d${index}`): Decision {
   return {
     id,
     assignmentId: assignment.id,
     submissionId: sub(index).id,
     submissionIndex: index,
-    criterionId: "reversibility",
+    studentName: sub(index).studentName,
     points,
-    deduction: 5 - points,
+    maxPoints: 30,
+    suggestedPoints: suggested,
     missingConcepts: missing,
     at: index,
   };
@@ -40,7 +41,7 @@ const get = (app: App, path: string, teacher = T1) => app.request(path, { header
 describe("auth and health", () => {
   it("reports the analyzer mode without a teacher header", async () => {
     const res = await mkApp().request("/health");
-    expect(await res.json()).toEqual({ ok: true, analyzer: "mock" });
+    expect(await res.json()).toEqual({ ok: true, analyzer: "mock", model: "mock" });
   });
 
   it("rejects scoped routes without a known teacher", async () => {
@@ -122,6 +123,8 @@ describe("multi-tenant LMS data", () => {
     const nationalism = body.criteria[1]!;
     expect(nationalism.missingConcepts).toContain("balkans");
     expect(nationalism.suggestedPoints).toBeLessThan(10);
+    expect(body.maxTotal).toBe(20);
+    expect(body.suggestedTotal).toBe(alliances.suggestedPoints + nationalism.suggestedPoints);
     expect(body.feedbackDraft.startsWith("Ada,")).toBe(true);
 
     // The other teacher cannot analyze against this rubric.
@@ -146,7 +149,7 @@ describe("multi-tenant LMS data", () => {
 });
 
 describe("POST /analyze on the seeded assignment", () => {
-  it("returns a rubric-aligned result with suggested points and the reversibility omission on submission 4", async () => {
+  it("returns a rubric-aligned result with a suggested grade and the reversibility omission on submission 4", async () => {
     const res = await post(mkApp(), "/analyze", { assignmentId: assignment.id, submission: sub(4) });
     expect(res.status).toBe(200);
     const body = (await res.json()) as AnalysisResult;
@@ -154,7 +157,10 @@ describe("POST /analyze on the seeded assignment", () => {
     const rev = body.criteria.find((c) => c.criterionId === "reversibility")!;
     expect(rev.missingConcepts).toContain("reversibility");
     expect(rev.suggestedPoints).toBe(0);
-    expect(body.criteria.find((c) => c.criterionId === "le_chatelier")!.suggestedPoints).toBe(5);
+    expect(body.suggestedTotal).toBe(20.5);
+    expect(body.maxTotal).toBe(30);
+    expect(body.missingConcepts).toEqual(["reversibility", "dynamic_equilibrium"]);
+    expect(body.summary.length).toBeGreaterThan(10);
     expect(body.feedbackDraft).toMatch(/^Daniel,/);
   });
 
@@ -166,17 +172,30 @@ describe("POST /analyze on the seeded assignment", () => {
 });
 
 describe("decision flow", () => {
-  it("raises the demo alert on submission 11 after submission 4, and override silences it", async () => {
+  it("raises the comparison alert on submission 11 after submission 4, and override silences it", async () => {
     const app = mkApp();
-    let res = await post(app, "/decision", { decision: decision(4, 2.5, ["reversibility", "dynamic_equilibrium"]) });
+    // First student: no one to compare with.
+    let res = await post(app, "/decision", { decision: decision(4, 24, ["reversibility", "dynamic_equilibrium"]) });
     expect((await res.json()).alert).toBeNull();
 
-    res = await post(app, "/decision", { decision: decision(11, 0, ["reversibility", "dynamic_equilibrium"]) });
+    // Same gap, graded 8 points harsher relative to the suggestion.
+    res = await post(app, "/decision", { decision: decision(11, 16, ["reversibility", "dynamic_equilibrium"]) });
     const { alert } = await res.json();
-    expect(alert).toMatchObject({ priorSubmissionIndex: 4, currentSubmissionIndex: 11, sharedConcept: "reversibility", priorDeduction: 2.5, currentDeduction: 5, spread: 2.5 });
+    expect(alert).toMatchObject({
+      priorSubmissionIndex: 4,
+      priorStudentName: "Daniel Okafor",
+      currentSubmissionIndex: 11,
+      sharedConcepts: ["reversibility", "dynamic_equilibrium"],
+      priorPoints: 24,
+      currentPoints: 16,
+      priorOffset: 3.5,
+      currentOffset: -4.5,
+      spread: 8,
+      recommendedPoints: 24,
+    });
 
     expect((await post(app, "/override", { assignmentId: assignment.id, decisionIdA: "d11", decisionIdB: "d4" })).status).toBe(204);
-    res = await post(app, "/decision", { decision: decision(11, 0, ["reversibility"], "d11") });
+    res = await post(app, "/decision", { decision: decision(11, 16, ["reversibility"], 20.5, "d11") });
     expect((await res.json()).alert).toBeNull();
 
     expect((await post(app, "/check-raised", { assignmentId: assignment.id })).status).toBe(204);
@@ -189,12 +208,12 @@ describe("decision flow", () => {
 
     // Another teacher cannot read or record into this session.
     expect((await get(app, `/session/${assignment.id}`, T2)).status).toBe(404);
-    expect((await post(app, "/decision", { decision: decision(1, 5, []) }, T2)).status).toBe(404);
+    expect((await post(app, "/decision", { decision: decision(1, 30, []) }, T2)).status).toBe(404);
   });
 
-  it("rejects decisions on unknown criteria", async () => {
-    const res = await post(mkApp(), "/decision", { decision: { ...decision(1, 5, []), criterionId: "nope" } });
-    expect(res.status).toBe(404);
+  it("rejects malformed decisions", async () => {
+    const res = await post(mkApp(), "/decision", { decision: { ...decision(1, 5, []), points: "high" } });
+    expect(res.status).toBe(400);
   });
 
   it("allows CORS from the mock LMS origin and from extensions", async () => {

@@ -5,55 +5,90 @@
       "criterionId": "reversibility",
       "level": "Exemplary",
       "evidence": [
-        "ammonia decomposes back into nitrogen and hydrogen at the same time",
-        "the forward rate equals the reverse rate"
+        "The Haber process is reversible: nitrogen and hydrogen form ammonia, and ammonia decomposes back into nitrogen and hydrogen at the same time.",
+        "the system settles into a dynamic equilibrium in which the forward rate equals the reverse rate"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
-      "level": "Exemplary",
+      "level": "Proficient",
       "evidence": [
-        "an increase in temperature shifts the equilibrium in the endothermic direction, toward nitrogen and hydrogen"
+        "By Le Chatelier's principle, an increase in temperature shifts the equilibrium in the endothermic direction, toward nitrogen and hydrogen",
+        "A decrease in temperature shifts it toward ammonia."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Correct direction of shift with a partial or implicit link to exothermicity.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Proficient",
       "evidence": [
+        "the forward reaction is exothermic",
         "the reaction would then be too slow to be useful"
       ],
       "missingConcepts": [
+        "specific_example",
         "quantitative_reference"
       ],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Includes a specific example or value, but not both.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Exemplary",
-      "evidence": [],
+      "evidence": [
+        "the system settles into a dynamic equilibrium in which the forward rate equals the reverse rate",
+        "temperature decides which side of that equilibrium is favored."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Precise terminology throughout; every claim is explained.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Exemplary",
       "evidence": [
-        "To conclude, the reaction is reversible"
+        "To conclude, the reaction is reversible, it reaches equilibrium, and temperature decides which side of that equilibrium is favored.",
+        "Changing the temperature disturbs this balance."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Clear introduction, logical progression, and a conclusion that ties reversibility to temperature.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Exemplary",
       "evidence": [],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.95,
+      "suggestedPoints": 5,
+      "bandDescriptor": "No errors that affect reading.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Elena, you explained both reversibility and the temperature shift with precise terminology and a clear logical thread from principle to prediction. To strengthen this response, add one quantitative reference, such as the enthalpy change or the operating temperature, to anchor your claims in evidence. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 27,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "exothermic_endothermic_link",
+    "specific_example",
+    "quantitative_reference"
+  ],
+  "summary": "Elena's response is strong overall, but it lacks a specific quantitative reference to fully support her claims about temperature and the exothermic nature of the reaction.",
+  "feedbackDraft": "Great job, Elena! You clearly explained the reversibility of the Haber process and how temperature affects equilibrium. To strengthen your response, consider including a specific value or example related to the exothermic reaction."
 }

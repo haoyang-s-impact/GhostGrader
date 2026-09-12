@@ -5,55 +5,81 @@
       "criterionId": "reversibility",
       "level": "Exemplary",
       "evidence": [
-        "ammonia can decompose into nitrogen and hydrogen just as nitrogen and hydrogen can combine to make ammonia"
+        "The Haber process, N2 + 3H2 ⇌ 2NH3, is reversible because ammonia can decompose into nitrogen and hydrogen just as nitrogen and hydrogen can combine to make ammonia.",
+        "In a closed system both processes run at once, and when their rates become equal the system is at dynamic equilibrium: the macroscopic concentrations are fixed while reactions continue at the molecular level."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Exemplary",
       "evidence": [
-        "heating the system shifts the equilibrium toward the endothermic side to absorb the added heat"
+        "Le Chatelier's principle predicts that heating the system shifts the equilibrium toward the endothermic side to absorb the added heat, which here means toward nitrogen and hydrogen, reducing the ammonia yield.",
+        "Cooling shifts it toward ammonia."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Correct direction of shift for both heating and cooling, explicitly linked to the exothermic forward reaction via Le Chatelier's principle.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Exemplary",
       "evidence": [
-        "an enthalpy change of roughly -92 kJ/mol",
-        "about 400 to 450 °C"
+        "the forward reaction is exothermic, with an enthalpy change of roughly -92 kJ/mol.",
+        "manufacturers settle on about 400 to 450 °C and use a catalyst to recover speed."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Includes at least one quantitative reference (enthalpy, temperature) and a specific example.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Exemplary",
       "evidence": [
-        "the macroscopic concentrations are fixed while reactions continue at the molecular level"
+        "In a closed system both processes run at once, and when their rates become equal the system is at dynamic equilibrium: the macroscopic concentrations are fixed while reactions continue at the molecular level.",
+        "Overall, reversibility produces an equilibrium and temperature sets its position."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Precise terminology throughout; every claim is explained.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Exemplary",
       "evidence": [
-        "Overall, reversibility produces an equilibrium and temperature sets its position"
+        "The Haber process, N2 + 3H2 ⇌ 2NH3, is reversible because ammonia can decompose into nitrogen and hydrogen just as nitrogen and hydrogen can combine to make ammonia.",
+        "Overall, reversibility produces an equilibrium and temperature sets its position."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Clear introduction, logical progression, and a conclusion that ties reversibility to temperature.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Exemplary",
       "evidence": [],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "No errors that affect reading.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Jonah, this is a precise, well-evidenced response: the enthalpy value, the distinction between macroscopic and molecular behavior, and the correct direction of shift are all present. To strengthen this response, you could briefly note why a catalyst does not change the equilibrium position, which would round out the kinetics versus equilibrium distinction. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 30,
+  "maxTotal": 30,
+  "missingConcepts": [],
+  "summary": "Jonah's response demonstrates a strong understanding of the Haber process and its equilibrium, with no significant gaps in content or clarity.",
+  "feedbackDraft": "Great job, Jonah! Your explanation of the reversibility of the Haber process and the application of Le Chatelier's principle is clear and well-supported. To enhance your response further, consider adding more specific examples of industrial practices related to temperature management."
 }

@@ -5,57 +5,96 @@
       "criterionId": "reversibility",
       "level": "Proficient",
       "evidence": [
-        "the products can turn back into the reactants"
+        "The Haber process is one of these reactions because the products can turn back into the reactants.",
+        "When the forward and backward reactions balance out, the reaction is at equilibrium."
       ],
       "missingConcepts": [
         "forward_reverse_rates"
       ],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "States the reaction is reversible and mentions equilibrium, but the rate explanation is thin or missing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Proficient",
       "evidence": [
-        "more heat means the equilibrium moves toward the reactants and less product is made"
+        "more heat means the equilibrium moves toward the reactants and less product is made.",
+        "depending on whether the reaction is exothermic or endothermic."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "temperature_shift_direction",
+        "exothermic_endothermic_link"
+      ],
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Correct direction of shift with a partial or implicit link to exothermicity.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
-      "level": "Beginning",
+      "level": "Developing",
       "evidence": [],
       "missingConcepts": [
         "specific_example",
         "quantitative_reference"
       ],
-      "confidence": 0.9
+      "confidence": 0.6,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Evidence is general or only loosely tied to the claim.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
-      "level": "Developing",
-      "evidence": [],
-      "missingConcepts": [
-        "precise_terminology"
+      "level": "Proficient",
+      "evidence": [
+        "Temperature can change a reversible reaction.",
+        "In conclusion, the Haber process is reversible and temperature changes where the equilibrium sits."
       ],
-      "confidence": 0.9
+      "missingConcepts": [],
+      "confidence": 0.75,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Proficient",
       "evidence": [
-        "In conclusion, the Haber process is reversible"
+        "In conclusion, the Haber process is reversible and temperature changes where the equilibrium sits."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Logical order with a weak opening or closing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
-      "level": "Exemplary",
+      "level": "Developing",
       "evidence": [],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "grammar",
+        "spelling"
+      ],
+      "confidence": 0.5,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Frequent errors that slow reading.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Isabel, you correctly stated that heating an exothermic equilibrium shifts it toward the reactants and reduces the product. To strengthen this response, ground each claim in this specific reaction: name the reverse reaction, explain equilibrium as equal rates, and include a value such as the enthalpy change or operating temperature. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 18,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "forward_reverse_rates",
+    "temperature_shift_direction",
+    "exothermic_endothermic_link",
+    "specific_example",
+    "quantitative_reference",
+    "grammar",
+    "spelling"
+  ],
+  "summary": "Isabel's response demonstrates a solid understanding of reversibility and the effects of temperature, but lacks specific evidence and has some mechanical issues.",
+  "feedbackDraft": "Isabel, you've done a great job explaining the concept of reversibility in the Haber process! To strengthen your response, try to include specific examples or quantitative references that support your claims."
 }

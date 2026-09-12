@@ -3,14 +3,14 @@ import { checkScore, type Decision, type DriftAlert, type ScoreCheck, type Submi
 import { api, ApiError, setTeacherId } from "./api";
 import { buildDecision } from "./decisions";
 import { startObserver } from "./observer";
-import { commentBox, pointsInputFor, setControlValue, type PageSubmission } from "./selectors";
+import { commentBox, gradeInput, setControlValue, type PageSubmission } from "./selectors";
 import { loadMirror, saveMirror } from "./storage";
 import { AlignmentTab, type AnalysisState } from "./tabs/AlignmentTab";
 import { ConsistencyTab } from "./tabs/ConsistencyTab";
 import { SessionTab } from "./tabs/SessionTab";
 
 type Tab = "alignment" | "consistency" | "session";
-type Mode = "claude" | "mock" | "offline" | "unknown";
+type Mode = "claude" | "openrouter" | "mock" | "offline" | "unknown";
 
 const emptyStats = { alertsRaised: 0, alertsAligned: 0, checksRaised: 0, checksApproved: 0 };
 
@@ -25,13 +25,14 @@ export function Panel() {
   const [stats, setStats] = useState(emptyStats);
   const [tab, setTab] = useState<Tab>("alignment");
   const [mode, setMode] = useState<Mode>("unknown");
+  const [modelName, setModelName] = useState("");
   const [collapsed, setCollapsed] = useState(false);
 
   // Refs so observer callbacks always see current state without re-subscribing.
   const pageRef = useRef<PageSubmission | null>(null);
   const analysisRef = useRef<AnalysisState>({ status: "idle" });
   const decisionsRef = useRef<Decision[]>([]);
-  const dismissedChecks = useRef<Set<string>>(new Set());
+  const checkDismissed = useRef(false);
   const requestSeq = useRef(0);
   const hydrated = useRef<string | null>(null);
   pageRef.current = page;
@@ -72,10 +73,10 @@ export function Panel() {
       if (hydrated.current === assignmentId) return;
       hydrated.current = assignmentId;
       setAlertHistory([]);
-      dismissedChecks.current.clear();
       try {
         const h = await api.health();
         setMode(h.analyzer);
+        setModelName(h.model ?? "");
       } catch {
         setMode("offline");
         return;
@@ -94,34 +95,34 @@ export function Panel() {
     [refreshSession],
   );
 
-  const recordPoints = useCallback(async (criterionId: string, points: number | null) => {
+  /** The teacher entered or changed the single grade. */
+  const recordGrade = useCallback(async (points: number | null) => {
     const p = pageRef.current;
     if (!p || points === null) return;
     const a = analysisRef.current;
     const ready = a.status === "ready" ? a.result : null;
-    const d = buildDecision(p, criterionId, points, ready);
+    const d = buildDecision(p, points, ready);
     if (!d) return;
+    setPage({ ...p, grade: points });
     const next = [...decisionsRef.current, d];
     setDecisions(next);
     void saveMirror(p.assignmentId, next);
 
-    // Rubric check: does this score match what the rubric-bound analysis says?
-    const row = p.rubric.find((r) => r.criterionId === criterionId);
-    const ca = ready?.criteria.find((c) => c.criterionId === criterionId);
+    // Rubric check: does this grade match what the rubric-referenced analysis says?
     let raisedCheck = false;
-    if (row && ca) {
-      const sc = checkScore({ id: row.criterionId, maxPoints: row.maxPoints }, ca, points);
-      const key = `${p.submissionId}:${criterionId}`;
-      if (sc && !dismissedChecks.current.has(key)) {
+    if (ready) {
+      const sc = checkScore(ready, points);
+      if (sc && !checkDismissed.current) {
         setCheck(sc);
         raisedCheck = true;
         setStats((s) => ({ ...s, checksRaised: s.checksRaised + 1 }));
         void api.checkRaised(p.assignmentId).catch(() => undefined);
       } else {
-        setCheck((cur) => (cur && cur.criterionId === criterionId ? null : cur));
+        setCheck(null);
       }
     }
 
+    // Comparison with other students, decided server-side over the session history.
     try {
       const { alert: incoming } = await api.decision(d);
       if (incoming) {
@@ -129,7 +130,7 @@ export function Panel() {
         setAlertHistory((h) => [incoming, ...h]);
         setStats((s) => ({ ...s, alertsRaised: s.alertsRaised + 1 }));
       } else {
-        setAlert((cur) => (cur && cur.criterionId === criterionId && cur.currentDecisionId === d.id ? null : cur));
+        setAlert(null);
       }
       if (incoming || raisedCheck) setTab("consistency");
     } catch {
@@ -144,7 +145,8 @@ export function Panel() {
         setPage(s);
         setAlert(null);
         setCheck(null);
-        dismissedChecks.current.clear(); // a dismissal only lasts while that submission stays open
+        setTab("alignment"); // a new student always starts on the Grade tab
+        checkDismissed.current = false; // a dismissal only lasts while that submission stays open
         void hydrate(s.assignmentId);
         void analyze(s);
       },
@@ -152,10 +154,10 @@ export function Panel() {
         setPage(null);
         setAnalysis({ status: "idle" });
       },
-      onPointsChanged: (criterionId, points) => void recordPoints(criterionId, points),
+      onGradeChanged: (points) => void recordGrade(points),
     });
     return stop;
-  }, [analyze, hydrate, recordPoints]);
+  }, [analyze, hydrate, recordGrade]);
 
   const insertFeedback = () => {
     if (analysis.status !== "ready") return false;
@@ -166,9 +168,21 @@ export function Panel() {
     return true;
   };
 
+  const writeGrade = (points: number) => {
+    const input = gradeInput();
+    if (input) setControlValue(input, String(points));
+  };
+
+  const onApplyGrade = () => {
+    if (analysis.status !== "ready") return;
+    checkDismissed.current = true;
+    writeGrade(analysis.result.suggestedTotal);
+    setCheck(null);
+  };
+
   const onAlign = (a: DriftAlert) => {
-    const input = pointsInputFor(a.criterionId);
-    if (input) setControlValue(input, String(a.priorPoints));
+    checkDismissed.current = true;
+    writeGrade(a.recommendedPoints);
     setAlert(null);
     setStats((s) => ({ ...s, alertsAligned: s.alertsAligned + 1 }));
     if (page) void api.aligned(page.assignmentId).catch(() => undefined);
@@ -179,19 +193,18 @@ export function Panel() {
     if (page) void api.override(page.assignmentId, a.currentDecisionId, a.priorDecisionId).catch(() => undefined);
   };
 
-  /** Teacher approves the AI's rubric-aligned score: write it to the LMS and drop in the feedback. */
+  /** Teacher approves the rubric-referenced grade: write it to the LMS and drop in the feedback. */
   const onApproveCheck = (c: ScoreCheck) => {
-    if (page) dismissedChecks.current.add(`${page.submissionId}:${c.criterionId}`);
-    const input = pointsInputFor(c.criterionId);
-    if (input) setControlValue(input, String(c.suggestedPoints));
+    checkDismissed.current = true;
+    writeGrade(c.suggestedPoints);
     insertFeedback();
     setCheck(null);
     setStats((s) => ({ ...s, checksApproved: s.checksApproved + 1 }));
     if (page) void api.checkApproved(page.assignmentId).catch(() => undefined);
   };
 
-  const onDismissCheck = (c: ScoreCheck) => {
-    if (page) dismissedChecks.current.add(`${page.submissionId}:${c.criterionId}`);
+  const onDismissCheck = () => {
+    checkDismissed.current = true;
     setCheck(null);
   };
 
@@ -201,7 +214,8 @@ export function Panel() {
   };
 
   const pending = (alert ? 1 : 0) + (check ? 1 : 0);
-  const modeLabel = mode === "claude" ? "Claude" : mode === "mock" ? "Mock mode" : mode === "offline" ? "Offline" : "…";
+  const modeLabel =
+    mode === "claude" ? "Claude" : mode === "openrouter" ? modelName.split("/").pop() || "OpenRouter" : mode === "mock" ? "Mock mode" : mode === "offline" ? "Offline" : "…";
 
   return (
     <div className={`gg-root ${collapsed ? "is-collapsed" : ""}`} data-gg-panel data-gg-analysis={analysis.status}>
@@ -211,24 +225,34 @@ export function Panel() {
         </button>
         <div className="gg-ghost">👻</div>
         <div className="gg-title">Ghost Grader</div>
-        <span className={`gg-chip ${mode === "mock" ? "is-mock" : mode === "offline" ? "is-offline" : ""}`} data-gg-mode={mode}>
+        <span className={`gg-chip ${mode === "mock" ? "is-mock" : mode === "offline" ? "is-offline" : ""}`} data-gg-mode={mode} title={modelName}>
           {modeLabel}
         </span>
       </div>
       <div className="gg-tabs" role="tablist">
-        <button className={`gg-tab ${tab === "alignment" ? "is-active" : ""}`} onClick={() => openTab("alignment")} role="tab" data-gg-tab="alignment">Alignment</button>
+        <button className={`gg-tab ${tab === "alignment" ? "is-active" : ""}`} onClick={() => openTab("alignment")} role="tab" data-gg-tab="alignment">Grade</button>
         <button className={`gg-tab ${tab === "consistency" ? "is-active" : ""}`} onClick={() => openTab("consistency")} role="tab" data-gg-tab="consistency">
           Checks{pending > 0 && <span className="gg-badge">{pending}</span>}
         </button>
         <button className={`gg-tab ${tab === "session" ? "is-active" : ""}`} onClick={() => openTab("session")} role="tab" data-gg-tab="session">Session</button>
       </div>
       <div className="gg-body">
-        {tab === "alignment" && <AlignmentTab page={page} analysis={analysis} inserted={inserted} onRetry={() => page && analyze(page)} onInsert={() => void insertFeedback()} />}
+        {tab === "alignment" && (
+          <AlignmentTab page={page} analysis={analysis} inserted={inserted} onRetry={() => page && analyze(page)} onInsert={() => void insertFeedback()} onApplyGrade={onApplyGrade} />
+        )}
         {tab === "consistency" && (
           <ConsistencyTab page={page} alert={alert} check={check} history={alertHistory} onAlign={onAlign} onKeep={onKeep} onApproveCheck={onApproveCheck} onDismissCheck={onDismissCheck} />
         )}
         {tab === "session" && (
-          <SessionTab page={page} decisions={decisions} alertsRaised={stats.alertsRaised} alertsAligned={stats.alertsAligned} checksRaised={stats.checksRaised} checksApproved={stats.checksApproved} totalSubmissions={page?.totalSubmissions ?? 0} />
+          <SessionTab
+            decisions={decisions}
+            alertsRaised={stats.alertsRaised}
+            alertsAligned={stats.alertsAligned}
+            checksRaised={stats.checksRaised}
+            checksApproved={stats.checksApproved}
+            totalSubmissions={page?.totalSubmissions ?? 0}
+            maxPoints={page?.maxPoints ?? 0}
+          />
         )}
       </div>
     </div>

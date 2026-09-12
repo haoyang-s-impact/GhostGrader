@@ -1,4 +1,4 @@
-import { detectDrift, overrideKey, type Criterion, type Decision, type DriftAlert } from "@gg/shared";
+import { detectDrift, overrideKey, type Decision, type DriftAlert } from "@gg/shared";
 import type { Store } from "./store";
 
 /** Grading-session operations on top of the persistent store. */
@@ -9,9 +9,9 @@ export class SessionService {
     return this.store.session(assignmentId);
   }
 
-  record(decision: Decision, criterion: Pick<Criterion, "maxPoints">): DriftAlert | null {
+  record(decision: Decision): DriftAlert | null {
     const s = this.store.session(decision.assignmentId);
-    const alert = detectDrift(decision, s.decisions, criterion, new Set(s.overrides));
+    const alert = detectDrift(decision, s.decisions, new Set(s.overrides));
     s.decisions.push(decision);
     if (alert) s.alertsRaised += 1;
     this.store.saveSession(decision.assignmentId, s);

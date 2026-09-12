@@ -3,25 +3,37 @@
   "criteria": [
     {
       "criterionId": "reversibility",
-      "level": "Beginning",
-      "evidence": [],
+      "level": "Developing",
+      "evidence": [
+        "The Haber process makes ammonia.",
+        "it gives out heat when it happens."
+      ],
       "missingConcepts": [
         "reversibility",
         "dynamic_equilibrium",
         "forward_reverse_rates"
       ],
-      "confidence": 0.9
+      "confidence": 0.6,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Mentions reversibility or equilibrium in passing without explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Developing",
       "evidence": [
-        "the heat makes it go backwards"
+        "If it is hot then there is less ammonia because the heat makes it go backwards.",
+        "Le Chatelier said that the reaction goes against the change."
       ],
       "missingConcepts": [
+        "le_chatelier_principle",
+        "temperature_shift_direction",
         "exothermic_endothermic_link"
       ],
-      "confidence": 0.9
+      "confidence": 0.5,
+      "suggestedPoints": 2,
+      "bandDescriptor": "States that temperature matters but the direction or reasoning is vague.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
@@ -31,34 +43,70 @@
         "specific_example",
         "quantitative_reference"
       ],
-      "confidence": 0.9
+      "confidence": 0.4,
+      "suggestedPoints": 0,
+      "bandDescriptor": "No supporting evidence.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
-      "level": "Beginning",
-      "evidence": [],
+      "level": "Developing",
+      "evidence": [
+        "Temperature changes the reaction.",
+        "but it is slow so they use a medium temperature."
+      ],
       "missingConcepts": [
         "precise_terminology",
         "explained_reasoning"
       ],
-      "confidence": 0.9
+      "confidence": 0.5,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Informal language or several unexplained assertions.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Developing",
       "evidence": [],
       "missingConcepts": [
+        "logical_order",
         "introduction_conclusion"
       ],
-      "confidence": 0.9
+      "confidence": 0.4,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Some order but ideas jump around, or no conclusion.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Proficient",
-      "evidence": [],
+      "evidence": [
+        "it gives out heat when it happens.",
+        "but it is slow so they use a medium temperature."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "A few minor errors.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Noah, you have the right instinct that heating reduces the ammonia yield and that industry uses a compromise temperature. To strengthen this response, explain the reasoning: the reaction is reversible and reaches a dynamic equilibrium, and because the forward reaction is exothermic, heating shifts that equilibrium toward the reactants. Use scientific terms and add a specific value. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 11.5,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "reversibility",
+    "dynamic_equilibrium",
+    "forward_reverse_rates",
+    "le_chatelier_principle",
+    "temperature_shift_direction",
+    "exothermic_endothermic_link",
+    "specific_example",
+    "quantitative_reference",
+    "precise_terminology",
+    "explained_reasoning",
+    "logical_order",
+    "introduction_conclusion"
+  ],
+  "summary": "The response demonstrates a basic understanding of the Haber process but lacks clarity and specific evidence to support claims effectively.",
+  "feedbackDraft": "Noah, you've made a good start by explaining how temperature affects ammonia production in the Haber process. To strengthen your response, try to include more specific details and examples, especially regarding the concept of reversibility and equilibrium."
 }

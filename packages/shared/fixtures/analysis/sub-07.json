@@ -3,60 +3,115 @@
   "criteria": [
     {
       "criterionId": "reversibility",
-      "level": "Beginning",
-      "evidence": [],
+      "level": "Developing",
+      "evidence": [
+        "The reaction gives out heat.",
+        "Temperature affects the amount of ammonia that forms."
+      ],
       "missingConcepts": [
         "reversibility",
-        "dynamic_equilibrium"
+        "dynamic_equilibrium",
+        "forward_reverse_rates"
       ],
-      "confidence": 0.9
+      "confidence": 0.6,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Mentions reversibility or equilibrium in passing without explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
-      "level": "Developing",
+      "level": "Proficient",
       "evidence": [
-        "the heat pushes the reaction the other way"
+        "When the temperature is high, less ammonia forms because the heat pushes the reaction the other way.",
+        "This follows Le Chatelier's principle, which says a reaction shifts to oppose a change."
       ],
       "missingConcepts": [
+        "temperature_shift_direction",
         "exothermic_endothermic_link"
       ],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Correct direction of shift with a partial or implicit link to exothermicity.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
-      "level": "Beginning",
+      "level": "Developing",
       "evidence": [],
       "missingConcepts": [
         "specific_example",
         "quantitative_reference"
       ],
-      "confidence": 0.9
+      "confidence": 0.5,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Evidence is general or only loosely tied to the claim.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
-      "level": "Developing",
-      "evidence": [],
+      "level": "Proficient",
+      "evidence": [
+        "Temperature affects the amount of ammonia that forms.",
+        "Factories have to pick a temperature that is not too high and not too low."
+      ],
       "missingConcepts": [
+        "precise_terminology",
         "explained_reasoning"
       ],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
-      "level": "Proficient",
+      "level": "Developing",
       "evidence": [
-        "In conclusion, temperature is important"
+        "In conclusion, temperature is important for the Haber process."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "logical_order",
+        "introduction_conclusion"
+      ],
+      "confidence": 0.5,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Some order but ideas jump around, or no conclusion.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
-      "level": "Exemplary",
-      "evidence": [],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "level": "Proficient",
+      "evidence": [
+        "The reaction gives out heat.",
+        "Temperature affects the amount of ammonia that forms."
+      ],
+      "missingConcepts": [
+        "grammar",
+        "spelling"
+      ],
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "A few minor errors.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Grace, you identified the correct direction of the temperature effect and named Le Chatelier's principle. To strengthen this response, explain why the reaction is reversible and connect the shift to the exothermic forward reaction, then support your claims with a specific value such as the operating temperature. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 16.5,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "reversibility",
+    "dynamic_equilibrium",
+    "forward_reverse_rates",
+    "temperature_shift_direction",
+    "exothermic_endothermic_link",
+    "specific_example",
+    "quantitative_reference",
+    "precise_terminology",
+    "explained_reasoning",
+    "logical_order",
+    "introduction_conclusion",
+    "grammar",
+    "spelling"
+  ],
+  "summary": "The response demonstrates a basic understanding of the Haber process but lacks depth in explaining reversibility and specific evidence.",
+  "feedbackDraft": "Grace, you've done a good job explaining how temperature affects ammonia production in the Haber process. To strengthen your response, consider providing specific examples or values related to the reaction, which will enhance your claims."
 }

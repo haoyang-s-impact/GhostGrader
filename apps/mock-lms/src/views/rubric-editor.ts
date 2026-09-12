@@ -15,7 +15,7 @@ export async function rubricEditorView(app: HTMLElement, params: { assignmentId?
   const courseId = existing?.courseId ?? params.courseId ?? courses[0]?.id ?? "";
 
   let draft: AssignmentInput = existing
-    ? { courseId: existing.courseId, title: existing.title, prompt: existing.prompt, learningObjectives: existing.learningObjectives, rubric: existing.rubric, anchors: existing.anchors }
+    ? { courseId: existing.courseId, title: existing.title, prompt: existing.prompt, learningObjectives: existing.learningObjectives, rubric: existing.rubric, anchors: existing.anchors, totalPoints: existing.totalPoints }
     : {
         courseId,
         title: "",
@@ -41,6 +41,9 @@ export async function rubricEditorView(app: HTMLElement, params: { assignmentId?
           <label class="sg-field">Title <input id="f-title" class="sg-input" value="${esc(draft.title)}" placeholder="e.g. Causes of the First World War" /></label>
           <label class="sg-field">Prompt given to students <textarea id="f-prompt" class="sg-textarea" rows="3" placeholder="The question students answer">${esc(draft.prompt)}</textarea></label>
           <label class="sg-field">Learning objectives, one per line <textarea id="f-objectives" class="sg-textarea" rows="2">${esc(draft.learningObjectives.join("\n"))}</textarea></label>
+          <label class="sg-field">Grade out of <input id="f-total" class="sg-input sg-input-xs" type="number" min="1" step="0.5" value="${draft.totalPoints ?? ""}" placeholder="${draft.rubric.criteria.reduce((a, c) => a + c.maxPoints, 0) || ""}" />
+            <span class="sg-help sg-help-inline">Leave blank to grade out of the rubric total. Students get one grade; the rubric stays behind the scenes for the AI.</span>
+          </label>
         </section>
 
         <section class="sg-card">
@@ -116,8 +119,10 @@ export async function rubricEditorView(app: HTMLElement, params: { assignmentId?
         text: (el.querySelector("[data-anchor-text]") as HTMLTextAreaElement).value.trim(),
       }))
       .filter((a) => a.text);
+    const totalRaw = (document.getElementById("f-total") as HTMLInputElement).value.trim();
     return {
       courseId: courseSel.value,
+      totalPoints: totalRaw === "" ? undefined : Number(totalRaw),
       title: (document.getElementById("f-title") as HTMLInputElement).value.trim(),
       prompt: (document.getElementById("f-prompt") as HTMLTextAreaElement).value.trim(),
       learningObjectives: (document.getElementById("f-objectives") as HTMLTextAreaElement).value.split("\n").map((s) => s.trim()).filter(Boolean),
@@ -188,6 +193,7 @@ function validateLocally(a: AssignmentInput): string | null {
   if (!a.title) return "Give the assignment a title.";
   if (!a.prompt) return "Add the prompt students answer.";
   if (a.rubric.criteria.length === 0) return "Add at least one criterion.";
+  if (a.totalPoints !== undefined && !(a.totalPoints > 0)) return "Grade out of must be a positive number.";
   for (const c of a.rubric.criteria) {
     if (!c.title) return "Every criterion needs a title.";
     if (c.maxPoints <= 0) return `"${c.title}" needs a positive max score.`;

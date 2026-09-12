@@ -5,58 +5,94 @@
       "criterionId": "reversibility",
       "level": "Exemplary",
       "evidence": [
-        "ammonia simultaneously breaks down into nitrogen and hydrogen",
-        "the forward and reverse reactions occur at equal rates"
+        "The Haber process is a reversible reaction, shown by the double arrow in the equation.",
+        "Eventually the forward and reverse reactions occur at equal rates and the mixture is in dynamic equilibrium, so the concentrations no longer change."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
-      "level": "Beginning",
+      "level": "Proficient",
       "evidence": [
-        "the equilibrium shifts toward ammonia, increasing the yield"
+        "Increasing the temperature gives the particles more energy, which helps them overcome the activation energy, so more collisions are successful and the equilibrium shifts toward ammonia, increasing the yield.",
+        "Decreasing the temperature shifts the equilibrium back toward the reactants."
       ],
       "missingConcepts": [
-        "temperature_shift_direction",
+        "le_chatelier_principle",
         "exothermic_endothermic_link"
       ],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Correct direction of shift with a partial or implicit link to exothermicity.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Developing",
       "evidence": [
-        "a high temperature of several hundred degrees"
+        "the Haber process is run at a high temperature of several hundred degrees.",
+        "increasing the yield."
       ],
       "missingConcepts": [
+        "specific_example",
         "quantitative_reference"
       ],
-      "confidence": 0.9
+      "confidence": 0.6,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Evidence is general or only loosely tied to the claim.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Proficient",
-      "evidence": [],
+      "evidence": [
+        "Temperature shifts this equilibrium.",
+        "To summarise, the reaction is reversible and reaches equilibrium, and raising the temperature pushes the equilibrium toward the product."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
-      "level": "Exemplary",
+      "level": "Proficient",
       "evidence": [
-        "To summarise, the reaction is reversible"
+        "To summarise, the reaction is reversible and reaches equilibrium, and raising the temperature pushes the equilibrium toward the product."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Logical order with a weak opening or closing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
-      "level": "Exemplary",
-      "evidence": [],
+      "level": "Proficient",
+      "evidence": [
+        "The Haber process is a reversible reaction, shown by the double arrow in the equation.",
+        "Temperature shifts this equilibrium."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "A few minor errors.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Hassan, your explanation of reversibility and dynamic equilibrium is thorough and well organized. To strengthen this response, revisit the direction of the shift: because the forward reaction is exothermic, heating shifts the equilibrium toward the reactants and lowers the yield. Rate and equilibrium position are different ideas. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 21,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "le_chatelier_principle",
+    "exothermic_endothermic_link",
+    "specific_example",
+    "quantitative_reference"
+  ],
+  "summary": "Hassan demonstrates a strong understanding of reversibility and dynamic equilibrium, but lacks a clear connection to exothermicity in discussing temperature effects.",
+  "feedbackDraft": "Hassan, you did a great job explaining the concept of dynamic equilibrium in the Haber process! To strengthen your response, consider explicitly linking the exothermic nature of the reaction to how temperature changes the equilibrium position."
 }

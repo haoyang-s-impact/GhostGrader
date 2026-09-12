@@ -5,56 +5,81 @@
       "criterionId": "reversibility",
       "level": "Exemplary",
       "evidence": [
-        "accompanied by the reverse conversion of ammonia back into nitrogen and hydrogen",
-        "the two rates become equal"
+        "the conversion of nitrogen and hydrogen into ammonia is accompanied by the reverse conversion of ammonia back into nitrogen and hydrogen",
+        "the two rates become equal and the system reaches dynamic equilibrium"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.95,
+      "suggestedPoints": 5,
+      "bandDescriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Exemplary",
       "evidence": [
-        "Raising the temperature shifts the equilibrium toward the endothermic reverse reaction, lowering the equilibrium yield of ammonia"
+        "Raising the temperature shifts the equilibrium toward the endothermic reverse reaction",
+        "lowering the temperature shifts it toward ammonia and raises the yield"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.95,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Correct direction of shift for both heating and cooling, explicitly linked to the exothermic forward reaction via Le Chatelier's principle.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Exemplary",
       "evidence": [
-        "ΔH is about -92 kJ per mole of reaction",
-        "near 450 °C with an iron catalyst"
+        "the forward reaction is exothermic (ΔH is about -92 kJ per mole of reaction)",
+        "plants operate near 450 °C with an iron catalyst"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.95,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Includes at least one quantitative reference (enthalpy, temperature) and a specific example.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Exemplary",
       "evidence": [
-        "a state in which the composition of the mixture is constant even though molecules are continuously reacting in both directions"
+        "the two rates become equal and the system reaches dynamic equilibrium",
+        "temperature has a predictable effect described by Le Chatelier's principle"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.95,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Precise terminology throughout; every claim is explained.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Exemplary",
       "evidence": [
-        "In conclusion, reversibility is what allows an equilibrium to exist"
+        "In conclusion, reversibility is what allows an equilibrium to exist, and temperature determines where that equilibrium lies",
+        "Describing the Haber process as reversible means that the conversion of nitrogen and hydrogen into ammonia is accompanied by the reverse conversion of ammonia back into nitrogen and hydrogen"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.95,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Clear introduction, logical progression, and a conclusion that ties reversibility to temperature.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Exemplary",
       "evidence": [],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.95,
+      "suggestedPoints": 5,
+      "bandDescriptor": "No errors that affect reading.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Olivia, this is an exemplary response: reversibility, dynamic equilibrium, the enthalpy value, and the direction of shift are all explained precisely and tied together in the conclusion. To strengthen this response, as an extension, you might comment on how the equilibrium constant itself changes with temperature, which would deepen the link between thermodynamics and yield. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 30,
+  "maxTotal": 30,
+  "missingConcepts": [],
+  "summary": "Olivia's response demonstrates a strong understanding of the Haber process and its equilibrium, with no significant gaps in any criterion.",
+  "feedbackDraft": "Great job, Olivia! Your explanation of the reversibility of the Haber process and how temperature affects equilibrium is clear and well-supported with specific evidence. To further enhance your writing, consider varying your sentence structure for even greater clarity."
 }

@@ -5,58 +5,95 @@
       "criterionId": "reversibility",
       "level": "Exemplary",
       "evidence": [
-        "the amonia can also split back up into nitrogen and hydrogen, so the reaction goes both ways"
+        "The haber proccess is a reversable reaction.",
+        "the reaction goes both ways."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Exemplary",
       "evidence": [
-        "the equilibrium moves to the left (towards nitrogen and hydrogen) because that direction takes in heat"
+        "If you raise the temprature the equilibrium moves to the left (towards nitrogen and hydrogen) because that direction takes in heat, so you get less amonia.",
+        "If you lower the temprature it moves to the right and you get more amonia."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.85,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Correct direction of shift for both heating and cooling, explicitly linked to the exothermic forward reaction via Le Chatelier's principle.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Proficient",
       "evidence": [
-        "about 450 degrees in factories"
+        "they use about 450 degrees in factories.",
+        "the forward reaction is exothermic so it gives out heat."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "specific_example",
+        "quantitative_reference"
+      ],
+      "confidence": 0.75,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Includes a specific example or value, but not both.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Proficient",
-      "evidence": [],
-      "missingConcepts": [
-        "precise_terminology"
+      "evidence": [
+        "the amounts stay the same even though the reactions are still going.",
+        "So temperature changes the position of equilibrium and reversability is why there is an equilibrium in the first place."
       ],
-      "confidence": 0.9
+      "missingConcepts": [],
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Proficient",
-      "evidence": [],
+      "evidence": [
+        "The haber proccess is a reversable reaction.",
+        "Thats why they use about 450 degrees in factories."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.75,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Logical order with a weak opening or closing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Developing",
       "evidence": [
-        "The haber proccess is a reversable reaction",
-        "Thats why"
+        "The haber proccess is a reversable reaction.",
+        "equilibrum"
       ],
       "missingConcepts": [
-        "spelling",
-        "grammar"
+        "grammar",
+        "spelling"
       ],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Frequent errors that slow reading.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Felix, your chemistry is right: you described the reverse reaction, dynamic equilibrium, and the correct direction of shift for heating and cooling. To strengthen this response, proofread for spelling (process, reversible, ammonia, temperature, equilibrium) and use formal scientific terms so the reader can focus on your reasoning. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 22.5,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "specific_example",
+    "quantitative_reference",
+    "grammar",
+    "spelling"
+  ],
+  "summary": "The response demonstrates a strong understanding of reversibility and temperature effects, but there are some spelling errors and a lack of specific quantitative evidence.",
+  "feedbackDraft": "Felix, you did a great job explaining the concept of dynamic equilibrium and how temperature affects the Haber process. To strengthen your response, focus on providing specific examples or quantitative values to support your claims. Additionally, be mindful of spelling to enhance clarity."
 }

@@ -1,10 +1,11 @@
 # Ghost Grader
 
 A browser-native grading copilot. A Chrome extension sits beside the LMS grading
-view and, as the teacher works, aligns each student response to the rubric with
-quoted evidence, warns when a deduction drifts from earlier decisions for the
-same omission, drafts rubric-tied feedback on request, and charts scoring
-strictness over the session.
+view. The teacher enters one grade per student. As they work, the agent reads
+the response against the course's rubric and suggests a grade with reasoning
+and quoted evidence, flags a grade that contradicts the rubric, compares the
+grade with those already given to other students with the same gaps, drafts
+student-specific feedback, and charts leniency over the session.
 
 It never grades on its own. Nothing is written into the LMS until the teacher
 clicks a button.
@@ -19,7 +20,7 @@ the rubric the teacher defined for that assignment.
 |---|---|
 | `apps/mock-lms` | A Canvas look-alike: course dashboard, rubric editor, and SpeedGrader. Seeded with one assignment, a six-criterion rubric, and fifteen essays. Runs on port 5173. |
 | `apps/extension` | Manifest V3 Chrome extension. Content script observes the page and renders a side panel with Alignment, Consistency, and Session tabs. |
-| `apps/api` | Hono server on port 8787. Teacher-scoped LMS data (courses, assignments, rubrics, submissions) in a JSON file store, Claude rubric alignment, grading sessions, drift detection. |
+| `apps/api` | Hono server on port 8787. Teacher-scoped LMS data (courses, assignments, rubrics, submissions) in a JSON file store, LLM rubric analysis (OpenRouter or Claude), grading sessions, cross-student comparison. |
 | `packages/shared` | Zod schemas, the drift algorithm, the seeded dataset, and a deterministic mock analyzer. |
 | `docs/plans` | Design document and implementation plan. |
 
@@ -39,14 +40,19 @@ Then load the extension in Chrome:
 2. Click "Load unpacked" and pick `apps/extension/dist`.
 3. Open http://localhost:5173. The Ghost Grader panel appears on the right.
 
-### Real Claude analysis
+### LLM provider
 
-Copy `apps/api/.env.example` to `apps/api/.env` and set `ANTHROPIC_API_KEY`.
-Restart the API. The panel chip switches from "Mock mode" to "Claude".
+Copy `apps/api/.env.example` to `apps/api/.env` and set one of:
 
-Without a key the API runs a deterministic mock analyzer built from the
-dataset's ground truth, so the whole demo works offline. The chip says
-"Mock mode" so nobody mistakes it for model output.
+- `OPENROUTER_API_KEY` (plus optional `OPENROUTER_MODEL`, default
+  `openai/gpt-4o-mini`). Any OpenAI-compatible model on OpenRouter works; the
+  panel chip shows the model name.
+- `ANTHROPIC_API_KEY` for Claude Opus 5 with structured outputs.
+
+OpenRouter wins if both are set. Without either, the API runs a deterministic
+mock analyzer built from the dataset's ground truth, so the whole demo works
+offline. The chip says "Mock mode" so nobody mistakes it for model output.
+`GG_MOCK=1` forces the mock even with a key (the tests use this).
 
 ## Defining a rubric
 
@@ -54,49 +60,63 @@ dataset's ground truth, so the whole demo works offline. The chip says
    "Signed in as" switcher in the header to change teacher; each teacher sees
    only their own courses.
 2. Add a course, then "+ New assignment" to open the rubric editor.
-3. For each criterion set a title, description, max points, the point bands
-   (level, points, descriptor), and the **concept tags**: a closed vocabulary
-   the AI may report as missing for that criterion. Tags are what make the
-   drift and rubric checks explainable ("missing reversibility").
+3. Set "Grade out of" if the single grade should be on a different scale than
+   the rubric total (for example 100). For each criterion set a title,
+   description, max points, the point bands (level, points, descriptor), and
+   the **concept tags**: a closed vocabulary the AI may report as missing for
+   that criterion. Tags are what make the checks explainable ("missing
+   reversibility").
 4. Optionally add anchor responses. Save. You land in SpeedGrader for that
    assignment, where you can paste student submissions.
 
 Everything the AI sees for an assignment comes from this definition. The
 prompt is rebuilt when the rubric changes.
 
-## Two kinds of intervention
+## One grade, two kinds of intervention
 
-**Rubric check.** When the teacher's score for a criterion diverges from the
-band the rubric-bound analysis chose (by 1.5 points or 20% of the criterion
-maximum, whichever is larger), the Checks tab shows the AI's band, its points,
-the band descriptor, the missing concepts, and quoted evidence. "Approve"
-writes the AI's points into the LMS input and inserts the student-specific
-feedback draft into the comment box. "Keep mine" dismisses it for that
-submission.
+The grader shows a single grade input and a comment box. The rubric stays
+behind the scenes: the agent scores each criterion against its bands, sums
+them, and scales the result to the assignment's grade. The Grade tab shows
+that rubric-referenced grade, a one-sentence reason, the per-criterion
+breakdown with quoted evidence and missing concepts, and a "Use" button.
 
-**Consistency alert.** When the deduction for a criterion differs from an
-earlier decision in the same session for the same missing concept, the panel
-names both submissions and offers to align.
+**Rubric check.** When the teacher's grade diverges from the rubric-referenced
+grade by more than 1.5 points or 10% of the scale, the Checks tab says so:
+"You gave 28 of 30. Referenced against this course's rubric, this response
+earns 20.5 because it is missing reversibility, dynamic equilibrium", with the
+per-criterion breakdown. "Approve" writes the referenced grade into the LMS and
+inserts the student-specific feedback. "Keep mine" dismisses it for that
+student.
+
+**Consistency alert.** Every grade is compared with the grades already given
+to other students in the session. The first student has no one to compare
+with. From the second on, students with the same missing concepts (or who are
+both complete) are compared by their offset from the rubric-referenced grade.
+If you were 3.5 points lenient with Daniel for missing reversibility and 4.5
+points strict with Kavya for the same gap, the panel names Daniel, shows both
+grades, and offers to treat Kavya the same way. "Keep mine" records an
+override for that pair.
 
 ## Demo script
 
-1. Open submissions 1 to 3 and score them normally. Watch the Alignment tab
-   show band, evidence quotes, and missing-concept tags per criterion.
-2. On submission 4, give "Reversibility and dynamic equilibrium" 2.5 points.
-3. Jump to submission 11 (same omission) and give it 0 points.
-4. A Consistency Alert appears: "-2.5 on #4, -5 here, same omission. Align?"
-   Click "Align to #4" to write 2.5 into the LMS input, or "Keep mine".
-5. Click "Insert into comment" to drop the drafted feedback into the comment
+1. Open submission 1. The Grade tab shows the rubric-referenced grade (30/30
+   in mock mode) with the reasoning per criterion. Click "Use" or type a
+   grade.
+2. Open submission 4 and give it 28. The rubric check says the response earns
+   20.5 because reversibility and dynamic equilibrium are missing. Approve to
+   apply 20.5 and insert the feedback, or keep 24 to set up the next step.
+3. Open submission 11, which has the same gap, and give it 16. The
+   consistency alert names Daniel Okafor (#4), shows 24 vs 16 against the same
+   rubric-referenced 20.5, and offers "Align to 24".
+4. Click "Insert into comment" to drop the drafted feedback into the comment
    box, then edit and submit as usual.
-6. Open the Session tab for the strictness chart and running mean.
-7. To show the rubric check: on submission 4 give "Reversibility" 5 points.
-   The rubric says Beginning (0) because reversibility and dynamic
-   equilibrium are missing. Approve to apply 0 and insert feedback.
+5. Open the Session tab: your grades, the rubric-referenced grades, and the
+   mean offset across the session.
 
 ## Tests
 
 ```bash
-pnpm test                  # unit tests: drift, score check, fixtures, tenant-scoped API routes, extension helpers
+pnpm test                  # unit tests: comparison, rubric check, fixtures, providers, tenant-scoped API routes, extension helpers
 pnpm typecheck
 pnpm --filter @gg/extension e2e:install   # once: downloads Chromium for Playwright
 pnpm e2e                   # end-to-end: loads the built extension into Chromium and runs the demo script
@@ -104,16 +124,17 @@ pnpm e2e                   # end-to-end: loads the built extension into Chromium
 
 The end-to-end run starts the API in mock mode and the mock LMS itself.
 
-## How drift detection works
+## How the comparison works
 
-Every score the teacher enters becomes a decision: criterion, points,
-deduction, and the missing-concept tags the alignment step found for that
-criterion. For the same criterion, earlier decisions sharing a tag are
-compared. If the deduction spread exceeds `max(1.5, 20% of the criterion
-maximum)`, an alert names both submissions. The comparison is deterministic
-and instant; the semantic part comes from the tags, which Claude extracts from
-a closed vocabulary per criterion. "Keep mine" records an override for that
-pair so it is not raised again.
+Every grade the teacher enters becomes a decision: points, the
+rubric-referenced suggestion at that moment, and the missing-concept tags the
+analysis found. Earlier decisions in the session that share a tag (or are
+both complete) are compared by offset, teacher points minus suggested points.
+If the offsets differ by more than `max(1.5, 10% of the scale)`, an alert
+names the earlier student and recommends the grade that applies the same
+offset here. The comparison is deterministic and instant; the semantic part
+comes from the tags, which the model extracts from the closed vocabulary the
+teacher defined per criterion.
 
 ## Tenancy and storage
 

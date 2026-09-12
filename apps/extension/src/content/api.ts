@@ -43,7 +43,7 @@ async function request<T>(path: string, init: RequestInit, schema?: z.ZodType<T>
 }
 
 export const api = {
-  health: () => request<{ ok: boolean; analyzer: "claude" | "mock" }>("/health", { method: "GET" }),
+  health: () => request<{ ok: boolean; analyzer: "claude" | "openrouter" | "mock"; model?: string }>("/health", { method: "GET" }),
 
   analyze: (assignmentId: string, submission: Submission) =>
     request("/analyze", { method: "POST", body: JSON.stringify({ assignmentId, submission }) }, AnalysisResultSchema),

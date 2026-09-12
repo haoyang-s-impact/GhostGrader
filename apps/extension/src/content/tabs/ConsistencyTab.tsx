@@ -16,18 +16,20 @@ function humanize(tag: string) {
   return tag.replace(/_/g, " ");
 }
 
-export function ConsistencyTab({ page, alert, check, history, onAlign, onKeep, onApproveCheck, onDismissCheck }: Props) {
-  const critTitle = (id: string) => page?.rubric.find((r) => r.criterionId === id)?.title ?? id;
-  const critMax = (id: string) => page?.rubric.find((r) => r.criterionId === id)?.maxPoints ?? 0;
+function signed(n: number) {
+  return n > 0 ? `+${n}` : `${n}`;
+}
 
+export function ConsistencyTab({ page, alert, check, history, onAlign, onKeep, onApproveCheck, onDismissCheck }: Props) {
+  void page;
   return (
     <>
       {check && (
         <div className="gg-alert gg-check" data-gg-check>
           <h4>⚑ Rubric check</h4>
           <p>
-            You entered <strong>{check.enteredPoints}</strong> of {critMax(check.criterionId)} for “{critTitle(check.criterionId)}”. Against this course's rubric
-            the response reads as <strong>{check.suggestedLevel}</strong> ({check.suggestedPoints} pts)
+            You gave <strong>{check.enteredPoints}</strong> of {check.maxPoints}. Referenced against this course's rubric, this response earns{" "}
+            <strong>{check.suggestedPoints}</strong>
             {check.missingConcepts.length > 0 && (
               <>
                 {" "}because it is missing <strong>{check.missingConcepts.map(humanize).join(", ")}</strong>
@@ -35,28 +37,30 @@ export function ConsistencyTab({ page, alert, check, history, onAlign, onKeep, o
             )}
             .
           </p>
-          {check.bandDescriptor && <p className="gg-band-desc">Rubric band: “{check.bandDescriptor}”</p>}
-          {check.evidence.length > 0 && (
-            <ul className="gg-evidence">
-              {check.evidence.slice(0, 2).map((q) => (
-                <li key={q}>“{q}”</li>
-              ))}
-            </ul>
-          )}
+          {check.summary && <p className="gg-band-desc">{check.summary}</p>}
           <div className="gg-compare">
             <div>
               <div className="gg-n">{check.enteredPoints}</div>
-              <div className="gg-l">your score</div>
+              <div className="gg-l">your grade</div>
             </div>
             <div>
               <div className="gg-n">{check.suggestedPoints}</div>
-              <div className="gg-l">rubric-aligned</div>
+              <div className="gg-l">rubric-referenced</div>
             </div>
           </div>
-          <p>Apply the rubric-aligned score and insert student-specific feedback?</p>
+          <ul className="gg-breakdown">
+            {check.breakdown.map((b) => (
+              <li key={b.criterionId}>
+                <span>{humanize(b.criterionId)}</span>
+                <span className={`gg-level ${b.level}`}>{b.level}</span>
+                <span className="gg-bd-pts">{b.suggestedPoints}/{b.maxPoints}</span>
+              </li>
+            ))}
+          </ul>
+          <p>Apply the rubric-referenced grade and insert student-specific feedback?</p>
           <div className="gg-row">
             <button className="gg-btn gg-btn-primary" onClick={() => onApproveCheck(check)} data-gg-approve-check>
-              Approve {check.suggestedPoints} pts + feedback
+              Approve {check.suggestedPoints} + feedback
             </button>
             <button className="gg-btn" onClick={() => onDismissCheck(check)} data-gg-dismiss-check>
               Keep mine
@@ -69,25 +73,29 @@ export function ConsistencyTab({ page, alert, check, history, onAlign, onKeep, o
         <div className="gg-alert" data-gg-alert>
           <h4>⚠ Consistency alert</h4>
           <p>
-            On submission <strong>#{alert.priorSubmissionIndex}</strong>, missing the{" "}
-            <strong>{humanize(alert.sharedConcept)}</strong> concept on “{critTitle(alert.criterionId)}” resulted in a{" "}
-            <strong>−{alert.priorDeduction}</strong> point deduction. Here the same omission was penalized with{" "}
-            <strong>−{alert.currentDeduction}</strong>.
+            <strong>{alert.priorStudentName || `Submission #${alert.priorSubmissionIndex}`}</strong> (#{alert.priorSubmissionIndex}) had the same gap
+            {alert.sharedConcepts.length > 0 && (
+              <>
+                , <strong>{alert.sharedConcepts.map(humanize).join(", ")}</strong>,
+              </>
+            )}{" "}
+            and you graded them <strong>{alert.priorPoints}</strong> against a rubric-referenced {alert.priorSuggested} ({signed(alert.priorOffset)}). Here you
+            entered <strong>{alert.currentPoints}</strong> against {alert.currentSuggested} ({signed(alert.currentOffset)}).
           </p>
           <div className="gg-compare">
             <div>
-              <div className="gg-n">−{alert.priorDeduction}</div>
-              <div className="gg-l">submission #{alert.priorSubmissionIndex}</div>
+              <div className="gg-n">{alert.priorPoints}</div>
+              <div className="gg-l">#{alert.priorSubmissionIndex} · {signed(alert.priorOffset)} vs rubric</div>
             </div>
             <div>
-              <div className="gg-n">−{alert.currentDeduction}</div>
-              <div className="gg-l">this submission #{alert.currentSubmissionIndex}</div>
+              <div className="gg-n">{alert.currentPoints}</div>
+              <div className="gg-l">this student · {signed(alert.currentOffset)} vs rubric</div>
             </div>
           </div>
-          <p>Would you like to align the criteria?</p>
+          <p>Treat this student the same way?</p>
           <div className="gg-row">
             <button className="gg-btn gg-btn-primary" onClick={() => onAlign(alert)} data-gg-align>
-              Align to #{alert.priorSubmissionIndex} ({alert.priorPoints} pts)
+              Align to {alert.recommendedPoints}
             </button>
             <button className="gg-btn" onClick={() => onKeep(alert)} data-gg-keep>
               Keep mine
@@ -97,7 +105,7 @@ export function ConsistencyTab({ page, alert, check, history, onAlign, onKeep, o
       ) : (
         !check && (
           <div className="gg-status" data-gg-no-alert>
-            No issues. Ghost Grader checks each score against this course's rubric and against your earlier decisions for the same omission.
+            No issues. Ghost Grader checks each grade against this course's rubric and against the grades you gave other students with the same gaps.
           </div>
         )
       )}
@@ -109,10 +117,10 @@ export function ConsistencyTab({ page, alert, check, history, onAlign, onKeep, o
             {history.map((h, i) => (
               <li key={`${h.currentDecisionId}-${i}`}>
                 <span>
-                  #{h.priorSubmissionIndex} vs #{h.currentSubmissionIndex} · {humanize(h.sharedConcept)}
+                  #{h.priorSubmissionIndex} vs #{h.currentSubmissionIndex} · {h.sharedConcepts.map(humanize).join(", ")}
                 </span>
                 <span>
-                  −{h.priorDeduction} / −{h.currentDeduction}
+                  {h.priorPoints} / {h.currentPoints}
                 </span>
               </li>
             ))}

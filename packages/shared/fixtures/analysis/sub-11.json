@@ -3,55 +3,94 @@
   "criteria": [
     {
       "criterionId": "reversibility",
-      "level": "Beginning",
-      "evidence": [],
-      "missingConcepts": [
-        "reversibility",
-        "dynamic_equilibrium"
+      "level": "Proficient",
+      "evidence": [
+        "The reaction is exothermic because heat is released as ammonia forms.",
+        "In short, temperature is the main lever for controlling the ammonia yield in this process."
       ],
-      "confidence": 0.9
+      "missingConcepts": [
+        "dynamic_equilibrium",
+        "forward_reverse_rates"
+      ],
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "States the reaction is reversible and mentions equilibrium, but the rate explanation is thin or missing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Exemplary",
       "evidence": [
-        "favors the direction that absorbs heat, which is ammonia breaking apart into nitrogen and hydrogen"
+        "According to Le Chatelier's principle, a system that is disturbed will shift in the direction that reduces the disturbance.",
+        "Lowering the temperature favors the heat-releasing forward direction and the yield increases."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Correct direction of shift for both heating and cooling, explicitly linked to the exothermic forward reaction via Le Chatelier's principle.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Proficient",
       "evidence": [
-        "roughly 450 °C to balance a reasonable yield against an acceptable rate"
+        "Industrial plants run the process at roughly 450 °C to balance a reasonable yield against an acceptable rate.",
+        "Adding heat by raising the temperature therefore favors the direction that absorbs heat, which is ammonia breaking apart into nitrogen and hydrogen."
       ],
-      "missingConcepts": [],
-      "confidence": 0.9
+      "missingConcepts": [
+        "specific_example",
+        "quantitative_reference"
+      ],
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Includes a specific example or value, but not both.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Proficient",
-      "evidence": [],
+      "evidence": [
+        "Temperature strongly influences how much ammonia is obtained.",
+        "In short, temperature is the main lever for controlling the ammonia yield in this process."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Proficient",
       "evidence": [
-        "In short, temperature is the main lever"
+        "In short, temperature is the main lever for controlling the ammonia yield in this process.",
+        "Adding heat by raising the temperature therefore favors the direction that absorbs heat, which is ammonia breaking apart into nitrogen and hydrogen."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Logical order with a weak opening or closing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Exemplary",
       "evidence": [],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "No errors that affect reading.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Kavya, your use of Le Chatelier's principle is excellent: you identified the heat-absorbing direction and predicted the yield change correctly for both heating and cooling. To strengthen this response, address reversibility explicitly by naming the reaction as reversible and explaining the dynamic equilibrium between the forward and reverse reactions. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 24,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "dynamic_equilibrium",
+    "forward_reverse_rates",
+    "specific_example",
+    "quantitative_reference"
+  ],
+  "summary": "Kavya's response demonstrates a solid understanding of Le Chatelier's principle but lacks a clear explanation of dynamic equilibrium and the rates of the forward and reverse reactions.",
+  "feedbackDraft": "Great job, Kavya! You clearly explained how temperature affects ammonia yield using Le Chatelier's principle. To strengthen your response, consider elaborating on the concept of dynamic equilibrium and how the rates of the forward and reverse reactions relate to it."
 }

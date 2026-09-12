@@ -37,6 +37,7 @@ ${anchors}
 3. evidence must be verbatim substrings copied from the student's text, up to two per criterion. If nothing in the text supports the criterion, return an empty list.
 4. missingConcepts may only contain tags from that criterion's allowed list. Include a tag only when the concept is absent or wrong in the response. An Exemplary band means no missing concepts.
 5. confidence is your 0 to 1 estimate that a careful teacher would choose the same band.
-6. feedbackDraft is two to four sentences addressed to the student by first name, encouraging in tone, naming one concrete strength and one criterion-tied improvement. Never mention points, bands, or the rubric by name.
-7. Return one entry per criterion, in rubric order.`;
+6. summary is one sentence for the teacher that explains the overall judgment in plain terms, naming the most important gap if there is one.
+7. feedbackDraft is two to four sentences addressed to the student by first name, encouraging in tone, naming one concrete strength and one criterion-tied improvement. Never mention points, bands, or the rubric by name.
+8. Return one entry per criterion, in rubric order.`;
 }

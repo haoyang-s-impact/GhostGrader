@@ -5,56 +5,81 @@
       "criterionId": "reversibility",
       "level": "Exemplary",
       "evidence": [
-        "nitrogen and hydrogen combine to form ammonia, and ammonia can also decompose back into nitrogen and hydrogen",
-        "the forward and reverse reactions continue at the same rate"
+        "the reaction can proceed in both directions",
+        "the system reaches dynamic equilibrium, where the forward and reverse reactions continue at the same rate"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 1,
+      "suggestedPoints": 5,
+      "bandDescriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
       "level": "Exemplary",
       "evidence": [
-        "raising the temperature favors the endothermic direction, so the equilibrium shifts toward the reactants and the yield of ammonia falls"
+        "raising the temperature favors the endothermic direction",
+        "Lowering the temperature favors the exothermic forward reaction"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 1,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Correct direction of shift for both heating and cooling, explicitly linked to the exothermic forward reaction via Le Chatelier's principle.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Exemplary",
       "evidence": [
-        "releasing about 92 kJ per mole of nitrogen consumed",
-        "around 450 °C with an iron catalyst"
+        "about 92 kJ per mole of nitrogen consumed",
+        "compromise temperature of around 450 °C with an iron catalyst"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 1,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Includes at least one quantitative reference (enthalpy, temperature) and a specific example.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Exemplary",
       "evidence": [
-        "dynamic equilibrium, where the forward and reverse reactions continue at the same rate"
+        "the reaction can proceed in both directions",
+        "Temperature changes the position of this equilibrium"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 1,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Precise terminology throughout; every claim is explained.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
       "level": "Exemplary",
       "evidence": [
-        "In summary, reversibility creates an equilibrium"
+        "In summary, reversibility creates an equilibrium, and temperature moves that equilibrium in a predictable direction",
+        "the system reaches dynamic equilibrium"
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 1,
+      "suggestedPoints": 5,
+      "bandDescriptor": "Clear introduction, logical progression, and a conclusion that ties reversibility to temperature.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
       "level": "Exemplary",
       "evidence": [],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 1,
+      "suggestedPoints": 5,
+      "bandDescriptor": "No errors that affect reading.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Aisha, your explanation of dynamic equilibrium as equal forward and reverse rates is precise, and you linked the exothermic forward reaction to the direction of the shift exactly as Le Chatelier's principle requires. To strengthen this response, consider stating explicitly why the rate becomes slow at low temperature, so the compromise at 450 °C is fully justified. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 30,
+  "maxTotal": 30,
+  "missingConcepts": [],
+  "summary": "Aisha's response is thorough and well-structured, demonstrating a strong understanding of the concepts involved in the Haber process.",
+  "feedbackDraft": "Great job, Aisha! Your explanation of the reversibility of the Haber process and how temperature affects equilibrium is clear and well-supported with specific evidence. To enhance your response, consider providing even more detailed examples or values related to the industrial application of the process."
 }

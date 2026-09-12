@@ -1,9 +1,9 @@
-import type { Assignment, StoredSubmission } from "@gg/shared";
+import { gradeMax, type Assignment, type StoredSubmission } from "@gg/shared";
 import { lms } from "../api";
 import { esc, go } from "../util";
 import { bindHeader, renderHeader } from "./header";
 
-type Grades = Record<string, { points: Record<string, number | null>; comment: string }>;
+type Grades = Record<string, { grade: number | null; comment: string }>;
 
 export async function speedGraderView(app: HTMLElement, assignmentId: string, index: number) {
   const [teachers, assignment, submissions] = await Promise.all([lms.teachers(), lms.assignment(assignmentId), lms.submissions(assignmentId)]);
@@ -17,7 +17,8 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
     }
   }
   const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(grades));
-  const gradeFor = (s: StoredSubmission) => (grades[s.id] ??= { points: Object.fromEntries(assignment.rubric.criteria.map((c) => [c.id, null])), comment: "" });
+  const gradeFor = (s: StoredSubmission) => (grades[s.id] ??= { grade: null, comment: "" });
+  const max = gradeMax(assignment);
 
   const crumb = `<a href="#/courses">${esc(assignment.course)}</a> › Assignments › <strong>${esc(assignment.title)}</strong>`;
 
@@ -31,9 +32,7 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
   const safeIndex = Math.min(Math.max(1, index), submissions.length);
   const sub = submissions.find((s) => s.index === safeIndex) ?? submissions[0]!;
   const g = gradeFor(sub);
-  const total = Object.values(g.points).reduce<number>((acc, v) => acc + (v ?? 0), 0);
-  const max = assignment.rubric.criteria.reduce((acc, c) => acc + c.maxPoints, 0);
-  const graded = submissions.filter((s) => Object.values(gradeFor(s).points).some((v) => v !== null)).length;
+  const graded = submissions.filter((s) => gradeFor(s).grade !== null).length;
 
   const nav = `
       <span class="sg-progress">${graded}/${submissions.length} graded</span>
@@ -58,27 +57,14 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
       <details class="sg-add-more"><summary>Add another submission</summary>${addSubmissionForm()}</details>
     </section>
     <aside class="sg-grading">
-      <div class="sg-grade-total"><span>Grade</span><strong data-gg-total>${total}</strong><span class="sg-muted">/ ${max}</span></div>
-      <h3>Rubric</h3>
-      <table class="sg-rubric" data-gg-rubric>
-        <thead><tr><th>Criterion</th><th>Ratings</th><th class="sg-pts-col">Pts</th></tr></thead>
-        <tbody>
-        ${assignment.rubric.criteria
-          .map((c) => {
-            const v = g.points[c.id];
-            return `<tr data-gg-criterion-id="${c.id}" data-gg-criterion-max="${c.maxPoints}">
-              <td class="sg-crit"><div class="sg-crit-title" data-gg-criterion-title>${esc(c.title)}</div><div class="sg-crit-desc">${esc(c.description)}</div></td>
-              <td class="sg-bands">${c.bands
-                .map((b) => `<button class="sg-band ${v === b.points ? "is-selected" : ""}" data-band-points="${b.points}" data-crit="${c.id}" title="${esc(b.descriptor)}"><span class="sg-band-pts">${b.points}</span><span class="sg-band-lvl">${esc(b.level)}</span></button>`)
-                .join("")}</td>
-              <td class="sg-pts"><input type="number" step="0.5" min="0" max="${c.maxPoints}" class="sg-pts-input" data-gg-points data-crit="${c.id}" value="${v ?? ""}" aria-label="${esc(c.title)} points" /><span class="sg-muted">/ ${c.maxPoints}</span></td>
-            </tr>`;
-          })
-          .join("")}
-        </tbody>
-      </table>
+      <h3>Grade</h3>
+      <div class="sg-grade-row">
+        <input type="number" step="0.5" min="0" max="${max}" class="sg-grade-input" data-gg-grade data-gg-grade-max="${max}" value="${g.grade ?? ""}" aria-label="Grade out of ${max}" placeholder="–" />
+        <span class="sg-grade-max">/ ${max}</span>
+      </div>
+      <p class="sg-help sg-grade-help">One overall grade. Ghost Grader compares it with the rubric and with the grades you gave other students.</p>
       <h3>Assignment Comments</h3>
-      <textarea class="sg-comment" data-gg-comment placeholder="Add a comment" rows="6">${esc(g.comment)}</textarea>
+      <textarea class="sg-comment" data-gg-comment placeholder="Add a comment" rows="8">${esc(g.comment)}</textarea>
       <div class="sg-actions"><button class="sg-btn sg-btn-primary" id="submit">Submit</button><span class="sg-saved" id="saved"></span></div>
     </aside>
   </main>`;
@@ -89,26 +75,11 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
   document.getElementById("next")!.addEventListener("click", () => goTo(sub.index + 1));
   document.getElementById("picker")!.addEventListener("change", (e) => goTo(Number((e.target as HTMLSelectElement).value)));
 
-  app.querySelectorAll<HTMLButtonElement>(".sg-band").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const input = app.querySelector<HTMLInputElement>(`input[data-crit="${btn.dataset.crit}"]`)!;
-      input.value = btn.dataset.bandPoints!;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  });
-
-  app.querySelectorAll<HTMLInputElement>("input[data-gg-points]").forEach((input) => {
-    input.addEventListener("input", () => {
-      const critId = input.dataset.crit!;
-      const raw = input.value.trim();
-      g.points[critId] = raw === "" ? null : Number(raw);
-      save();
-      const row = input.closest("tr")!;
-      row.querySelectorAll<HTMLButtonElement>(".sg-band").forEach((b) => b.classList.toggle("is-selected", Number(b.dataset.bandPoints) === g.points[critId]));
-      const t = Object.values(g.points).reduce<number>((acc, v) => acc + (v ?? 0), 0);
-      app.querySelector("[data-gg-total]")!.textContent = String(t);
-    });
+  const gradeInput = app.querySelector<HTMLInputElement>("[data-gg-grade]")!;
+  gradeInput.addEventListener("input", () => {
+    const raw = gradeInput.value.trim();
+    g.grade = raw === "" ? null : Number(raw);
+    save();
   });
 
   const comment = app.querySelector<HTMLTextAreaElement>("[data-gg-comment]")!;

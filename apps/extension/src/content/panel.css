@@ -76,3 +76,13 @@
 .gg-check .gg-compare div { border-color: #d9ccff; }
 .gg-band-desc { font-size: 12px; color: #4b4560; font-style: italic; }
 .gg-stats-2 { grid-template-columns: repeat(2, 1fr); }
+.gg-suggest { border: 1px solid #d9ccff; background: linear-gradient(180deg, #f7f4ff, #fff); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.gg-suggest-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gg-accent); font-weight: 700; }
+.gg-suggest-n { font-size: 34px; font-weight: 800; line-height: 1.1; margin: 2px 0 4px; }
+.gg-suggest-max { font-size: 14px; font-weight: 600; color: var(--gg-muted); margin-left: 4px; }
+.gg-suggest-why { margin: 0 0 10px; font-size: 12.5px; color: #3d4f5c; }
+.gg-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gg-muted); font-weight: 700; margin: 12px 0 6px; }
+.gg-breakdown { list-style: none; margin: 4px 0 10px; padding: 0; font-size: 12px; }
+.gg-breakdown li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 1px solid #ebe6f7; text-transform: capitalize; }
+.gg-bd-pts { font-variant-numeric: tabular-nums; color: var(--gg-muted); }
+.gg-stats-3 { grid-template-columns: repeat(3, 1fr); }

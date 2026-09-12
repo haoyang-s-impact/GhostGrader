@@ -5,56 +5,92 @@
       "criterionId": "reversibility",
       "level": "Exemplary",
       "evidence": [
-        "ammonia molecules are also breaking apart to re-form nitrogen and hydrogen",
-        "When the rate of the forward reaction equals the rate of the reverse reaction"
+        "The reaction between nitrogen and hydrogen to make ammonia is reversible.",
+        "When the rate of the forward reaction equals the rate of the reverse reaction, the system is in dynamic equilibrium."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.9,
+      "suggestedPoints": 5,
+      "bandDescriptor": "States the reaction is reversible, describes the reverse reaction, and explains dynamic equilibrium as equal forward and reverse rates.",
+      "maxPoints": 5
     },
     {
       "criterionId": "le_chatelier",
-      "level": "Beginning",
+      "level": "Developing",
       "evidence": [
-        "the reaction happens faster"
+        "Temperature also matters.",
+        "At a lower temperature the particles move slowly and the reaction is slower."
       ],
       "missingConcepts": [
+        "le_chatelier_principle",
         "temperature_shift_direction",
         "exothermic_endothermic_link"
       ],
-      "confidence": 0.9
+      "confidence": 0.6,
+      "suggestedPoints": 2,
+      "bandDescriptor": "States that temperature matters but the direction or reasoning is vague.",
+      "maxPoints": 5
     },
     {
       "criterionId": "evidence",
       "level": "Developing",
       "evidence": [],
       "missingConcepts": [
+        "specific_example",
         "quantitative_reference"
       ],
-      "confidence": 0.9
+      "confidence": 0.5,
+      "suggestedPoints": 2,
+      "bandDescriptor": "Evidence is general or only loosely tied to the claim.",
+      "maxPoints": 5
     },
     {
       "criterionId": "clarity",
       "level": "Proficient",
-      "evidence": [],
+      "evidence": [
+        "The reaction is written with a double arrow to show this.",
+        "Factories therefore heat the reactants so that ammonia forms quickly."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Mostly precise; minor lapses in terminology or explanation.",
+      "maxPoints": 5
     },
     {
       "criterionId": "structure",
-      "level": "Exemplary",
+      "level": "Proficient",
       "evidence": [
-        "In conclusion, the Haber process is reversible and reaches equilibrium"
+        "In conclusion, the Haber process is reversible and reaches equilibrium, and temperature changes how fast it gets there."
       ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.7,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "Logical order with a weak opening or closing.",
+      "maxPoints": 5
     },
     {
       "criterionId": "mechanics",
-      "level": "Exemplary",
-      "evidence": [],
+      "level": "Proficient",
+      "evidence": [
+        "When the temperature goes up, the particles have more kinetic energy, collide more often and with more force, and so the reaction happens faster."
+      ],
       "missingConcepts": [],
-      "confidence": 0.9
+      "confidence": 0.8,
+      "suggestedPoints": 3.5,
+      "bandDescriptor": "A few minor errors.",
+      "maxPoints": 5
     }
   ],
-  "feedbackDraft": "Chloe, your account of reversibility and dynamic equilibrium is clear and correctly framed in terms of equal forward and reverse rates. To strengthen this response, distinguish reaction rate from equilibrium position: the prompt asks how temperature shifts the equilibrium, which for this exothermic reaction means heating lowers the ammonia yield. Keep building on the reasoning you have already shown."
+  "suggestedTotal": 19.5,
+  "maxTotal": 30,
+  "missingConcepts": [
+    "le_chatelier_principle",
+    "temperature_shift_direction",
+    "exothermic_endothermic_link",
+    "specific_example",
+    "quantitative_reference"
+  ],
+  "summary": "Chloe demonstrates a strong understanding of reversibility but lacks specific evidence and a clear application of Le Chatelier's principle regarding temperature effects.",
+  "feedbackDraft": "Chloe, you did a great job explaining the reversibility of the Haber process and how it reaches dynamic equilibrium. To strengthen your response, consider incorporating specific examples or values related to temperature changes and their effects on the equilibrium position."
 }
