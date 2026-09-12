@@ -39,6 +39,11 @@ Then load the extension in Chrome:
 1. Open `chrome://extensions`, enable Developer mode.
 2. Click "Load unpacked" and pick `apps/extension/dist`.
 3. Open http://localhost:5173. The Ghost Grader panel appears on the right.
+4. After every `pnpm build`, click the reload icon on the extension's card.
+
+**No extension handy?** Open http://localhost:5173/?embed=1 instead. In embed
+mode the mock LMS loads the built panel script itself, so the same panel
+appears without installing anything. Good for demos and screen shares.
 
 ### LLM provider
 

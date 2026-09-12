@@ -17,7 +17,12 @@ export async function speedGraderView(app: HTMLElement, assignmentId: string, in
     }
   }
   const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(grades));
-  const gradeFor = (s: StoredSubmission) => (grades[s.id] ??= { grade: null, comment: "" });
+  const gradeFor = (s: StoredSubmission) => {
+    const g = grades[s.id] as { grade?: number | null; comment?: string } | undefined;
+    // Migrate entries saved by the earlier per-criterion grader.
+    if (!g || !("grade" in g)) grades[s.id] = { grade: null, comment: g?.comment ?? "" };
+    return grades[s.id]!;
+  };
   const max = gradeMax(assignment);
 
   const crumb = `<a href="#/courses">${esc(assignment.course)}</a> › Assignments › <strong>${esc(assignment.title)}</strong>`;

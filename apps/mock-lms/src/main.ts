@@ -28,6 +28,24 @@ async function route() {
   }
 }
 
+declare const __GG_EXTENSION_DIST__: string;
+
+/**
+ * Embed mode: with ?embed=1 the page loads the built extension script itself,
+ * so the panel works without installing the extension in Chrome. Handy for
+ * demos and screen shares. The real thing is still the extension.
+ */
+function embedGhostGrader() {
+  if (!new URLSearchParams(location.search).has("embed")) return;
+  if (document.getElementById("ghost-grader-host") || document.getElementById("gg-embed-script")) return;
+  const s = document.createElement("script");
+  s.id = "gg-embed-script";
+  s.src = `/@fs${__GG_EXTENSION_DIST__}/content.js?t=${Date.now()}`;
+  s.onerror = () => console.warn("Ghost Grader embed: build the extension first (pnpm --filter @gg/extension build).");
+  document.head.appendChild(s);
+}
+
 window.addEventListener("hashchange", route);
 if (!location.hash) location.hash = "#/courses";
 void route();
+embedGhostGrader();
