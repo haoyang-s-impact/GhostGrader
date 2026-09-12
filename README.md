@@ -45,19 +45,25 @@ Then load the extension in Chrome:
 mode the mock LMS loads the built panel script itself, so the same panel
 appears without installing anything. Good for demos and screen shares.
 
-### LLM provider
+### LLM providers and fallback
 
-Copy `apps/api/.env.example` to `apps/api/.env` and set one of:
+Copy `apps/api/.env.example` to `apps/api/.env` and set any of:
 
-- `OPENROUTER_API_KEY` (plus optional `OPENROUTER_MODEL`, default
-  `openai/gpt-4o-mini`). Any OpenAI-compatible model on OpenRouter works; the
-  panel chip shows the model name.
+- `OPENROUTER_API_KEY` (optional `OPENROUTER_MODEL`, default
+  `openai/gpt-4o-mini`). Any OpenAI-compatible model on OpenRouter.
+- `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-4o-mini`).
 - `ANTHROPIC_API_KEY` for Claude Opus 5 with structured outputs.
 
-OpenRouter wins if both are set. Without either, the API runs a deterministic
-mock analyzer built from the dataset's ground truth, so the whole demo works
-offline. The chip says "Mock mode" so nobody mistakes it for model output.
-`GG_MOCK=1` forces the mock even with a key (the tests use this).
+They form a chain in that order. The first configured provider is primary;
+when a call fails for any reason (outage, rate limit, refusal, malformed
+output after one retry) the same request is retried on the next one. The
+Grade tab shows which provider produced each result ("via openai"), and the
+API log records every fallback.
+
+Without any key, the API runs a deterministic mock analyzer built from the
+dataset's ground truth, so the whole demo works offline. The chip says
+"Mock mode" so nobody mistakes it for model output. `GG_MOCK=1` forces the
+mock even with keys (the tests use this).
 
 ## Defining a rubric
 

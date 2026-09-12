@@ -41,7 +41,7 @@ const get = (app: App, path: string, teacher = T1) => app.request(path, { header
 describe("auth and health", () => {
   it("reports the analyzer mode without a teacher header", async () => {
     const res = await mkApp().request("/health");
-    expect(await res.json()).toEqual({ ok: true, analyzer: "mock", model: "mock" });
+    expect(await res.json()).toEqual({ ok: true, analyzer: "mock", model: "mock", fallbacks: [] });
   });
 
   it("rejects scoped routes without a known teacher", async () => {

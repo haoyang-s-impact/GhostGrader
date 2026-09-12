@@ -86,3 +86,4 @@
 .gg-breakdown li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 1px solid #ebe6f7; text-transform: capitalize; }
 .gg-bd-pts { font-variant-numeric: tabular-nums; color: var(--gg-muted); }
 .gg-stats-3 { grid-template-columns: repeat(3, 1fr); }
+.gg-via { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--gg-muted); }

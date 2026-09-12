@@ -99,6 +99,8 @@ export const AnalysisResultSchema = z.object({
   missingConcepts: z.array(z.string()),
   summary: z.string(),
   feedbackDraft: z.string(),
+  /** Which provider produced this result, e.g. "openrouter", "openai", "claude", "mock". */
+  provider: z.string().optional(),
 });
 
 /** Raised when a teacher's grade diverges from the rubric-bound analysis. */

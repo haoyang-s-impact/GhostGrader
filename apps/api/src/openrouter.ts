@@ -3,18 +3,25 @@ import { AnalysisError } from "./claude";
 import { buildSystemPrompt } from "./prompt";
 
 /**
- * OpenAI-compatible chat completions through OpenRouter. Uses JSON mode and
- * validates the reply against the shared Zod schema, retrying once on a
- * malformed answer. The rubric-bound system prompt is identical to the
- * Claude path so the two providers are interchangeable.
+ * OpenAI-compatible chat completions: OpenRouter or OpenAI directly. Uses
+ * JSON mode and validates the reply against the shared Zod schema, retrying
+ * once on a malformed answer. The rubric-bound system prompt is identical to
+ * the Claude path so all providers are interchangeable.
  */
 export interface OpenRouterOptions {
   apiKey: string;
   model: string;
   baseUrl?: string;
+  /** Provider label stamped on results and used for provider-specific headers. */
+  provider?: "openrouter" | "openai";
   log?: (msg: string) => void;
   fetchImpl?: typeof fetch;
 }
+
+export const PROVIDER_BASE_URLS = {
+  openrouter: "https://openrouter.ai/api/v1",
+  openai: "https://api.openai.com/v1",
+} as const;
 
 const JSON_SHAPE = `Respond with a single JSON object and nothing else, shaped exactly like:
 {
@@ -26,7 +33,8 @@ const JSON_SHAPE = `Respond with a single JSON object and nothing else, shaped e
 }`;
 
 export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
-  const baseUrl = (opts.baseUrl ?? "https://openrouter.ai/api/v1").replace(/\/$/, "");
+  const provider = opts.provider ?? "openrouter";
+  const baseUrl = (opts.baseUrl ?? PROVIDER_BASE_URLS[provider]).replace(/\/$/, "");
   const doFetch = opts.fetchImpl ?? fetch;
   const systemCache = new Map<string, string>();
 
@@ -42,8 +50,7 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
       headers: {
         authorization: `Bearer ${opts.apiKey}`,
         "content-type": "application/json",
-        "http-referer": "https://github.com/onrbzkrt/GhostGrader",
-        "x-title": "Ghost Grader",
+        ...(provider === "openrouter" ? { "http-referer": "https://github.com/onrbzkrt/GhostGrader", "x-title": "Ghost Grader" } : {}),
       },
       body: JSON.stringify({
         model: opts.model,
@@ -57,14 +64,14 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
     });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      throw new AnalysisError(`OpenRouter ${res.status}: ${text.slice(0, 200)}`, res.status === 429 || res.status >= 500);
+      throw new AnalysisError(`${provider === "openai" ? "OpenAI" : "OpenRouter"} ${res.status}: ${text.slice(0, 200)}`, res.status === 429 || res.status >= 500);
     }
     const body = (await res.json()) as {
       choices?: { message?: { content?: string | null; refusal?: string | null }; finish_reason?: string }[];
       usage?: { prompt_tokens?: number; completion_tokens?: number; cost?: number };
     };
     const choice = body.choices?.[0];
-    opts.log?.(`usage prompt=${body.usage?.prompt_tokens ?? "?"} completion=${body.usage?.completion_tokens ?? "?"} cost=${body.usage?.cost ?? "?"}`);
+    opts.log?.(`[${provider}] usage prompt=${body.usage?.prompt_tokens ?? "?"} completion=${body.usage?.completion_tokens ?? "?"} cost=${body.usage?.cost ?? "?"}`);
     if (choice?.message?.refusal) throw new AnalysisError("The model declined to analyze this submission.", false);
     const content = choice?.message?.content;
     if (!content) throw new AnalysisError("The model returned an empty reply.", true);
@@ -76,7 +83,7 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
     }
     const out = ModelOutputSchema.safeParse(parsed);
     if (!out.success) throw new AnalysisError("The model returned output that did not match the schema.", true);
-    return finalizeAnalysis(submission.id, assignment, out.data);
+    return { ...finalizeAnalysis(submission.id, assignment, out.data), provider };
   }
 
   return async function analyze(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
@@ -92,4 +99,9 @@ export function createOpenRouterAnalyzer(opts: OpenRouterOptions) {
 function stripFences(s: string): string {
   const m = s.trim().match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
   return m ? m[1]! : s;
+}
+
+/** OpenAI directly, same protocol. */
+export function createOpenAIAnalyzer(opts: Omit<OpenRouterOptions, "provider">) {
+  return createOpenRouterAnalyzer({ ...opts, provider: "openai" });
 }

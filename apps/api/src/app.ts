@@ -41,7 +41,7 @@ export function createApp({ analyzer, store = new Store() }: AppDeps) {
     }),
   );
 
-  app.get("/health", (c) => c.json({ ok: true, analyzer: analyzer.mode, model: analyzer.model }));
+  app.get("/health", (c) => c.json({ ok: true, analyzer: analyzer.mode, model: analyzer.model, fallbacks: analyzer.fallbacks }));
   app.get("/lms/teachers", (c) => c.json(store.teachers()));
 
   // Every other route is scoped to one teacher. A real deployment would put

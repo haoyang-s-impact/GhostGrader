@@ -45,7 +45,9 @@ export function AlignmentTab({ page, analysis, inserted, onRetry, onInsert, onAp
       {analysis.status === "ready" && (
         <div data-gg-state="ready">
           <div className="gg-suggest" data-gg-suggested={analysis.result.suggestedTotal}>
-            <div className="gg-suggest-label">Rubric-referenced grade</div>
+            <div className="gg-suggest-label">
+              Rubric-referenced grade{analysis.result.provider && <span className="gg-via" data-gg-provider={analysis.result.provider}> · via {analysis.result.provider}</span>}
+            </div>
             <div className="gg-suggest-n">
               {analysis.result.suggestedTotal}
               <span className="gg-suggest-max">/ {analysis.result.maxTotal}</span>
