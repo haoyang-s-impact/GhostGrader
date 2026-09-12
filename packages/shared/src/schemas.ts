@@ -23,15 +23,35 @@ export const RubricSchema = z.object({
 
 export const AnchorSchema = z.object({ label: z.string(), text: z.string() });
 
+export const TeacherSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+});
+
+export const CourseSchema = z.object({
+  id: z.string(),
+  teacherId: z.string(),
+  name: z.string(),
+  term: z.string().default(""),
+});
+
 export const AssignmentSchema = z.object({
   id: z.string(),
+  teacherId: z.string(),
+  courseId: z.string(),
   title: z.string(),
+  /** Display name of the course, denormalized for prompts and headers. */
   course: z.string(),
   prompt: z.string(),
   learningObjectives: z.array(z.string()),
   rubric: RubricSchema,
   anchors: z.array(AnchorSchema),
+  updatedAt: z.number().default(0),
 });
+
+/** Payload a teacher sends when creating or editing an assignment. */
+export const AssignmentInputSchema = AssignmentSchema.omit({ id: true, teacherId: true, course: true, updatedAt: true });
 
 export const SubmissionSchema = z.object({
   id: z.string(),
@@ -40,12 +60,28 @@ export const SubmissionSchema = z.object({
   text: z.string(),
 });
 
-export const CriterionAnalysisSchema = z.object({
+export const StoredSubmissionSchema = SubmissionSchema.extend({ assignmentId: z.string() });
+
+/** One criterion as the model returns it. */
+export const ModelCriterionSchema = z.object({
   criterionId: z.string(),
   level: z.string(),
   evidence: z.array(z.string()),
   missingConcepts: z.array(z.string()),
   confidence: z.number().min(0).max(1),
+});
+
+/** What the model is asked to return. submissionId and suggestedPoints are stamped by the server. */
+export const ModelOutputSchema = z.object({
+  criteria: z.array(ModelCriterionSchema),
+  feedbackDraft: z.string(),
+});
+
+export const CriterionAnalysisSchema = ModelCriterionSchema.extend({
+  /** Points of the band the analysis selected, derived from the rubric, never from the model. */
+  suggestedPoints: z.number(),
+  /** Descriptor of that band, copied from the rubric so the panel can quote it. */
+  bandDescriptor: z.string().default(""),
 });
 
 export const AnalysisResultSchema = z.object({
@@ -54,10 +90,16 @@ export const AnalysisResultSchema = z.object({
   feedbackDraft: z.string(),
 });
 
-/** What the model is asked to return. submissionId is stamped by the server. */
-export const ModelOutputSchema = z.object({
-  criteria: z.array(CriterionAnalysisSchema),
-  feedbackDraft: z.string(),
+/** Raised when a teacher's score diverges from the rubric-bound analysis. */
+export const ScoreCheckSchema = z.object({
+  criterionId: z.string(),
+  enteredPoints: z.number(),
+  suggestedPoints: z.number(),
+  suggestedLevel: z.string(),
+  bandDescriptor: z.string(),
+  missingConcepts: z.array(z.string()),
+  evidence: z.array(z.string()),
+  diff: z.number(),
 });
 
 export const DecisionSchema = z.object({
@@ -104,11 +146,17 @@ export const GroundTruthSchema = z.record(
 export type Band = z.infer<typeof BandSchema>;
 export type Criterion = z.infer<typeof CriterionSchema>;
 export type Rubric = z.infer<typeof RubricSchema>;
+export type Teacher = z.infer<typeof TeacherSchema>;
+export type Course = z.infer<typeof CourseSchema>;
 export type Assignment = z.infer<typeof AssignmentSchema>;
+export type AssignmentInput = z.infer<typeof AssignmentInputSchema>;
 export type Submission = z.infer<typeof SubmissionSchema>;
+export type StoredSubmission = z.infer<typeof StoredSubmissionSchema>;
+export type ModelCriterion = z.infer<typeof ModelCriterionSchema>;
+export type ModelOutput = z.infer<typeof ModelOutputSchema>;
 export type CriterionAnalysis = z.infer<typeof CriterionAnalysisSchema>;
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
-export type ModelOutput = z.infer<typeof ModelOutputSchema>;
+export type ScoreCheck = z.infer<typeof ScoreCheckSchema>;
 export type Decision = z.infer<typeof DecisionSchema>;
 export type DriftAlert = z.infer<typeof DriftAlertSchema>;
 export type GroundTruth = z.infer<typeof GroundTruthSchema>;

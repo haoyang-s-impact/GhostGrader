@@ -71,3 +71,8 @@
 .gg-hist h4 { margin: 0 0 6px; font-size: 12px; color: var(--gg-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .gg-hist ul { margin: 0; padding: 0; list-style: none; font-size: 12px; }
 .gg-hist li { padding: 5px 0; border-bottom: 1px solid #eef1f3; display: flex; justify-content: space-between; gap: 8px; }
+.gg-check { border-color: #c7b7ff; background: #f4f0ff; margin-bottom: 10px; }
+.gg-check h4 { color: var(--gg-accent); }
+.gg-check .gg-compare div { border-color: #d9ccff; }
+.gg-band-desc { font-size: 12px; color: #4b4560; font-style: italic; }
+.gg-stats-2 { grid-template-columns: repeat(2, 1fr); }

@@ -1,4 +1,6 @@
 import { defineConfig } from "@playwright/test";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -14,7 +16,8 @@ export default defineConfig({
       command: "pnpm --filter @gg/api start",
       url: "http://localhost:8787/health",
       reuseExistingServer: true,
-      env: { GG_MOCK: "1", PORT: "8787", NODE_ENV: "test" },
+      // A throwaway data file so end-to-end runs never touch the dev store.
+      env: { GG_MOCK: "1", PORT: "8787", NODE_ENV: "test", GG_DATA_PATH: join(tmpdir(), `gg-e2e-${Date.now()}.json`) },
       cwd: "../..",
     },
     {

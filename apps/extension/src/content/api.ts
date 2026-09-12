@@ -4,6 +4,12 @@ import { z } from "zod";
 export const API_BASE = "http://localhost:8787";
 const TIMEOUT_MS = 45_000;
 
+/** Set from the page's data-gg-teacher-id; the API scopes everything by it. */
+let teacherId: string | null = null;
+export function setTeacherId(id: string | null) {
+  teacherId = id;
+}
+
 export class ApiError extends Error {
   constructor(message: string, public readonly retryable: boolean, public readonly status?: number) {
     super(message);
@@ -17,7 +23,7 @@ async function request<T>(path: string, init: RequestInit, schema?: z.ZodType<T>
   try {
     res = await fetch(`${API_BASE}${path}`, {
       ...init,
-      headers: { "content-type": "application/json", ...(init.headers ?? {}) },
+      headers: { "content-type": "application/json", ...(teacherId ? { "x-teacher-id": teacherId } : {}), ...(init.headers ?? {}) },
       signal: ctrl.signal,
     });
   } catch (err) {
@@ -49,9 +55,19 @@ export const api = {
     request<void>("/override", { method: "POST", body: JSON.stringify({ assignmentId, decisionIdA, decisionIdB }) }),
 
   aligned: (assignmentId: string) => request<void>("/aligned", { method: "POST", body: JSON.stringify({ assignmentId }) }),
+  checkRaised: (assignmentId: string) => request<void>("/check-raised", { method: "POST", body: JSON.stringify({ assignmentId }) }),
+  checkApproved: (assignmentId: string) => request<void>("/check-approved", { method: "POST", body: JSON.stringify({ assignmentId }) }),
 
   session: (assignmentId: string) =>
-    request<{ decisions: Decision[]; alertsRaised: number; alertsAligned: number }>(`/session/${assignmentId}`, { method: "GET" }),
+    request<SessionSummary>(`/session/${assignmentId}`, { method: "GET" }),
 };
+
+export interface SessionSummary {
+  decisions: Decision[];
+  alertsRaised: number;
+  alertsAligned: number;
+  checksRaised: number;
+  checksApproved: number;
+}
 
 export type { AnalysisResult, DriftAlert };

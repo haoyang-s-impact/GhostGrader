@@ -1,33 +1,68 @@
 import type { AnalysisResult, Assignment, GroundTruth, Submission } from "./schemas";
+import { finalizeAnalysis } from "./rubric";
 
 /**
  * Deterministic stand-in for the Claude analysis call. Used when no API key is
  * configured and in tests. Produces the same shape the model is asked for.
+ * Only the seeded assignment has ground truth; for teacher-created assignments
+ * it falls back to a heuristic keyword scan so the demo still works offline.
  */
-export function mockAnalyze(
-  submission: Submission,
-  assignment: Assignment,
-  truth: GroundTruth,
-): AnalysisResult {
+export function mockAnalyze(submission: Submission, assignment: Assignment, truth: GroundTruth): AnalysisResult {
   const gt = truth[submission.id];
-  if (!gt) throw new Error(`No ground truth for ${submission.id}`);
   const firstName = submission.studentName.split(" ")[0] ?? "there";
+  if (gt) {
+    const feedbackDraft =
+      `${firstName}, ${gt.strength} ` +
+      `To strengthen this response, ${gt.improvement} ` +
+      `Keep building on the reasoning you have already shown.`;
+    return finalizeAnalysis(submission.id, assignment, {
+      criteria: assignment.rubric.criteria.map((c) => {
+        const g = gt.criteria.find((x) => x.criterionId === c.id);
+        return {
+          criterionId: c.id,
+          level: g?.level ?? "Proficient",
+          evidence: g?.evidence ?? [],
+          missingConcepts: g?.missingConcepts ?? [],
+          confidence: 0.9,
+        };
+      }),
+      feedbackDraft,
+    });
+  }
+  return heuristicAnalyze(submission, assignment, firstName);
+}
+
+/** Crude stem so "reversibility" matches "reversible" and "equilibrium" matches "equilibria". */
+function stem(word: string): string {
+  return word.length >= 6 ? word.slice(0, 6) : word;
+}
+
+/** Keyword heuristic for assignments without ground truth: a concept counts as present if its words appear. */
+function heuristicAnalyze(submission: Submission, assignment: Assignment, firstName: string): AnalysisResult {
+  const text = submission.text.toLowerCase();
+  const sentences = submission.text.split(/(?<=[.!?])\s+/).filter((s) => s.trim().length > 0);
+  const missingAll: string[] = [];
+  const criteria = assignment.rubric.criteria.map((c) => {
+    const present: string[] = [];
+    const missing: string[] = [];
+    for (const tag of c.concepts) {
+      const stems = tag.split("_").filter((w) => w.length > 2).map(stem);
+      const hit = stems.length > 0 && stems.every((w) => text.includes(w));
+      (hit ? present : missing).push(tag);
+    }
+    const ratio = c.concepts.length === 0 ? 1 : present.length / c.concepts.length;
+    const sorted = [...c.bands].sort((a, b) => b.points - a.points);
+    const idx = Math.min(sorted.length - 1, Math.round((1 - ratio) * (sorted.length - 1)));
+    const level = sorted[idx]?.level ?? sorted[0]?.level ?? "Proficient";
+    const evidence = sentences.filter((s) => present.some((tag) => tag.split("_").some((w) => w.length > 2 && s.toLowerCase().includes(stem(w))))).slice(0, 2);
+    missingAll.push(...missing.map((t) => t.replace(/_/g, " ")));
+    return { criterionId: c.id, level, evidence, missingConcepts: missing, confidence: 0.5 };
+  });
   const feedbackDraft =
-    `${firstName}, ${gt.strength} ` +
-    `To strengthen this response, ${gt.improvement} ` +
+    `${firstName}, thank you for a thoughtful response to "${assignment.title}". ` +
+    (missingAll.length
+      ? `To strengthen it, address ${missingAll.slice(0, 2).join(" and ")} explicitly, as the assignment asks. `
+      : `You addressed the key ideas the assignment asks for. `) +
     `Keep building on the reasoning you have already shown.`;
-  return {
-    submissionId: submission.id,
-    criteria: assignment.rubric.criteria.map((c) => {
-      const g = gt.criteria.find((x) => x.criterionId === c.id);
-      return {
-        criterionId: c.id,
-        level: g?.level ?? "Proficient",
-        evidence: g?.evidence ?? [],
-        missingConcepts: g?.missingConcepts ?? [],
-        confidence: 0.9,
-      };
-    }),
-    feedbackDraft,
-  };
+  return finalizeAnalysis(submission.id, assignment, { criteria, feedbackDraft });
 }

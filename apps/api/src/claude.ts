@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { ModelOutputSchema, type AnalysisResult, type Assignment, type Submission } from "@gg/shared";
+import { finalizeAnalysis, ModelOutputSchema, type AnalysisResult, type Assignment, type Submission } from "@gg/shared";
 import { buildSystemPrompt } from "./prompt";
 
 export const MODEL = "claude-opus-5";
@@ -22,10 +22,12 @@ export function createClaudeAnalyzer(opts: ClaudeAnalyzerOptions = {}) {
   const systemCache = new Map<string, string>();
 
   async function once(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
-    let system = systemCache.get(assignment.id);
+    // Keyed by version so a rubric edit produces a fresh prompt (and a fresh cache entry upstream).
+    const cacheKey = `${assignment.id}:${assignment.updatedAt}`;
+    let system = systemCache.get(cacheKey);
     if (!system) {
       system = buildSystemPrompt(assignment);
-      systemCache.set(assignment.id, system);
+      systemCache.set(cacheKey, system);
     }
     const response = await client.messages.parse({
       model: MODEL,
@@ -48,7 +50,7 @@ export function createClaudeAnalyzer(opts: ClaudeAnalyzerOptions = {}) {
     if (!response.parsed_output) {
       throw new AnalysisError("The model returned output that did not match the schema.", true);
     }
-    return { submissionId: submission.id, ...response.parsed_output };
+    return finalizeAnalysis(submission.id, assignment, response.parsed_output);
   }
 
   return async function analyze(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {

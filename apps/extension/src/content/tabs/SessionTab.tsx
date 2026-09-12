@@ -6,6 +6,8 @@ interface Props {
   decisions: Decision[];
   alertsRaised: number;
   alertsAligned: number;
+  checksRaised: number;
+  checksApproved: number;
   totalSubmissions: number;
 }
 
@@ -29,10 +31,10 @@ function latestSeries(decisions: Decision[]) {
   return { byCrit, all: [...latest.values()].sort((a, b) => a.submissionIndex - b.submissionIndex || a.at - b.at) };
 }
 
-export function SessionTab({ page, decisions, alertsRaised, alertsAligned, totalSubmissions }: Props) {
+export function SessionTab({ page, decisions, alertsRaised, alertsAligned, checksRaised, checksApproved, totalSubmissions }: Props) {
   const { byCrit, all } = latestSeries(decisions);
   const maxDeduction = Math.max(5, ...(page?.rubric.map((r) => r.maxPoints) ?? []));
-  const maxIndex = Math.max(totalSubmissions, ...all.map((d) => d.submissionIndex));
+  const maxIndex = Math.max(2, totalSubmissions, ...all.map((d) => d.submissionIndex));
 
   const W = 340, H = 170, PL = 28, PR = 8, PT = 10, PB = 22;
   const x = (i: number) => PL + ((i - 1) / Math.max(1, maxIndex - 1)) * (W - PL - PR);
@@ -56,6 +58,10 @@ export function SessionTab({ page, decisions, alertsRaised, alertsAligned, total
         <div className="gg-stat"><div className="gg-n" data-gg-stat-graded>{gradedSubs}</div><div className="gg-l">graded</div></div>
         <div className="gg-stat"><div className="gg-n" data-gg-stat-alerts>{alertsRaised}</div><div className="gg-l">alerts</div></div>
         <div className="gg-stat"><div className="gg-n" data-gg-stat-aligned>{alertsAligned}</div><div className="gg-l">aligned</div></div>
+      </div>
+      <div className="gg-stats gg-stats-2">
+        <div className="gg-stat"><div className="gg-n" data-gg-stat-checks>{checksRaised}</div><div className="gg-l">rubric checks</div></div>
+        <div className="gg-stat"><div className="gg-n" data-gg-stat-approved>{checksApproved}</div><div className="gg-l">approved</div></div>
       </div>
 
       {all.length === 0 ? (

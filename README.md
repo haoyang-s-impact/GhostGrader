@@ -9,13 +9,17 @@ strictness over the session.
 It never grades on its own. Nothing is written into the LMS until the teacher
 clicks a button.
 
+It is multi-tenant: each teacher owns courses, each course owns assignments,
+and each assignment carries its own rubric. Ghost Grader is bound to exactly
+the rubric the teacher defined for that assignment.
+
 ## What is in the repo
 
 | Path | What it is |
 |---|---|
-| `apps/mock-lms` | A Canvas SpeedGrader look-alike with one assignment, a six-criterion rubric, and fifteen seeded essays. Runs on port 5173. |
+| `apps/mock-lms` | A Canvas look-alike: course dashboard, rubric editor, and SpeedGrader. Seeded with one assignment, a six-criterion rubric, and fifteen essays. Runs on port 5173. |
 | `apps/extension` | Manifest V3 Chrome extension. Content script observes the page and renders a side panel with Alignment, Consistency, and Session tabs. |
-| `apps/api` | Hono server on port 8787. Calls Claude for rubric alignment, holds the session's grading decisions, runs drift detection. |
+| `apps/api` | Hono server on port 8787. Teacher-scoped LMS data (courses, assignments, rubrics, submissions) in a JSON file store, Claude rubric alignment, grading sessions, drift detection. |
 | `packages/shared` | Zod schemas, the drift algorithm, the seeded dataset, and a deterministic mock analyzer. |
 | `docs/plans` | Design document and implementation plan. |
 
@@ -44,6 +48,36 @@ Without a key the API runs a deterministic mock analyzer built from the
 dataset's ground truth, so the whole demo works offline. The chip says
 "Mock mode" so nobody mistakes it for model output.
 
+## Defining a rubric
+
+1. Open http://localhost:5173, which lands on the course dashboard. Use the
+   "Signed in as" switcher in the header to change teacher; each teacher sees
+   only their own courses.
+2. Add a course, then "+ New assignment" to open the rubric editor.
+3. For each criterion set a title, description, max points, the point bands
+   (level, points, descriptor), and the **concept tags**: a closed vocabulary
+   the AI may report as missing for that criterion. Tags are what make the
+   drift and rubric checks explainable ("missing reversibility").
+4. Optionally add anchor responses. Save. You land in SpeedGrader for that
+   assignment, where you can paste student submissions.
+
+Everything the AI sees for an assignment comes from this definition. The
+prompt is rebuilt when the rubric changes.
+
+## Two kinds of intervention
+
+**Rubric check.** When the teacher's score for a criterion diverges from the
+band the rubric-bound analysis chose (by 1.5 points or 20% of the criterion
+maximum, whichever is larger), the Checks tab shows the AI's band, its points,
+the band descriptor, the missing concepts, and quoted evidence. "Approve"
+writes the AI's points into the LMS input and inserts the student-specific
+feedback draft into the comment box. "Keep mine" dismisses it for that
+submission.
+
+**Consistency alert.** When the deduction for a criterion differs from an
+earlier decision in the same session for the same missing concept, the panel
+names both submissions and offers to align.
+
 ## Demo script
 
 1. Open submissions 1 to 3 and score them normally. Watch the Alignment tab
@@ -55,11 +89,14 @@ dataset's ground truth, so the whole demo works offline. The chip says
 5. Click "Insert into comment" to drop the drafted feedback into the comment
    box, then edit and submit as usual.
 6. Open the Session tab for the strictness chart and running mean.
+7. To show the rubric check: on submission 4 give "Reversibility" 5 points.
+   The rubric says Beginning (0) because reversibility and dynamic
+   equilibrium are missing. Approve to apply 0 and insert feedback.
 
 ## Tests
 
 ```bash
-pnpm test                  # unit tests: drift algorithm, fixtures, API routes, extension helpers
+pnpm test                  # unit tests: drift, score check, fixtures, tenant-scoped API routes, extension helpers
 pnpm typecheck
 pnpm --filter @gg/extension e2e:install   # once: downloads Chromium for Playwright
 pnpm e2e                   # end-to-end: loads the built extension into Chromium and runs the demo script
@@ -77,6 +114,15 @@ maximum)`, an alert names both submissions. The comparison is deterministic
 and instant; the semantic part comes from the tags, which Claude extracts from
 a closed vocabulary per criterion. "Keep mine" records an override for that
 pair so it is not raised again.
+
+## Tenancy and storage
+
+The API scopes every request by the `X-Teacher-Id` header, which the mock LMS
+sets from its teacher switcher and the extension reads from the page. A real
+deployment replaces the header with an LTI launch or OAuth session. Data
+lives in `apps/api/data/ghost-grader.json` (override with `GG_DATA_PATH`),
+rewritten atomically on each change; swap the `Store` class for a database
+when needed.
 
 ## Real LMS later
 

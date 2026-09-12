@@ -1,41 +1,37 @@
 import { detectDrift, overrideKey, type Criterion, type Decision, type DriftAlert } from "@gg/shared";
+import type { Store } from "./store";
 
-export interface SessionState {
-  decisions: Decision[];
-  overrides: Set<string>;
-  alertsRaised: number;
-  alertsAligned: number;
-}
+/** Grading-session operations on top of the persistent store. */
+export class SessionService {
+  constructor(private readonly store: Store) {}
 
-export class SessionStore {
-  private sessions = new Map<string, SessionState>();
-
-  get(assignmentId: string): SessionState {
-    let s = this.sessions.get(assignmentId);
-    if (!s) {
-      s = { decisions: [], overrides: new Set(), alertsRaised: 0, alertsAligned: 0 };
-      this.sessions.set(assignmentId, s);
-    }
-    return s;
+  get(assignmentId: string) {
+    return this.store.session(assignmentId);
   }
 
   record(decision: Decision, criterion: Pick<Criterion, "maxPoints">): DriftAlert | null {
-    const s = this.get(decision.assignmentId);
-    const alert = detectDrift(decision, s.decisions, criterion, s.overrides);
+    const s = this.store.session(decision.assignmentId);
+    const alert = detectDrift(decision, s.decisions, criterion, new Set(s.overrides));
     s.decisions.push(decision);
     if (alert) s.alertsRaised += 1;
+    this.store.saveSession(decision.assignmentId, s);
     return alert;
   }
 
-  override(assignmentId: string, a: string, b: string): void {
-    this.get(assignmentId).overrides.add(overrideKey(a, b));
+  override(assignmentId: string, a: string, b: string) {
+    const s = this.store.session(assignmentId);
+    const k = overrideKey(a, b);
+    if (!s.overrides.includes(k)) s.overrides.push(k);
+    this.store.saveSession(assignmentId, s);
   }
 
-  markAligned(assignmentId: string): void {
-    this.get(assignmentId).alertsAligned += 1;
+  bump(assignmentId: string, field: "alertsAligned" | "checksRaised" | "checksApproved") {
+    const s = this.store.session(assignmentId);
+    s[field] += 1;
+    this.store.saveSession(assignmentId, s);
   }
 
-  reset(assignmentId: string): void {
-    this.sessions.delete(assignmentId);
+  reset(assignmentId: string) {
+    this.store.resetSession(assignmentId);
   }
 }

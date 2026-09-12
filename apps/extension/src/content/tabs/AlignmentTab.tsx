@@ -49,7 +49,9 @@ export function AlignmentTab({ page, analysis, inserted, onRetry, onInsert }: Pr
               <div className="gg-card" key={c.criterionId} data-gg-criterion-card={c.criterionId}>
                 <div className="gg-card-head">
                   <span className="gg-crit-title">{row?.title ?? c.criterionId}</span>
-                  <span className={`gg-level ${c.level}`}>{c.level}</span>
+                  <span className={`gg-level ${c.level}`} data-gg-suggested={c.suggestedPoints}>
+                    {c.level} · {c.suggestedPoints}/{row?.maxPoints ?? "?"}
+                  </span>
                 </div>
                 {c.evidence.length > 0 ? (
                   <ul className="gg-evidence">

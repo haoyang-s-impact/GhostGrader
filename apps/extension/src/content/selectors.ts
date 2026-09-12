@@ -12,6 +12,8 @@ export interface PageRubricRow {
 
 export interface PageSubmission {
   assignmentId: string;
+  teacherId: string | null;
+  totalSubmissions: number;
   submissionId: string;
   submissionIndex: number;
   studentName: string;
@@ -44,6 +46,8 @@ export function readSubmission(root: ParentNode = document): PageSubmission | nu
   }
   return {
     assignmentId,
+    teacherId: root.querySelector<HTMLElement>("[data-gg-teacher-id]")?.dataset.ggTeacherId ?? null,
+    totalSubmissions: Number(main.dataset.ggSubmissionTotal ?? 0) || 0,
     submissionId,
     submissionIndex,
     studentName: root.querySelector("[data-gg-student-name]")?.textContent?.trim() ?? "Student",

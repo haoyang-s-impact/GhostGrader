@@ -5,6 +5,8 @@ import { parsePoints, type PageSubmission } from "../src/content/selectors";
 
 const page: PageSubmission = {
   assignmentId: "chem-haber-eq",
+  teacherId: "t-demo",
+  totalSubmissions: 15,
   submissionId: "sub-11",
   submissionIndex: 11,
   studentName: "Kavya Sharma",
@@ -19,8 +21,8 @@ const analysis: AnalysisResult = {
   submissionId: "sub-11",
   feedbackDraft: "Kavya, …",
   criteria: [
-    { criterionId: "reversibility", level: "Beginning", evidence: [], missingConcepts: ["reversibility", "dynamic_equilibrium"], confidence: 0.9 },
-    { criterionId: "clarity", level: "Proficient", evidence: [], missingConcepts: [], confidence: 0.8 },
+    { criterionId: "reversibility", level: "Beginning", evidence: [], missingConcepts: ["reversibility", "dynamic_equilibrium"], confidence: 0.9, suggestedPoints: 0, bandDescriptor: "" },
+    { criterionId: "clarity", level: "Proficient", evidence: [], missingConcepts: [], confidence: 0.8, suggestedPoints: 3.5, bandDescriptor: "" },
   ],
 };
 
