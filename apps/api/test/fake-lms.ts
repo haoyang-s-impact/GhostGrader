@@ -45,12 +45,12 @@ export function fakeLms(opts: { failPush?: boolean; rejectRefs?: string[] } = {}
     name: "fake",
     listAssignments: async () => [{ lmsId: assignment.lmsAssignmentId, courseName: assignment.course, title: assignment.title, questionCount: assignment.questions.length }],
     pullAssignment: async (id) => {
-      if (id !== assignment.lmsAssignmentId) throw new LmsError(`mock-lms 404: no assignment ${id}`, false, 404);
+      if (id !== assignment.lmsAssignmentId) throw new LmsError(`fake-lms 404: no assignment ${id}`, false, 404);
       return pull();
     },
     pushGrades: async (_id, batch): Promise<PushResult> => {
       pushCalls.push(batch);
-      if (opts.failPush) throw new LmsError("mock-lms 503: unavailable", true, 503);
+      if (opts.failPush) throw new LmsError("fake-lms 503: unavailable", true, 503);
       const result: PushResult = { accepted: [], rejected: [] };
       for (const g of batch) {
         if (opts.rejectRefs?.includes(g.clientReferenceId)) {

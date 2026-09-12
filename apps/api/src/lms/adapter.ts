@@ -1,7 +1,8 @@
 /**
  * The boundary between Ghost Grader and an LMS. Everything LMS-specific lives
- * behind this interface: the mock LMS implements it today, and a Canvas
- * adapter is the only thing that has to be written to point at a real one.
+ * behind this interface. No LMS is connected by default (the demo grades
+ * seeded answers); a Canvas adapter is the only thing that has to be written
+ * to point at a real one. See canvas.ts.
  *
  * The LMS owns courses, assignments, questions and student answers. It does
  * not own rubrics: it knows how many points a question is worth, and the
