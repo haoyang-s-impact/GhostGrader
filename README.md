@@ -20,7 +20,7 @@ bound to exactly that rubric when it looks at answers to that question.
 | Path | What it is |
 |---|---|
 | `apps/web` | The Ghost Grader app (React, port 5173): courses, the grading workspace, a gradebook, and the rubric editor. |
-| `apps/api` | Hono server on port 8787. Teacher-scoped data (courses, assignments, questions, rubrics, answers) in a JSON file store, LLM rubric analysis (OpenRouter, OpenAI or Claude), grading sessions, cross-student comparison, and the LMS sync layer. |
+| `apps/api` | Hono server on port 8787. Teacher-scoped data (courses, assignments, questions, rubrics, answers, grades, push records) in a SQLite database, LLM rubric analysis (OpenRouter, OpenAI or Claude), grading sessions, cross-student comparison, and the LMS sync layer. |
 | `packages/shared` | Zod schemas, rubric math and grade rollup, the comparison algorithm, the seeded dataset, and a deterministic mock analyzer. |
 | `docs/plans` | The original design and implementation plan, from the earlier Chrome-extension version. |
 
@@ -135,6 +135,18 @@ panel names Daniel, shows both grades, and offers to treat Kavya the same way.
    this question, and the mean offset. From the home page, **Grades** shows each
    student's per-question grades rolled up to an assignment total.
 
+## Storage
+
+Everything lives in one SQLite file, `apps/api/data/ghost-grader.sqlite`
+(override with `GG_DB_PATH`). The schema is in `apps/api/src/db/schema.ts`
+and is applied by migrations at API startup, so pulling the repo and starting
+the API is enough. An empty database is seeded with the demo teachers,
+courses, questions and answers. Two people, or two browsers, see the same
+grades.
+
+If you have a `data/ghost-grader.json` from an earlier version, run
+`pnpm --filter @gg/api import-json` once to copy it in.
+
 ## How the comparison works
 
 Every submitted grade becomes a decision: the points, the rubric-referenced
@@ -180,7 +192,7 @@ pnpm --filter @gg/web e2e:install   # once: downloads Chromium for Playwright
 pnpm e2e                   # end-to-end: runs the demo script in a real browser
 ```
 
-The end-to-end run starts the API (mock analyzer, throwaway data file) and the
+The end-to-end run starts the API (mock analyzer, throwaway database) and the
 web app itself. If dev servers already hold ports 8787 and 5173, run
 `E2E_API_PORT=18787 E2E_WEB_PORT=15173 pnpm e2e`.
 
@@ -190,7 +202,4 @@ The API scopes every request by the `X-Teacher-Id` header, which the web app
 sets from its "Signed in as" switcher. A real deployment replaces the header
 with an LTI launch or OAuth session.
 
-Data lives in `apps/api/data/ghost-grader.json` (override with
-`GG_DATA_PATH`), rewritten atomically on each change. The file carries a
-schema version; a file from an older version is replaced with fresh seed data
-at startup. Swap the `Store` class for a database when needed.
+Data lives in the SQLite database described under Storage above.

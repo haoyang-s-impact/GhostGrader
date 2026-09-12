@@ -1,219 +1,230 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
-import {
-  answers as seededAnswers,
-  assignment as seededAssignment,
-  students as seededStudents,
-  type Answer,
-  type Assignment,
-  type Course,
-  type Decision,
-  type PushRecord,
-  type Student,
-  type Teacher,
-} from "@gg/shared";
+import { and, asc, eq, inArray } from "drizzle-orm";
+import type { Answer, Assignment, Course, Decision, PushRecord, Student, Teacher } from "@gg/shared";
+import { openDb, schema, type Db } from "./db";
+import { emptySession, seedData, type SeedOptions, type SessionState } from "./json-store";
 
-/** Bump when StoreData changes shape. A data file on another version is discarded and reseeded. */
-export const SCHEMA_VERSION = 2;
-
-export interface SessionState {
-  decisions: Decision[];
-  overrides: string[];
-  /** Answers whose rubric check has already been counted. */
-  checksRaisedFor?: string[];
-  alertsRaised: number;
-  alertsAligned: number;
-  checksRaised: number;
-  checksApproved: number;
-}
-
-export interface StoreData {
-  schemaVersion: number;
-  teachers: Teacher[];
-  courses: Course[];
-  students: Student[];
-  /** Questions and their rubrics are embedded in each assignment. */
-  assignments: Assignment[];
-  answers: Answer[];
-  sessions: Record<string, SessionState>;
-  /** What has been sent to the LMS, keyed by assignment id. */
-  pushes: Record<string, PushRecord[]>;
-}
-
-export function emptySession(): SessionState {
-  return { decisions: [], overrides: [], checksRaisedFor: [], alertsRaised: 0, alertsAligned: 0, checksRaised: 0, checksApproved: 0 };
-}
-
-export interface SeedOptions {
-  /**
-   * Seed the demo questions' answers into the store. On by default, so the
-   * demo has student answers to grade without any LMS. Sync tests turn it off
-   * to watch answers arrive through a pull.
-   */
-  withAnswers?: boolean;
-}
-
-export function seedData(opts: SeedOptions = {}): StoreData {
-  const withAnswers = opts.withAnswers ?? true;
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    teachers: [
-      { id: "t-demo", name: "Dr. Selin Demir", email: "selin.demir@example.edu" },
-      { id: "t-second", name: "Mr. James Park", email: "james.park@example.edu" },
-    ],
-    courses: [
-      { id: "c-chem101", teacherId: "t-demo", name: "CHEM 101: General Chemistry", term: "Fall 2026", lmsCourseId: "lms-c-chem101" },
-      { id: "c-hist210", teacherId: "t-second", name: "HIST 210: Modern Europe", term: "Fall 2026", lmsCourseId: "" },
-    ],
-    students: withAnswers ? [...seededStudents] : [],
-    // The seeded assignment ships with its rubrics written. Its LMS ids let a
-    // configured LMS pull into it later without clobbering those rubrics.
-    assignments: [{ ...seededAssignment, updatedAt: Date.now() }],
-    answers: withAnswers ? seededAnswers.map((a) => ({ ...a, pulledAt: Date.now() })) : [],
-    sessions: {},
-    pushes: {},
-  };
-}
+export { emptySession, seedData, SCHEMA_VERSION, type SeedOptions, type SessionState, type StoreData } from "./json-store";
 
 /**
- * Tiny JSON-file persistence. Teachers, courses, assignments with their
- * questions and rubrics, the roster, answers pulled from the LMS, grading
- * sessions and push records live in one file rewritten atomically on every
- * change. Pass no path for a memory-only store (tests).
+ * SQLite persistence through Drizzle. Teachers, courses, assignments with
+ * their questions and rubrics, the roster, answers, grading sessions and
+ * push records. Same public surface as the JSON store it replaced, so the
+ * routes, the session service and the sync layer do not know the difference.
+ * Pass no path for an in-memory database (tests). An empty database is
+ * seeded with the demo data on first open.
  */
 export class Store {
-  private data: StoreData;
+  readonly db: Db;
+  private readonly sqlite;
+  readonly path: string;
 
-  constructor(
-    private readonly path?: string,
-    seed: SeedOptions = {},
-    log?: (m: string) => void,
-  ) {
-    const loaded = path && existsSync(path) ? (JSON.parse(readFileSync(path, "utf8")) as Partial<StoreData>) : null;
-    if (loaded && loaded.schemaVersion === SCHEMA_VERSION) {
-      this.data = loaded as StoreData;
-    } else {
-      // The file predates the current shape. It is read with a plain cast, so
-      // loading it would fail later somewhere confusing; start fresh instead.
-      if (loaded) log?.(`Data file ${path} is on schema ${loaded.schemaVersion ?? 1}, expected ${SCHEMA_VERSION}. Reseeding.`);
-      this.data = seedData(seed);
-      this.flush();
+  constructor(path?: string, seed: SeedOptions = {}, log?: (m: string) => void) {
+    this.path = path ?? ":memory:";
+    const opened = openDb(this.path);
+    this.db = opened.db;
+    this.sqlite = opened.sqlite;
+    if (this.db.select().from(schema.teachers).limit(1).all().length === 0) {
+      log?.(`Database ${this.path} is empty. Seeding the demo data.`);
+      this.seed(seed);
     }
   }
 
-  private flush() {
-    if (!this.path) return;
-    mkdirSync(dirname(this.path), { recursive: true });
-    const tmp = `${this.path}.tmp`;
-    writeFileSync(tmp, JSON.stringify(this.data, null, 2));
-    renameSync(tmp, this.path);
+  close() {
+    this.sqlite.close();
+  }
+
+  private seed(opts: SeedOptions) {
+    const data = seedData(opts);
+    this.db.transaction((tx) => {
+      tx.insert(schema.teachers).values(data.teachers).run();
+      tx.insert(schema.courses).values(data.courses).run();
+      if (data.students.length) tx.insert(schema.students).values(data.students).run();
+      tx.insert(schema.assignments).values(data.assignments.map(toAssignmentRow)).run();
+      if (data.answers.length) tx.insert(schema.answers).values(data.answers).run();
+    });
   }
 
   // ----- teachers -----
   teachers(): Teacher[] {
-    return this.data.teachers;
+    return this.db.select().from(schema.teachers).all();
   }
   teacher(id: string): Teacher | undefined {
-    return this.data.teachers.find((t) => t.id === id);
+    return this.db.select().from(schema.teachers).where(eq(schema.teachers.id, id)).get();
   }
 
   // ----- courses -----
   coursesFor(teacherId: string): Course[] {
-    return this.data.courses.filter((c) => c.teacherId === teacherId);
+    return this.db.select().from(schema.courses).where(eq(schema.courses.teacherId, teacherId)).all();
   }
   course(teacherId: string, id: string): Course | undefined {
-    return this.data.courses.find((c) => c.id === id && c.teacherId === teacherId);
+    return this.db.select().from(schema.courses).where(and(eq(schema.courses.id, id), eq(schema.courses.teacherId, teacherId))).get();
   }
   courseByLmsId(teacherId: string, lmsCourseId: string): Course | undefined {
-    return this.data.courses.find((c) => c.teacherId === teacherId && c.lmsCourseId !== "" && c.lmsCourseId === lmsCourseId);
+    if (lmsCourseId === "") return undefined;
+    return this.db.select().from(schema.courses).where(and(eq(schema.courses.teacherId, teacherId), eq(schema.courses.lmsCourseId, lmsCourseId))).get();
   }
   createCourse(teacherId: string, name: string, term: string, lmsCourseId = ""): Course {
     const course: Course = { id: newId("c"), teacherId, name, term, lmsCourseId };
-    this.data.courses.push(course);
-    this.flush();
+    this.db.insert(schema.courses).values(course).run();
     return course;
   }
 
   // ----- assignments -----
   assignmentsFor(teacherId: string, courseId?: string): Assignment[] {
-    return this.data.assignments.filter((a) => a.teacherId === teacherId && (!courseId || a.courseId === courseId));
+    const where = courseId ? and(eq(schema.assignments.teacherId, teacherId), eq(schema.assignments.courseId, courseId)) : eq(schema.assignments.teacherId, teacherId);
+    return this.db.select().from(schema.assignments).where(where).all().map(fromAssignmentRow);
   }
   assignment(teacherId: string, id: string): Assignment | undefined {
-    return this.data.assignments.find((a) => a.id === id && a.teacherId === teacherId);
+    const row = this.db.select().from(schema.assignments).where(and(eq(schema.assignments.id, id), eq(schema.assignments.teacherId, teacherId))).get();
+    return row ? fromAssignmentRow(row) : undefined;
   }
   assignmentByLmsId(teacherId: string, lmsAssignmentId: string): Assignment | undefined {
-    return this.data.assignments.find((a) => a.teacherId === teacherId && a.lmsAssignmentId !== "" && a.lmsAssignmentId === lmsAssignmentId);
+    if (lmsAssignmentId === "") return undefined;
+    const row = this.db
+      .select()
+      .from(schema.assignments)
+      .where(and(eq(schema.assignments.teacherId, teacherId), eq(schema.assignments.lmsAssignmentId, lmsAssignmentId)))
+      .get();
+    return row ? fromAssignmentRow(row) : undefined;
   }
   createAssignment(a: Assignment): Assignment {
-    this.data.assignments.push(a);
-    this.flush();
+    this.db.insert(schema.assignments).values(toAssignmentRow(a)).run();
     return a;
   }
   updateAssignment(teacherId: string, id: string, patch: Omit<Assignment, "id" | "teacherId">): Assignment | undefined {
-    const idx = this.data.assignments.findIndex((a) => a.id === id && a.teacherId === teacherId);
-    if (idx < 0) return undefined;
+    if (!this.assignment(teacherId, id)) return undefined;
     const next: Assignment = { ...patch, id, teacherId };
-    this.data.assignments[idx] = next;
-    this.flush();
+    const { id: _id, ...values } = toAssignmentRow(next);
+    this.db.update(schema.assignments).set(values).where(eq(schema.assignments.id, id)).run();
     return next;
   }
 
   // ----- students -----
   student(id: string): Student | undefined {
-    return this.data.students.find((s) => s.id === id);
+    return this.db.select().from(schema.students).where(eq(schema.students.id, id)).get();
   }
   studentByLmsId(lmsStudentId: string): Student | undefined {
-    return this.data.students.find((s) => s.lmsStudentId !== "" && s.lmsStudentId === lmsStudentId);
+    if (lmsStudentId === "") return undefined;
+    return this.db.select().from(schema.students).where(eq(schema.students.lmsStudentId, lmsStudentId)).get();
   }
   upsertStudent(s: Student): Student {
-    const idx = this.data.students.findIndex((x) => x.id === s.id);
-    if (idx < 0) this.data.students.push(s);
-    else this.data.students[idx] = s;
-    this.flush();
+    const { id, ...rest } = s;
+    this.db.insert(schema.students).values(s).onConflictDoUpdate({ target: schema.students.id, set: rest }).run();
     return s;
   }
 
   // ----- answers -----
   answersFor(assignmentId: string, questionId?: string): Answer[] {
-    return this.data.answers
-      .filter((a) => a.assignmentId === assignmentId && (!questionId || a.questionId === questionId))
-      .sort((a, b) => a.studentIndex - b.studentIndex);
+    const where = questionId ? and(eq(schema.answers.assignmentId, assignmentId), eq(schema.answers.questionId, questionId)) : eq(schema.answers.assignmentId, assignmentId);
+    return this.db.select().from(schema.answers).where(where).orderBy(asc(schema.answers.studentIndex)).all();
   }
   answer(assignmentId: string, id: string): Answer | undefined {
-    return this.data.answers.find((a) => a.assignmentId === assignmentId && a.id === id);
+    return this.db.select().from(schema.answers).where(and(eq(schema.answers.assignmentId, assignmentId), eq(schema.answers.id, id))).get();
   }
   answerByLmsId(assignmentId: string, lmsAnswerId: string): Answer | undefined {
-    return this.data.answers.find((a) => a.assignmentId === assignmentId && a.lmsAnswerId !== "" && a.lmsAnswerId === lmsAnswerId);
+    if (lmsAnswerId === "") return undefined;
+    return this.db.select().from(schema.answers).where(and(eq(schema.answers.assignmentId, assignmentId), eq(schema.answers.lmsAnswerId, lmsAnswerId))).get();
   }
   upsertAnswer(a: Answer): Answer {
-    const idx = this.data.answers.findIndex((x) => x.id === a.id);
-    if (idx < 0) this.data.answers.push(a);
-    else this.data.answers[idx] = a;
-    this.flush();
+    const { id, ...rest } = a;
+    this.db.insert(schema.answers).values(a).onConflictDoUpdate({ target: schema.answers.id, set: rest }).run();
     return a;
   }
 
   // ----- sessions -----
   session(assignmentId: string): SessionState {
-    return (this.data.sessions[assignmentId] ??= emptySession());
+    const decisions = this.db.select().from(schema.decisions).where(eq(schema.decisions.assignmentId, assignmentId)).orderBy(asc(schema.decisions.at)).all();
+    const overrides = this.db.select({ key: schema.overrides.key }).from(schema.overrides).where(eq(schema.overrides.assignmentId, assignmentId)).all();
+    const stats = this.db.select().from(schema.sessionStats).where(eq(schema.sessionStats.assignmentId, assignmentId)).get();
+    return {
+      ...emptySession(),
+      decisions,
+      overrides: overrides.map((o) => o.key),
+      checksRaisedFor: stats?.checksRaisedFor ?? [],
+      alertsRaised: stats?.alertsRaised ?? 0,
+      alertsAligned: stats?.alertsAligned ?? 0,
+      checksRaised: stats?.checksRaised ?? 0,
+      checksApproved: stats?.checksApproved ?? 0,
+    };
   }
+
+  /** Write the whole session state in one transaction: decisions upserted and pruned, overrides replaced, stats upserted. */
   saveSession(assignmentId: string, s: SessionState) {
-    this.data.sessions[assignmentId] = s;
-    this.flush();
+    this.db.transaction((tx) => {
+      const keep = s.decisions.map((d) => d.id);
+      const existing = tx.select({ id: schema.decisions.id }).from(schema.decisions).where(eq(schema.decisions.assignmentId, assignmentId)).all().map((r) => r.id);
+      const stale = existing.filter((id) => !keep.includes(id));
+      if (stale.length) tx.delete(schema.decisions).where(and(eq(schema.decisions.assignmentId, assignmentId), inArray(schema.decisions.id, stale))).run();
+      for (const d of s.decisions) {
+        const { id, ...rest } = d;
+        tx.insert(schema.decisions).values(d).onConflictDoUpdate({ target: schema.decisions.id, set: rest }).run();
+      }
+      tx.delete(schema.overrides).where(eq(schema.overrides.assignmentId, assignmentId)).run();
+      if (s.overrides.length) tx.insert(schema.overrides).values(s.overrides.map((key) => ({ assignmentId, key }))).run();
+      const stats = {
+        alertsRaised: s.alertsRaised,
+        alertsAligned: s.alertsAligned,
+        checksRaised: s.checksRaised,
+        checksApproved: s.checksApproved,
+        checksRaisedFor: s.checksRaisedFor ?? [],
+      };
+      tx.insert(schema.sessionStats).values({ assignmentId, ...stats }).onConflictDoUpdate({ target: schema.sessionStats.assignmentId, set: stats }).run();
+    });
   }
   resetSession(assignmentId: string) {
-    delete this.data.sessions[assignmentId];
-    this.flush();
+    this.db.transaction((tx) => {
+      tx.delete(schema.decisions).where(eq(schema.decisions.assignmentId, assignmentId)).run();
+      tx.delete(schema.overrides).where(eq(schema.overrides.assignmentId, assignmentId)).run();
+      tx.delete(schema.sessionStats).where(eq(schema.sessionStats.assignmentId, assignmentId)).run();
+    });
   }
 
   // ----- pushes -----
   pushesFor(assignmentId: string): PushRecord[] {
-    return this.data.pushes[assignmentId] ?? [];
+    return this.db
+      .select()
+      .from(schema.pushes)
+      .where(eq(schema.pushes.assignmentId, assignmentId))
+      .orderBy(asc(schema.pushes.seq))
+      .all()
+      .map(({ seq: _seq, assignmentId: _a, ...rec }) => rec);
   }
   savePushes(assignmentId: string, records: PushRecord[]) {
-    this.data.pushes[assignmentId] = records;
-    this.flush();
+    this.db.transaction((tx) => {
+      tx.delete(schema.pushes).where(eq(schema.pushes.assignmentId, assignmentId)).run();
+      if (records.length) tx.insert(schema.pushes).values(records.map((r) => ({ ...r, assignmentId }))).run();
+    });
   }
+}
+
+function toAssignmentRow(a: Assignment): typeof schema.assignments.$inferInsert {
+  return {
+    id: a.id,
+    teacherId: a.teacherId,
+    courseId: a.courseId,
+    title: a.title,
+    course: a.course,
+    learningObjectives: a.learningObjectives,
+    questions: a.questions,
+    updatedAt: a.updatedAt,
+    lmsAssignmentId: a.lmsAssignmentId,
+    lastPulledAt: a.lastPulledAt,
+  };
+}
+
+function fromAssignmentRow(r: typeof schema.assignments.$inferSelect): Assignment {
+  return {
+    id: r.id,
+    teacherId: r.teacherId,
+    courseId: r.courseId,
+    title: r.title,
+    course: r.course,
+    learningObjectives: r.learningObjectives,
+    questions: r.questions,
+    updatedAt: r.updatedAt,
+    lmsAssignmentId: r.lmsAssignmentId,
+    lastPulledAt: r.lastPulledAt,
+  };
 }
 
 export function newId(prefix: string): string {

@@ -21,8 +21,8 @@ export default defineConfig({
       command: "pnpm --filter @gg/api start",
       url: `${API_URL}/health`,
       reuseExistingServer: false,
-      // A throwaway data file so end-to-end runs never touch the dev store.
-      env: { GG_MOCK: "1", PORT: API_PORT, NODE_ENV: "test", GG_DATA_PATH: join(tmpdir(), `gg-e2e-${Date.now()}.json`) },
+      // A throwaway database so end-to-end runs never touch the dev store.
+      env: { GG_MOCK: "1", PORT: API_PORT, NODE_ENV: "test", GG_DB_PATH: join(tmpdir(), `gg-e2e-${Date.now()}.sqlite`) },
       cwd: "../..",
     },
     {
