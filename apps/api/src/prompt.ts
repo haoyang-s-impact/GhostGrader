@@ -23,6 +23,7 @@ export function buildSystemPrompt(a: Assignment, q: Question): string {
     .join("\n");
   const anchors = q.anchors.length ? q.anchors.map((x) => `### ${x.label}\n${x.text}`).join("\n\n") : "None provided.";
   const heading = q.title ? `Question ${q.index}: ${q.title}` : `Question ${q.index}`;
+  const stimulus = stimulusSection(q);
 
   return `You are Ghost Grader, a grading assistant that works alongside a teacher's LMS. You do not assign grades. You align a student's answer to an analytic rubric and draft feedback the teacher will review.
 
@@ -36,7 +37,7 @@ ${a.learningObjectives.map((o) => `- ${o}`).join("\n")}
 # ${heading}
 Prompt given to students:
 ${q.prompt}
-
+${stimulus}
 # Rubric
 ${rubric}
 
@@ -52,4 +53,26 @@ ${anchors}
 6. summary is one sentence for the teacher that explains the overall judgment in plain terms, naming the most important gap if there is one.
 7. feedbackDraft is two to four sentences addressed to the student by first name, encouraging in tone, naming one concrete strength and one criterion-tied improvement. Never mention points, bands, or the rubric by name.
 8. Return one entry per criterion, in rubric order.`;
+}
+
+/**
+ * What students worked from, for questions that carry media. Audio is given as
+ * its transcript; the analyzer never receives the audio itself. Empty for
+ * questions without media, so their prompt is byte-for-byte unchanged.
+ */
+function stimulusSection(q: Question): string {
+  const media = q.media ?? [];
+  if (media.length === 0) return "";
+  const items = media.map((m) => {
+    if (m.kind === "image") return `### Image: ${m.label}\nStudents could see this image. You cannot; rely on the prompt and anchors for what it shows.`;
+    return m.transcript
+      ? `### Audio: ${m.label}\nStudents listened to this clip and wrote their answers from it. Transcript:\n${m.transcript}`
+      : `### Audio: ${m.label}\nStudents listened to this clip. No transcript is available; judge against the anchor responses.`;
+  });
+  return `
+# Stimulus
+${items.join("\n\n")}
+
+The anchor responses remain the answer key: when the transcript and an anchor seem to differ, follow the anchor.
+`;
 }

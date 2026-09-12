@@ -55,6 +55,13 @@ a { color: var(--app-accent); }
 .ws-progress { margin: 10px 2px; }
 .ws-prompt { background: #f8f7ff; border-left: 3px solid var(--app-accent); padding: 10px 14px; margin: 0 0 16px; border-radius: 0 8px 8px 0; color: #3d4560; white-space: pre-wrap; }
 .ws-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--app-muted); font-weight: 700; margin: 0 0 6px; }
+.ws-media { display: flex; flex-direction: column; gap: 10px; margin: -4px 0 16px; }
+.ws-media-item { border: 1px solid #e6e4f0; border-radius: 8px; padding: 8px 12px; }
+.ws-media-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.ws-media-item audio { width: 100%; max-width: 480px; display: block; }
+.ws-media-item summary { cursor: pointer; font-size: 13px; color: var(--app-muted); margin-top: 4px; }
+.ws-media-item img { max-width: 100%; display: block; margin-top: 8px; border-radius: 6px; }
+.ws-transcript { white-space: pre-wrap; font-size: 13px; color: #3d4560; margin: 6px 0 0; }
 .ws-answer { font-size: 15px; line-height: 1.7; white-space: pre-wrap; margin: 0; }
 .ws-student { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .ws-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--app-accent); color: #fff; display: grid; place-items: center; font-weight: 700; }

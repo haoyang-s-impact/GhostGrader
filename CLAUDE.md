@@ -46,7 +46,15 @@ pnpm workspace (`apps/*`, `packages/*`), TypeScript everywhere.
 
 - **Assignment** → ordered **Questions** (embedded). A question carries its own
   `rubric` (criteria, point bands, closed `concepts` vocabulary), `anchors`,
-  optional `totalPoints`, and `lmsQuestionId`.
+  optional `totalPoints`, `lmsQuestionId`, and optional `media`.
+- **QuestionMedia**: `{kind: "audio" | "image", src, label, transcript?}`, the
+  material students work from (a listening clip, a menu). Answers stay text.
+  `src` is a URL; relative ones resolve against the web app, and seeded files
+  live in `apps/web/public/media/`. `media` is `optional()`, not defaulted,
+  because the `questions` JSON column is read back with a cast. The analyzer
+  never receives audio: `buildSystemPrompt` (`apps/api/src/prompt.ts`) adds a
+  Stimulus section with each clip's `transcript`, made once by
+  `scripts/transcribe-media.ts` and committed with the fixture.
 - **Student**, and **Answer** keyed by `(questionId, studentId)`, with
   `studentIndex` (roster position) and `lmsAnswerId`.
 - **Decision**: one submitted grade for one answer, id `${answerId}:grade`, with
@@ -67,7 +75,8 @@ A second seeded assignment, `eng8-open-ended` (course `c-eng8`, also `t-demo`),
 is a Grade 8 English exam with five short-answer questions and a separate
 10-student roster (`stu-e01`..`stu-e10`). Q1 is a written comparison (1 criterion,
 10/5/0), Q2 and Q3 are listening tasks (1 criterion, 5 points per correct menu
-item out of 20), Q4 is a dialogue question (10/5/0), and Q5 is a paragraph with a
+item out of 20, spelling forgiven; each has its audio clip with transcript and the
+menu image as `media`), Q4 is a dialogue question (10/5/0), and Q5 is a paragraph with a
 3-criterion analytic rubric (4 pts each). All 50 answers (`e-q<n>-<nn>`) have
 ground truth. Fixtures are in `fixtures/english8/`, and `data.ts` merges its
 ground truth into `groundTruth` (answer ids are unique across assignments). The
@@ -94,6 +103,9 @@ Hash routes: `#/` home, `#/grade/:assignmentId/:questionId[/:answerId]`,
 `#/grades/:assignmentId`, `#/rubric/:assignmentId`, `#/rubric/new/:courseId`.
 Grading logic is the `useGrading` hook (`grading/useGrading.ts`); the page owns
 the grade and comment as form state. Panel tabs are in `grading/tabs/`.
+`grading/QuestionMedia.tsx` renders a question's audio (with a collapsible
+transcript) and images under the prompt. Static files in `apps/web/public/`
+are served by Vite, so media needs no API route or teacher header.
 
 ## Database (`apps/api`)
 
@@ -110,9 +122,10 @@ methods return plain values, no `await`).
    message instead of failing later.
 2. `new Store(path, seed, log)` (`src/store.ts`) calls `openDb`, then, if the
    `teachers` table is empty, inserts `seedData()` from `json-store.ts` in one
-   transaction (two teachers, two courses, the chemistry assignment with both
-   questions, the fifteen plus five seeded answers). An existing database is
-   never reseeded.
+   transaction (two teachers, three courses, the chemistry assignment with its
+   15 + 5 answers and the English exam with its 50). An existing database is
+   never reseeded, so a seed change reaches a developer only after they delete
+   their `.sqlite` file.
 3. `index.ts` builds the store once with `GG_DB_PATH` (default
    `apps/api/data/ghost-grader.sqlite`) and hands it to `createApp`. Tests use
    `new Store()` for an in-memory database; call `store.close()` when a test
@@ -129,7 +142,7 @@ the demo.
 | `teachers` | id | name, email |
 | `courses` | id | teacher_id, name, term, lms_course_id |
 | `students` | id | name, lms_student_id |
-| `assignments` | id | teacher_id, course_id, title, course, `learning_objectives` JSON, `questions` JSON (every question with its rubric, anchors, totalPoints, lmsQuestionId), updated_at, lms_assignment_id, last_pulled_at |
+| `assignments` | id | teacher_id, course_id, title, course, `learning_objectives` JSON, `questions` JSON (every question with its rubric, anchors, totalPoints, lmsQuestionId, media), updated_at, lms_assignment_id, last_pulled_at |
 | `answers` | id | assignment_id, question_id, student_id, student_name, student_index, text, lms_answer_id, submitted_at, pulled_at |
 | `decisions` | id (`${answerId}:grade`) | assignment_id, question_id, answer_id, student_id, points, max_points, suggested_points (nullable), `missing_concepts` JSON, comment, at |
 | `overrides` | (assignment_id, key) unique | "Keep mine" pairs, `key` from `overrideKey` |
@@ -226,6 +239,7 @@ pnpm typecheck
 pnpm test         # vitest in every package
 pnpm --filter @gg/api db:generate   # after changing apps/api/src/db/schema.ts
 pnpm --filter @gg/api import-json   # one-time import of an old data/ghost-grader.json
+pnpm --filter @gg/api transcribe-media [assignment.json]   # transcribe untranscribed audio media (OpenAI), write back to the fixture
 pnpm e2e          # Playwright against the web app; boots API (mock analyzer) and web itself
 ```
 
@@ -242,6 +256,8 @@ scripts shell out to bare `pnpm`, so a shim on PATH is needed.
   `OPENROUTER_API_KEY` (+`OPENROUTER_MODEL`) → `OPENAI_API_KEY` (+`OPENAI_MODEL`)
   → `ANTHROPIC_API_KEY`. No key: deterministic mock analyzer. `GG_MOCK=1`
   forces the mock (tests do this).
+- `OPENAI_TRANSCRIBE_MODEL` (default `gpt-4o-transcribe`): only for
+  `scripts/transcribe-media.ts`, which uses `OPENAI_API_KEY`.
 - `PORT` (8787), `GG_DB_PATH` (default `apps/api/data/ghost-grader.sqlite`, gitignored).
 - `GG_LMS` (unset: no LMS; `canvas`: stub, not implemented), `GG_LMS_BASE_URL`, `GG_LMS_TOKEN`.
 - Web: `VITE_API_BASE` (default `http://localhost:8787`).

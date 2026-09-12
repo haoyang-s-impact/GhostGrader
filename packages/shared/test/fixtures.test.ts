@@ -169,6 +169,27 @@ describe("English exam seed", () => {
     }
   });
 
+  it("attaches each listening clip and the menu, and no media anywhere else", () => {
+    const listening = englishAssignment.questions.filter((q) => q.id.startsWith("q-eng-order-"));
+    expect(listening.map((q) => q.id)).toEqual(["q-eng-order-barbara", "q-eng-order-adam"]);
+    for (const q of listening) expect(q.media?.map((m) => m.kind), q.id).toEqual(["audio", "image"]);
+    for (const q of englishAssignment.questions.filter((x) => !listening.includes(x))) expect(q.media, q.id).toBeUndefined();
+  });
+
+  it("has transcripts that say what the answer key says", () => {
+    const transcript = (id: string) => eq(id).media!.find((m) => m.kind === "audio")!.transcript!.toLowerCase();
+    const key: Record<string, string[]> = {
+      "q-eng-order-barbara": ["lentil soup", "mixed kebab", "apple pie", "no, thank you"],
+      "q-eng-order-adam": ["chicken soup", "grilled chicken", "piece of cake", "glass of lemonade"],
+    };
+    for (const [id, items] of Object.entries(key)) {
+      for (const item of items) {
+        expect(transcript(id), `${id}: ${item}`).toContain(item);
+        if (item !== "no, thank you") expect(eq(id).anchors[0]!.text.toLowerCase(), `${id} anchor: ${item}`).toContain(item.replace(/^(piece|glass) of /, ""));
+      }
+    }
+  });
+
   it("produces a schema-valid mock analysis for every answer", () => {
     for (const a of englishAnswers) {
       const r = analyze(a.id);

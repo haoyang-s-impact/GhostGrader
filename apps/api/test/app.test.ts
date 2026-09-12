@@ -204,6 +204,24 @@ describe("multi-tenant data", () => {
     expect(body.updatedAt).toBeGreaterThanOrEqual(existing.updatedAt);
     expect((await put(app, `/assignments/${assignment.id}`, edited, T2)).status).toBe(404);
   });
+
+  it("serves a listening question's audio, transcript and menu, and keeps them through a rubric edit", async () => {
+    const app = mkApp();
+    const existing = (await (await get(app, `/assignments/${englishAssignment.id}`)).json()) as Assignment;
+    const barbara = existing.questions.find((q) => q.id === "q-eng-order-barbara")!;
+    expect(barbara.media).toMatchObject([
+      { kind: "audio", src: "media/eng8/barbara-order.mp3", transcript: expect.stringContaining("lentil soup") },
+      { kind: "image", src: "media/eng8/menu.png", label: "Menu" },
+    ]);
+
+    const edited = editable(existing);
+    edited.questions.find((q) => q.id === "q-eng-order-barbara")!.rubric.criteria[0]!.title = "Menu items";
+    const body = (await (await put(app, `/assignments/${englishAssignment.id}`, edited)).json()) as Assignment;
+    const after = body.questions.find((q) => q.id === "q-eng-order-barbara")!;
+    expect(after.rubric.criteria[0]!.title).toBe("Menu items");
+    expect(after.media).toEqual(barbara.media);
+    expect((await (await get(app, `/assignments/${englishAssignment.id}`)).json()).questions[1].media).toEqual(barbara.media);
+  });
 });
 
 describe("POST /analyze on the seeded assignment", () => {

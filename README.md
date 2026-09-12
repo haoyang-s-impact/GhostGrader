@@ -51,6 +51,9 @@ students who answered all of them.
   earns 5. Spelling and punctuation are ignored.
 - **Q2 and Q3, Listening: Barbara's and Adam's orders**: 20 points, 5 per menu
   item (soup, main course, dessert, beverage) that matches the answer key.
+  Spelling is forgiven. Each question carries its recording, the recording's
+  transcript and the restaurant menu. The files are in
+  `apps/web/public/media/eng8/`.
 - **Q4, Kevin's excuse**: 10/5/0 against the dialogue.
 - **Q5, Weekend activities**: 12 points across three analytic criteria (task
   completion, grammar, vocabulary), 4 points each.
@@ -158,8 +161,11 @@ panel names Daniel, shows both grades, and offers to treat Kavya the same way.
 3. Open **Burak Arslan** (#6), who has the same gap. Type 0, keep it, and
    submit. The consistency alert names Mehmet, shows 10 vs 0 against the same
    suggestion of 5, and offers **Align to 10**.
-4. Switch to **Q2**. Answers are scored by how many menu items match the key:
-   Mehmet (#2) and Ayşe (#5) both miss the dessert, so both are suggested 15.
+4. Switch to **Q2**, a listening task. Play the dialogue under the prompt, open
+   **Transcript** to read it, and open **Menu** to see what students chose from.
+   Answers are scored by how many menu items match the key. Mehmet (#2) and
+   Ayşe (#5) both miss the dessert, so both are suggested 15. Ece (#10) wrote
+   only "Kebab" for the Mixed Kebab, so she gets 15 as well.
 5. Switch to **Q5** to see a paragraph scored on three analytic criteria.
 
 ## Storage
@@ -169,7 +175,27 @@ Everything lives in one SQLite file, `apps/api/data/ghost-grader.sqlite`
 and is applied by migrations at API startup, so pulling the repo and starting
 the API is enough. An empty database is seeded with the demo teachers,
 courses, questions and answers. Two people, or two browsers, see the same
-grades.
+grades. An existing database is never reseeded. If yours predates the English
+exam, run `rm apps/api/data/ghost-grader.sqlite*` and restart the API to pick
+it up. This also clears your grades.
+
+### Listening questions: audio and transcripts
+
+A question can carry `media`: audio clips and images students work from, shown
+under the prompt while you grade. Answers are still text. The analyzer never
+hears audio. It reads the clip's transcript, which is made once, when the
+question is set up:
+
+```bash
+pnpm --filter @gg/api transcribe-media [path/to/assignment.json]
+```
+
+This sends each untranscribed clip under `apps/web/public/` to OpenAI's
+transcription API (`OPENAI_API_KEY`, model `gpt-4o-transcribe` or
+`OPENAI_TRANSCRIBE_MODEL`). It then writes the text into the fixture so it can
+be committed. Grading, tests and mock mode never need the key. The anchor
+responses stay the answer key. The transcript tells the analyzer what students
+heard.
 
 If you have a `data/ghost-grader.json` from an earlier version, run
 `pnpm --filter @gg/api import-json` once to copy it in.

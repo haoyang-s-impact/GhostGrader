@@ -128,6 +128,19 @@
           "text": "Soup: Lentil Soup\nMain Course: Mixed Kebab\nDessert: Apple Pie\nBeverage: Nothing / None"
         }
       ],
+      "media": [
+        {
+          "kind": "audio",
+          "src": "media/eng8/barbara-order.mp3",
+          "label": "Dialogue: Barbara and the waiter",
+          "transcript": "Unit 1. Recording 2. Listen and circle what Barbara orders on the menu.\n\nHello. May I take your order?\nYes, please, Barbara. What would you like to have?\nWell, I'd like lentil soup first.\nLentil soup. OK. What would you like to have for a main course?\nI'd like a mixed kebab, please.\nAll right. Would you like to have a dessert?\nYes. I'd like a piece of apple pie.\nAll right. And would you like anything to drink?\nNo, thank you."
+        },
+        {
+          "kind": "image",
+          "src": "media/eng8/menu.png",
+          "label": "Menu"
+        }
+      ],
       "lmsQuestionId": "lms-q-eng-order-barbara"
     },
     {
@@ -183,6 +196,19 @@
         {
           "label": "Answer key (20 points)",
           "text": "Soup: Chicken Soup\nMain Course: Grilled chicken\nDessert: Piece of cake\nBeverage: A glass of lemonade"
+        }
+      ],
+      "media": [
+        {
+          "kind": "audio",
+          "src": "media/eng8/adam-order.mp3",
+          "label": "Dialogue: Adam and the waiter",
+          "transcript": "Unit 1. Recording 3. Listen to the rest of the conversation and write down what Adam orders.\n\nWhat about you, sir?\n\nUm, I'd like chicken soup.\n\nWhat would you like to have for a main course?\n\nWell, I'd like a grilled chicken, please.\n\nWould you like a dessert?\n\nYes. I'd like a piece of cake, please.\n\nWould you like anything to drink, sir?\n\nCan I have a glass of lemonade, please?\n\nSure, thank you."
+        },
+        {
+          "kind": "image",
+          "src": "media/eng8/menu.png",
+          "label": "Menu"
         }
       ],
       "lmsQuestionId": "lms-q-eng-order-adam"

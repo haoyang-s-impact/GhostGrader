@@ -3,6 +3,7 @@ import { questionById, questionMax, type Answer, type Assignment } from "@gg/sha
 import { api, type SyncStatus } from "../api";
 import { go, href } from "../router";
 import { latestByAnswer, type GradingTarget } from "../grading/decisions";
+import { QuestionMedia } from "../grading/QuestionMedia";
 import { AlignmentTab } from "../grading/tabs/AlignmentTab";
 import { ConsistencyTab } from "../grading/tabs/ConsistencyTab";
 import { SessionTab } from "../grading/tabs/SessionTab";
@@ -127,6 +128,7 @@ export function GradeView({ assignmentId, questionId, answerId }: Props) {
             Question {question.index}{question.title ? `: ${question.title}` : ""} · {questionMax(question)} pts
           </div>
           <p className="ws-prompt">{question.prompt}</p>
+          <QuestionMedia media={question.media} />
           {answer ? (
             <>
               <div className="ws-student">
