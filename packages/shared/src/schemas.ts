@@ -34,6 +34,28 @@ export const CourseSchema = z.object({
   teacherId: z.string(),
   name: z.string(),
   term: z.string().default(""),
+  /** Identifier of this course in the LMS. Empty for locally created courses. */
+  lmsCourseId: z.string().default(""),
+});
+
+/**
+ * One question within an assignment. The rubric lives here, not on the
+ * assignment: grading is per (student, question), and concept tags, band
+ * descriptors and the drift threshold are all rubric-scoped, so an
+ * assignment-wide rubric stops meaning anything the moment two questions
+ * differ.
+ */
+export const QuestionSchema = z.object({
+  id: z.string(),
+  index: z.number().int().positive(),
+  title: z.string().default(""),
+  prompt: z.string(),
+  rubric: RubricSchema,
+  anchors: z.array(AnchorSchema).default([]),
+  /** Points this question's grade is out of. Defaults to the sum of criterion maxima. */
+  totalPoints: z.number().positive().optional(),
+  /** Identifier of this question in the LMS. Empty for locally authored questions. */
+  lmsQuestionId: z.string().default(""),
 });
 
 export const AssignmentSchema = z.object({
@@ -43,26 +65,48 @@ export const AssignmentSchema = z.object({
   title: z.string(),
   /** Display name of the course, denormalized for prompts and headers. */
   course: z.string(),
-  prompt: z.string(),
   learningObjectives: z.array(z.string()),
-  rubric: RubricSchema,
-  anchors: z.array(AnchorSchema),
-  /** Points the single grade is out of. Defaults to the sum of criterion maxima. */
-  totalPoints: z.number().positive().optional(),
+  /** Ordered questions. Questions inherit the assignment's updatedAt. */
+  questions: z.array(QuestionSchema).min(1),
   updatedAt: z.number().default(0),
+  /** Set when this assignment was pulled from an LMS; empty when authored locally. */
+  lmsAssignmentId: z.string().default(""),
+  lastPulledAt: z.number().default(0),
 });
 
 /** Payload a teacher sends when creating or editing an assignment. */
-export const AssignmentInputSchema = AssignmentSchema.omit({ id: true, teacherId: true, course: true, updatedAt: true });
-
-export const SubmissionSchema = z.object({
-  id: z.string(),
-  index: z.number().int().positive(),
-  studentName: z.string(),
-  text: z.string(),
+export const AssignmentInputSchema = AssignmentSchema.omit({
+  id: true,
+  teacherId: true,
+  course: true,
+  updatedAt: true,
+  lmsAssignmentId: true,
+  lastPulledAt: true,
 });
 
-export const StoredSubmissionSchema = SubmissionSchema.extend({ assignmentId: z.string() });
+export const StudentSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  /** Identifier of this student in the LMS. Empty for locally added students. */
+  lmsStudentId: z.string().default(""),
+});
+
+/** One student's answer to one question. Replaces the old flat Submission. */
+export const AnswerSchema = z.object({
+  id: z.string(),
+  assignmentId: z.string(),
+  questionId: z.string(),
+  studentId: z.string(),
+  /** Denormalized for prompts, the panel and alert copy. */
+  studentName: z.string(),
+  /** Roster position within the assignment, stable across questions. */
+  studentIndex: z.number().int().positive(),
+  text: z.string(),
+  /** Opaque LMS id. The pull upsert key; empty for locally added answers. */
+  lmsAnswerId: z.string().default(""),
+  submittedAt: z.number().default(0),
+  pulledAt: z.number().default(0),
+});
 
 /** One criterion as the model returns it. */
 export const ModelCriterionSchema = z.object({
@@ -73,7 +117,7 @@ export const ModelCriterionSchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
-/** What the model is asked to return. submissionId and suggestedPoints are stamped by the server. */
+/** What the model is asked to return. Ids and suggestedPoints are stamped by the server. */
 export const ModelOutputSchema = z.object({
   criteria: z.array(ModelCriterionSchema),
   /** One sentence for the teacher explaining the suggested grade. */
@@ -90,9 +134,10 @@ export const CriterionAnalysisSchema = ModelCriterionSchema.extend({
 });
 
 export const AnalysisResultSchema = z.object({
-  submissionId: z.string(),
+  answerId: z.string(),
+  questionId: z.string(),
   criteria: z.array(CriterionAnalysisSchema),
-  /** Rubric-derived grade on the assignment's scale. */
+  /** Rubric-derived grade on this question's scale. */
   suggestedTotal: z.number(),
   maxTotal: z.number(),
   /** Union of missing concepts across criteria; what the comparisons key on. */
@@ -105,6 +150,7 @@ export const AnalysisResultSchema = z.object({
 
 /** Raised when a teacher's grade diverges from the rubric-bound analysis. */
 export const ScoreCheckSchema = z.object({
+  questionId: z.string(),
   enteredPoints: z.number(),
   suggestedPoints: z.number(),
   maxPoints: z.number(),
@@ -122,31 +168,37 @@ export const ScoreCheckSchema = z.object({
   ),
 });
 
-/** One overall grade the teacher entered for one submission. */
+/** One grade the teacher entered for one student's answer to one question. */
 export const DecisionSchema = z.object({
   id: z.string(),
   assignmentId: z.string(),
-  submissionId: z.string(),
-  submissionIndex: z.number().int().positive(),
+  questionId: z.string(),
+  answerId: z.string(),
+  studentId: z.string(),
+  studentIndex: z.number().int().positive(),
   studentName: z.string().default(""),
   points: z.number(),
   maxPoints: z.number(),
   /** What the rubric-bound analysis suggested at the time, if it was available. */
   suggestedPoints: z.number().nullable(),
   missingConcepts: z.array(z.string()),
+  /** Feedback the teacher wrote for the student; pushed to the LMS with the grade. */
+  comment: z.string().default(""),
   at: z.number(),
 });
 
 /**
  * Raised when this grade treats the same gaps differently from an earlier
- * student's grade. Offsets are (teacher points - suggested points), so the
- * comparison is about leniency relative to the rubric, not raw scores.
+ * student's grade on the same question. Offsets are (teacher points -
+ * suggested points), so the comparison is about leniency relative to the
+ * rubric, not raw scores.
  */
 export const DriftAlertSchema = z.object({
+  questionId: z.string(),
   currentDecisionId: z.string(),
   priorDecisionId: z.string(),
-  currentSubmissionIndex: z.number(),
-  priorSubmissionIndex: z.number(),
+  currentStudentIndex: z.number(),
+  priorStudentIndex: z.number(),
   priorStudentName: z.string(),
   sharedConcepts: z.array(z.string()),
   currentPoints: z.number(),
@@ -159,6 +211,25 @@ export const DriftAlertSchema = z.object({
   /** The grade that would treat this student the way the earlier one was treated. */
   recommendedPoints: z.number(),
   maxPoints: z.number(),
+});
+
+/**
+ * What Ghost Grader has sent to the LMS. Kept separate from Decision on
+ * purpose: a re-grade replaces its Decision wholesale by deterministic id, so
+ * sync state attached there would erase the fact that a grade was already
+ * pushed. Separate records give "you pushed 23; the grade is now 20" for free.
+ */
+export const PushRecordSchema = z.object({
+  answerId: z.string(),
+  questionId: z.string(),
+  studentId: z.string(),
+  points: z.number(),
+  /** Content-addressed from answer, points and comment (see pushReference), so a repeated push is a no-op. */
+  clientReferenceId: z.string(),
+  status: z.enum(["pending", "pushed", "failed"]),
+  lmsGradeId: z.string().default(""),
+  pushedAt: z.number().default(0),
+  error: z.string().default(""),
 });
 
 export const GroundTruthSchema = z.record(
@@ -180,12 +251,14 @@ export const GroundTruthSchema = z.record(
 export type Band = z.infer<typeof BandSchema>;
 export type Criterion = z.infer<typeof CriterionSchema>;
 export type Rubric = z.infer<typeof RubricSchema>;
+export type Anchor = z.infer<typeof AnchorSchema>;
 export type Teacher = z.infer<typeof TeacherSchema>;
 export type Course = z.infer<typeof CourseSchema>;
+export type Question = z.infer<typeof QuestionSchema>;
 export type Assignment = z.infer<typeof AssignmentSchema>;
 export type AssignmentInput = z.infer<typeof AssignmentInputSchema>;
-export type Submission = z.infer<typeof SubmissionSchema>;
-export type StoredSubmission = z.infer<typeof StoredSubmissionSchema>;
+export type Student = z.infer<typeof StudentSchema>;
+export type Answer = z.infer<typeof AnswerSchema>;
 export type ModelCriterion = z.infer<typeof ModelCriterionSchema>;
 export type ModelOutput = z.infer<typeof ModelOutputSchema>;
 export type CriterionAnalysis = z.infer<typeof CriterionAnalysisSchema>;
@@ -193,4 +266,5 @@ export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
 export type ScoreCheck = z.infer<typeof ScoreCheckSchema>;
 export type Decision = z.infer<typeof DecisionSchema>;
 export type DriftAlert = z.infer<typeof DriftAlertSchema>;
+export type PushRecord = z.infer<typeof PushRecordSchema>;
 export type GroundTruth = z.infer<typeof GroundTruthSchema>;

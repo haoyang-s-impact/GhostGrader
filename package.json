@@ -2,13 +2,13 @@
   "name": "ghost-grader",
   "private": true,
   "version": "0.1.0",
-  "description": "Browser-native grading copilot that detects intra-rater drift inside the LMS",
+  "description": "Grading copilot that sits alongside the LMS: grade question/answer pairs against each question's rubric and catch inconsistent grading",
   "scripts": {
-    "dev": "pnpm -r --parallel --filter ./apps/api --filter ./apps/mock-lms dev",
+    "dev": "pnpm -r --parallel --filter ./apps/api --filter ./apps/web dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "e2e": "pnpm --filter @gg/extension e2e"
+    "e2e": "pnpm --filter @gg/web e2e"
   },
   "devDependencies": {
     "typescript": "^5.9.2"

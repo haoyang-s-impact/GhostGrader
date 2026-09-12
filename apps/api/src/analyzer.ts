@@ -1,8 +1,8 @@
-import { groundTruth, mockAnalyze, type AnalysisResult, type Assignment, type Submission } from "@gg/shared";
+import { groundTruth, mockAnalyze, type AnalysisResult, type Answer, type Assignment, type Question } from "@gg/shared";
 import { AnalysisError, createClaudeAnalyzer } from "./claude";
 import { createOpenAIAnalyzer, createOpenRouterAnalyzer } from "./openrouter";
 
-export type Analyzer = (submission: Submission, assignment: Assignment) => Promise<AnalysisResult>;
+export type Analyzer = (answer: Answer, assignment: Assignment, question: Question) => Promise<AnalysisResult>;
 
 export type ProviderMode = "openrouter" | "openai" | "claude" | "mock";
 
@@ -39,7 +39,7 @@ export function selectAnalyzer(env: NodeJS.ProcessEnv = process.env, log?: (m: s
       chain.push({ mode: "openai", model, analyze: createOpenAIAnalyzer({ apiKey: env.OPENAI_API_KEY, model, baseUrl: env.OPENAI_BASE_URL, log }) });
     }
     if (env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN) {
-      chain.push({ mode: "claude", model: "claude-opus-5", analyze: async (s, a) => ({ ...(await createClaudeAnalyzer({ log })(s, a)), provider: "claude" }) });
+      chain.push({ mode: "claude", model: "claude-opus-5", analyze: async (ans, a, q) => ({ ...(await createClaudeAnalyzer({ log })(ans, a, q)), provider: "claude" }) });
     }
   }
   if (chain.length === 0) {
@@ -47,10 +47,10 @@ export function selectAnalyzer(env: NodeJS.ProcessEnv = process.env, log?: (m: s
       mode: "mock",
       model: "mock",
       fallbacks: [],
-      analyze: async (submission, assignment) => {
+      analyze: async (answer, assignment, question) => {
         // Small artificial latency so the panel's loading state is visible in demos.
         await new Promise((r) => setTimeout(r, env.NODE_ENV === "test" ? 0 : 350));
-        return { ...mockAnalyze(submission, assignment, groundTruth), provider: "mock" };
+        return { ...mockAnalyze(answer, assignment, question, groundTruth), provider: "mock" };
       },
     };
   }
@@ -59,11 +59,11 @@ export function selectAnalyzer(env: NodeJS.ProcessEnv = process.env, log?: (m: s
     mode: primary.mode,
     model: primary.model,
     fallbacks: rest.map(({ mode, model }) => ({ mode, model })),
-    analyze: async (submission, assignment) => {
+    analyze: async (answer, assignment, question) => {
       let lastError: unknown;
       for (const p of chain) {
         try {
-          return await p.analyze(submission, assignment);
+          return await p.analyze(answer, assignment, question);
         } catch (err) {
           lastError = err;
           log?.(`[${p.mode}] failed: ${err instanceof Error ? err.message : String(err)}${p === chain[chain.length - 1] ? "" : " -> trying next provider"}`);

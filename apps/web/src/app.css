@@ -1,0 +1,92 @@
+:root {
+  --app-bg: #f4f5f8;
+  --app-fg: #1f2a33;
+  --app-muted: #66737d;
+  --app-border: #dfe4e8;
+  --app-accent: #5b3df5;
+  --app-ok: #0b874b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  color: var(--app-fg);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--app-bg); font-size: 14px; line-height: 1.5; }
+button { font: inherit; cursor: pointer; }
+a { color: var(--app-accent); }
+
+.app-header { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 20px; background: #fff; border-bottom: 1px solid var(--app-border); position: sticky; top: 0; z-index: 5; }
+.app-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; letter-spacing: -0.01em; color: inherit; text-decoration: none; }
+.app-logo { width: 28px; height: 28px; border-radius: 8px; background: var(--app-accent); color: #fff; display: grid; place-items: center; }
+.app-crumb { color: var(--app-muted); font-size: 13px; }
+.app-crumb a { color: inherit; }
+.app-spacer { flex: 1; }
+.app-select, .app-input, .app-textarea { font: inherit; padding: 6px 10px; border: 1px solid var(--app-border); border-radius: 8px; background: #fff; color: inherit; }
+.app-input, .app-textarea { width: 100%; }
+.app-textarea { resize: vertical; }
+.app-input:focus, .app-textarea:focus, .app-select:focus { outline: 2px solid var(--app-accent); outline-offset: 1px; }
+.app-btn { border: 1px solid var(--app-border); background: #fff; color: inherit; border-radius: 8px; padding: 6px 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.app-btn:hover { background: #f5f6f8; }
+.app-btn:disabled { opacity: 0.5; cursor: default; }
+.app-btn-primary { background: var(--app-accent); border-color: var(--app-accent); color: #fff; }
+.app-btn-primary:hover { background: #4a2fd9; }
+.app-btn-sm { padding: 3px 9px; font-size: 12.5px; }
+.app-muted { color: var(--app-muted); font-size: 12.5px; }
+.app-error { background: #fde8e6; border: 1px solid #f3b6b0; color: #8a1f16; padding: 10px 12px; border-radius: 8px; margin: 8px 0 16px; }
+.app-page { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
+.app-page h1 { font-size: 22px; margin: 0 0 12px; }
+.app-page h2 { font-size: 16px; margin: 0 0 8px; }
+.app-card { background: #fff; border: 1px solid var(--app-border); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+.app-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.app-list { list-style: none; margin: 0; padding: 0; }
+.app-list > li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #eef1f3; flex-wrap: wrap; }
+
+/* ---- grading workspace ---- */
+.ws { display: grid; grid-template-columns: 240px minmax(0, 1fr) 400px; gap: 16px; padding: 16px; height: calc(100vh - 52px); }
+.ws-col { min-height: 0; overflow-y: auto; }
+.ws-questions { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.ws-qtab { border: 1px solid var(--app-border); background: #fff; border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 12.5px; color: var(--app-muted); text-decoration: none; }
+.ws-qtab.is-active { background: var(--app-accent); border-color: var(--app-accent); color: #fff; }
+.ws-students { list-style: none; margin: 0; padding: 0; background: #fff; border: 1px solid var(--app-border); border-radius: 12px; overflow: hidden; }
+.ws-students a { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: inherit; text-decoration: none; border-top: 1px solid #eef1f3; font-size: 13px; }
+.ws-students li:first-child a { border-top: 0; }
+.ws-students a:hover { background: #f7f7fb; }
+.ws-students a.is-active { background: #efeaff; }
+.ws-idx { color: var(--app-muted); font-variant-numeric: tabular-nums; width: 22px; }
+.ws-points { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--app-ok); }
+.ws-progress { margin: 10px 2px; }
+.ws-prompt { background: #f8f7ff; border-left: 3px solid var(--app-accent); padding: 10px 14px; margin: 0 0 16px; border-radius: 0 8px 8px 0; color: #3d4560; }
+.ws-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--app-muted); font-weight: 700; margin: 0 0 6px; }
+.ws-answer { font-size: 15px; line-height: 1.7; white-space: pre-wrap; margin: 0; }
+.ws-student { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.ws-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--app-accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
+.ws-name { font-weight: 700; font-size: 16px; }
+.ws-grade-row { display: flex; align-items: baseline; gap: 8px; }
+.ws-grade { width: 110px; font: inherit; font-size: 26px; font-weight: 800; padding: 4px 10px; border: 1px solid var(--app-border); border-radius: 8px; text-align: right; }
+.ws-grade:focus { outline: 2px solid var(--app-accent); outline-offset: 1px; }
+.ws-grade-max { font-size: 18px; color: var(--app-muted); }
+.ws-saved { color: var(--app-ok); font-size: 12.5px; }
+.ws-panel { display: flex; flex-direction: column; min-height: 0; }
+.ws-panel .gg-root { flex: 1; }
+.ws-sync { margin-top: 12px; }
+
+/* ---- gradebook ---- */
+.gb { width: 100%; border-collapse: collapse; font-size: 13px; }
+.gb th { text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--app-border); white-space: nowrap; }
+.gb td { padding: 8px 10px; border-bottom: 1px solid #eef1f3; font-variant-numeric: tabular-nums; }
+.gb td.num, .gb th.num { text-align: right; }
+.gb .na { color: #b6bec4; }
+
+/* ---- rubric editor ---- */
+.re-question { border: 1px solid var(--app-border); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: #fff; }
+.re-criterion { border: 1px solid var(--app-border); border-radius: 10px; padding: 12px; margin: 10px 0; background: #fafbfc; }
+.re-field { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--app-muted); margin-bottom: 10px; }
+.re-bands { width: 100%; border-collapse: collapse; margin: 6px 0; }
+.re-bands th { text-align: left; font-size: 11px; color: var(--app-muted); padding: 3px 4px; }
+.re-bands td { padding: 3px 4px; }
+.re-xs { width: 80px; }
+.re-sm { width: 150px; }
+.re-sticky { position: sticky; bottom: 0; background: var(--app-bg); padding: 12px 0; border-top: 1px solid var(--app-border); }
+
+@media (max-width: 1200px) {
+  .ws { grid-template-columns: 200px minmax(0, 1fr); height: auto; }
+  .ws-panel { grid-column: 1 / -1; }
+}

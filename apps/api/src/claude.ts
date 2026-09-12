@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { finalizeAnalysis, ModelOutputSchema, type AnalysisResult, type Assignment, type Submission } from "@gg/shared";
-import { buildSystemPrompt } from "./prompt";
+import { finalizeAnalysis, ModelOutputSchema, type AnalysisResult, type Answer, type Assignment, type Question } from "@gg/shared";
+import { buildSystemPrompt, promptCacheKey } from "./prompt";
 
 export const MODEL = "claude-opus-5";
 
@@ -21,12 +21,12 @@ export function createClaudeAnalyzer(opts: ClaudeAnalyzerOptions = {}) {
   const client = opts.client ?? new Anthropic();
   const systemCache = new Map<string, string>();
 
-  async function once(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
+  async function once(answer: Answer, assignment: Assignment, question: Question): Promise<AnalysisResult> {
     // Keyed by version so a rubric edit produces a fresh prompt (and a fresh cache entry upstream).
-    const cacheKey = `${assignment.id}:${assignment.updatedAt}`;
+    const cacheKey = promptCacheKey(assignment, question);
     let system = systemCache.get(cacheKey);
     if (!system) {
-      system = buildSystemPrompt(assignment);
+      system = buildSystemPrompt(assignment, question);
       systemCache.set(cacheKey, system);
     }
     const response = await client.messages.parse({
@@ -36,7 +36,7 @@ export function createClaudeAnalyzer(opts: ClaudeAnalyzerOptions = {}) {
       messages: [
         {
           role: "user",
-          content: `Student: ${submission.studentName}\n\nResponse:\n${submission.text}`,
+          content: `Student: ${answer.studentName}\n\nResponse:\n${answer.text}`,
         },
       ],
       output_config: { format: zodOutputFormat(ModelOutputSchema) },
@@ -45,22 +45,22 @@ export function createClaudeAnalyzer(opts: ClaudeAnalyzerOptions = {}) {
       `usage input=${response.usage.input_tokens} cache_write=${response.usage.cache_creation_input_tokens ?? 0} cache_read=${response.usage.cache_read_input_tokens ?? 0} output=${response.usage.output_tokens}`,
     );
     if (response.stop_reason === "refusal") {
-      throw new AnalysisError("The model declined to analyze this submission.", false);
+      throw new AnalysisError("The model declined to analyze this answer.", false);
     }
     if (!response.parsed_output) {
       throw new AnalysisError("The model returned output that did not match the schema.", true);
     }
-    return finalizeAnalysis(submission.id, assignment, response.parsed_output);
+    return finalizeAnalysis(answer.id, question, response.parsed_output);
   }
 
-  return async function analyze(submission: Submission, assignment: Assignment): Promise<AnalysisResult> {
+  return async function analyze(answer: Answer, assignment: Assignment, question: Question): Promise<AnalysisResult> {
     try {
-      return await once(submission, assignment);
+      return await once(answer, assignment, question);
     } catch (err) {
       if (err instanceof AnalysisError && !err.retryable) throw err;
       if (err instanceof Anthropic.APIError && err.status && err.status < 500 && err.status !== 429) throw err;
       // One retry for parse failures, rate limits, and server errors.
-      return await once(submission, assignment);
+      return await once(answer, assignment, question);
     }
   };
 }
